@@ -6,19 +6,18 @@ Description:
 
 global class Option
 {
-	@AuraEnabled @InvocableVariable public string sLabel='';
-	@AuraEnabled @InvocableVariable public string sName='';
-	@AuraEnabled @InvocableVariable public string sValue='';
-	@AuraEnabled @InvocableVariable public string sFlow='';
-	@AuraEnabled @InvocableVariable public string sType='';
-	@AuraEnabled @InvocableVariable public string sName2='';
-	@AuraEnabled @InvocableVariable public string sValue2='';
-	@AuraEnabled @InvocableVariable public string sName3='';
-	@AuraEnabled @InvocableVariable public string sValue3='';
+	@AuraEnabled @InvocableVariable global string sLabel='';
+	@AuraEnabled @InvocableVariable global string sName='';
+	@AuraEnabled @InvocableVariable global string sValue='';
+	@AuraEnabled @InvocableVariable global string sFlow='';
+	@AuraEnabled @InvocableVariable global string sType='';
+	@AuraEnabled @InvocableVariable global string sName2='';
+	@AuraEnabled @InvocableVariable global string sValue2='';
+	@AuraEnabled @InvocableVariable global string sName3='';
+	@AuraEnabled @InvocableVariable global string sValue3='';
 	//	@AuraEnabled @InvocableVariable public string sURL;
 
 	public integer iNumber;
-
 	public string getBody()
 	{
 		return ''+'*'+iNumber+')* '+sLabel;

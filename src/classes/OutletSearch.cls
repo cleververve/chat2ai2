@@ -11,14 +11,14 @@ global class OutletSearch
 	string sDefaultBackFlow = SM010_Utils.getChat2aiValue('Main_Menu');
 	string sGenderFlow = SM010_Utils.getChat2aiValue('search_select_gender');
 
-	@AuraEnabled @InvocableVariable public id visitorId;
-	@AuraEnabled @InvocableVariable public string keyword;
-	@AuraEnabled @InvocableVariable public string gender;
-	@AuraEnabled @InvocableVariable public string detailsFlow;
-	@AuraEnabled @InvocableVariable public string backFlow;
-	@AuraEnabled @InvocableVariable public integer pageNum;
-	@AuraEnabled @InvocableVariable public string entities;
-	@AuraEnabled @InvocableVariable public string type;
+	@AuraEnabled @InvocableVariable global id visitorId;
+	@AuraEnabled @InvocableVariable global string keyword;
+	@AuraEnabled @InvocableVariable global string gender;
+	@AuraEnabled @InvocableVariable global string detailsFlow;
+	@AuraEnabled @InvocableVariable global string backFlow;
+	@AuraEnabled @InvocableVariable global integer pageNum;
+	@AuraEnabled @InvocableVariable global string entities;
+	@AuraEnabled @InvocableVariable global string type;
 	Visitor__c vis;
 
 

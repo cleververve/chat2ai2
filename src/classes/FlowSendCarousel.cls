@@ -3,10 +3,10 @@ global class FlowSendCarousel
 
 	global class SendCrsInput
 	{
-		@AuraEnabled @InvocableVariable public id visitorId;
-        @AuraEnabled @InvocableVariable public string imageurl;
-        @AuraEnabled @InvocableVariable public string caption;
-        @AuraEnabled @InvocableVariable public boolean async;
+		@AuraEnabled @InvocableVariable global id visitorId;
+        @AuraEnabled @InvocableVariable global string imageurl;
+        @AuraEnabled @InvocableVariable global string caption;
+        @AuraEnabled @InvocableVariable global boolean async;
 	}
 
 	@InvocableMethod(label='Send Carousel' description='sends a carousel')

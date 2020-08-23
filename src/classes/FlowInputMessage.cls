@@ -6,13 +6,11 @@ Description:
 
 global class FlowInputMessage
 {
-	@AuraEnabled @InvocableVariable public string sMessage;
-	@AuraEnabled @InvocableVariable public string sFieldName;
-	@AuraEnabled @InvocableVariable public string sFlow;
-    @AuraEnabled @InvocableVariable public string sConfirmMessage;
-	@AuraEnabled @InvocableVariable public id visitorId;
-    
-
+	@AuraEnabled @InvocableVariable global string sMessage;
+	@AuraEnabled @InvocableVariable global string sFieldName;
+	@AuraEnabled @InvocableVariable global string sFlow;
+    @AuraEnabled @InvocableVariable global string sConfirmMessage;
+	@AuraEnabled @InvocableVariable global id visitorId;
 
 	@InvocableMethod(label='Input Message' description='Prompts Visitor to input data and saves the input in Visitor object field')
 	global static void send(list<FlowInputMessage> lMessages)

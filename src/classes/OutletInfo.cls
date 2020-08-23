@@ -8,9 +8,10 @@ global class OutletInfo
 {
 	global class OutletInfoRequest
 	{
-		@AuraEnabled @InvocableVariable public id visitorId;
-		@AuraEnabled @InvocableVariable public id outletId;
+		@AuraEnabled @InvocableVariable global id visitorId;
+		@AuraEnabled @InvocableVariable global id outletId;
 	}
+
 
 	@InvocableMethod(label='get outlet info' description='')
 	global static void getOutlet(list<OutletInfoRequest> lRec)

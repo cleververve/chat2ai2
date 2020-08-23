@@ -8,8 +8,8 @@ global class FlowUtils
 {
     global class getEntityParam
 	{
-		@AuraEnabled @InvocableVariable public String sEntityName;
-		@AuraEnabled @InvocableVariable public String sEntities;
+		@AuraEnabled @InvocableVariable global String sEntityName;
+		@AuraEnabled @InvocableVariable global String sEntities;
 	}
 	@InvocableMethod(label='Get Entity String' description='returns Entity Value from the json string of map of entities')
 	global static list<string> getEntityString(list<getEntityParam> lParam)
@@ -22,7 +22,6 @@ global class FlowUtils
 		return lret;
 	}
 
- 
 	public static object getEntity(getEntityParam param)
 	{
 

@@ -2,9 +2,9 @@ global class FlowSendVideo
 {
 	global class SendVideoInput
     {
-        @AuraEnabled @InvocableVariable public id visitorId;
-        @AuraEnabled @InvocableVariable public string fileURL;
-        @AuraEnabled @InvocableVariable public string caption;
+        @AuraEnabled @InvocableVariable global id visitorId;
+        @AuraEnabled @InvocableVariable global string fileURL;
+        @AuraEnabled @InvocableVariable global string caption;
     }
     
     @InvocableMethod(label='Send Video' description='sends a Video')

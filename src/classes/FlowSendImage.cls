@@ -2,9 +2,9 @@ global class FlowSendImage
 {   
     global class SendImgInput
     {
-        @AuraEnabled @InvocableVariable public id visitorId;
-        @AuraEnabled @InvocableVariable public string imageURL;
-        @AuraEnabled @InvocableVariable public boolean async;
+        @AuraEnabled @InvocableVariable global id visitorId;
+        @AuraEnabled @InvocableVariable global string imageURL;
+        @AuraEnabled @InvocableVariable global boolean async;
     }
     
     @InvocableMethod(label='Send Image' description='sends an image')

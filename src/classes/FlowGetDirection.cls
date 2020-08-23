@@ -2,12 +2,12 @@ global class FlowGetDirection {
     
 	global class FlowInput
 	{
-		@AuraEnabled @InvocableVariable public id visitorId;
-		@AuraEnabled @InvocableVariable public string location;
-        @AuraEnabled @InvocableVariable public string type;
-        @AuraEnabled @InvocableVariable public string programId;
-        @AuraEnabled @InvocableVariable public string sLang;
-        @AuraEnabled @InvocableVariable public string entities;
+		@AuraEnabled @InvocableVariable global id visitorId;
+		@AuraEnabled @InvocableVariable global string location;
+        @AuraEnabled @InvocableVariable global string type;
+        @AuraEnabled @InvocableVariable global string programId;
+        @AuraEnabled @InvocableVariable global string sLang;
+        @AuraEnabled @InvocableVariable global string entities;
 	}
     
     @InvocableMethod(label='Get Direction' description='Takes current/desired location and gives link to the google maps')
