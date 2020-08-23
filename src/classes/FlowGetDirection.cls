@@ -22,11 +22,11 @@ global class FlowGetDirection {
         	sids.add((id)inp.visitorId);
         }
         
-        map<id,Visitor__c> mVis = new map<id,Visitor__c>(DM080_Visitor.getRecords(sids));
+        map<id,CVCH__Visitor__c> mVis = new map<id,CVCH__Visitor__c>(DM080_Visitor.getRecords(sids));
         
         for(FlowInput inp: lParam)
 		{
-			Visitor__c vis = mVis.get((id)inp.visitorId);
+            CVCH__Visitor__c vis = mVis.get((id)inp.visitorId);
             
             Map<string,object> mEntities = new map<string,object>();
             if (inp.entities != null && inp.entities != '')

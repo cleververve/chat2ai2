@@ -260,7 +260,7 @@ public class SM010_Utils
 
         return sKey;
     }
-/*
+
     public static map<string,string> translateBatch( set<string>lTranslate, string sLang)
     {
         map<string,string> mRet = new map<string,string>();
@@ -317,7 +317,7 @@ public class SM010_Utils
         }
         return mRet;
     }
-
+/*
     public static string phone(string sPhone)
     {
         if(sPhone == null)

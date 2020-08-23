@@ -182,10 +182,10 @@ global class MessageOptions implements iMessage
 		SM010_Utils.saveTran();
 	}
 
-	public MessageOptions(string sMess)
-	{
-		this.sMessage = sMess;
-	}
+//	public MessageOptions(string sMess)
+//	{
+//		this.sMessage = sMess;
+//	}
 	public MessageOptions(SM080_QnA.QnAResponse respQnA)
 	{
 		this.sMessage = respQnA.sAnswer;
@@ -195,7 +195,6 @@ global class MessageOptions implements iMessage
 			this.mOptions.put('' + i, new Option(pro.displayText, i, 'QnA', '' + pro.qnaId));
 		}
 	}
-
 
 	public MessageOptions()
 	{
@@ -208,7 +207,6 @@ global class MessageOptions implements iMessage
 		this.sMessage = '';
 	}
 
-
 	public class OptionsJSON
 	{
 		string sType;
@@ -217,7 +215,7 @@ global class MessageOptions implements iMessage
 
 	public class CarouselJSON
 	{
-		list<CarouselItem> items;
+		public list<CarouselItem> items;
 	}
 
 	@InvocableMethod(label='Send Message with Options' description='Send Message with Options')
