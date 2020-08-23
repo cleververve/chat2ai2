@@ -108,23 +108,115 @@ public class SM031_NexmoTEST {
         SM031_Nexmo.getMessage();
         Test.stopTest();
     }
+    public static Blob getRequestBody(string sText)
+    {
+        string sRet = '{"message_uuid":"3315e684-4491-47b9-88a2-3990e543ce6e","to":{"type":"whatsapp","number":"1234567890"},"from":{"type":"whatsapp","number":"09876543211"},"timestamp":"2020-08-22T11:13:21.798Z","message":{"content":{"type":"text","text":"'+sText+'"}},"direction":"inbound"}';
+        return Blob.valueOf(sRet);
+    }
+
+    public static string getVisitorContext(string sType,string sFieldName)
+    {
+         string sRet = '{"visitorId":"a0e7E00000DhvqyQAB","sType":"'+sType+'","sMessage":"Seleziona la tua lingua: ","sFlow":"send_options","sFieldName":"'+sFieldName+'","sConfirmMessage":null,"mOptions":{"2":{"sValue3":"","sValue2":"","sValue":"it","sType":"","sName3":"","sName2":"","sName":"language","sLabel":"Italian","sFlow":"send_options","iNumber":2},"1":{"sValue3":"","sValue2":"","sValue":"111","sType":"QnA","sName3":"","sName2":"","sName":"language","sLabel":"English","sFlow":"send_options","iNumber":1}},"lOptions":[],"lItems":[],"content":"{\\"sType\\":\\"\\",\\"a\\":[{\\"sValue3\\":\\"\\",\\"sValue2\\":\\"\\",\\"sValue\\":\\"en\\",\\"sType\\":\\"\\",\\"sName3\\":\\"\\",\\"sName2\\":\\"\\",\\"sName\\":\\"language\\",\\"sLabel\\":\\"English\\",\\"sFlow\\":\\"send_options\\",\\"iNumber\\":null},{\\"sValue3\\":\\"\\",\\"sValue2\\":\\"\\",\\"sValue\\":\\"it\\",\\"sType\\":\\"\\",\\"sName3\\":\\"\\",\\"sName2\\":\\"\\",\\"sName\\":\\"language\\",\\"sLabel\\":\\"Italian\\",\\"sFlow\\":\\"send_options\\",\\"iNumber\\":null},{},{},{},{},{},{},{},{}]}"}';
+        return sRet;
+    }
 
     @isTest
     static void TestMessageWOptions()
     {
-
         RestRequest req = new RestRequest();
         RestResponse res = new RestResponse();
 
         req.requestURI = '/services/apexrest/nexmo/';
         req.httpMethod = 'POST';
-        req.requestBody = Blob.ValueOf('{"message_uuid":"3315e684-4491-47b9-88a2-3990e543ce6e","to":{"type":"whatsapp","number":"1234567890"},"from":{"type":"whatsapp","number":"09876543211"},"timestamp":"2020-08-22T11:13:21.798Z","message":{"content":{"type":"text","text":"2"}},"direction":"inbound"}');
-
+        req.requestBody = getRequestBody('2');
         RestContext.request = req;
         RestContext.response = res;
 
         Visitor__c v = createExistingVisitor('Full Access');
-        v.CVCH__Context__c = '{"visitorId":"a0e7E00000DhvqyQAB","sType":"options","sMessage":"Seleziona la tua lingua: ","sFlow":null,"sFieldName":null,"sConfirmMessage":null,"mOptions":{"2":{"sValue3":"","sValue2":"","sValue":"it","sType":"","sName3":"","sName2":"","sName":"language","sLabel":"Italian","sFlow":"send_options","iNumber":2},"1":{"sValue3":"","sValue2":"","sValue":"en","sType":"","sName3":"","sName2":"","sName":"language","sLabel":"English","sFlow":"send_options","iNumber":1}},"lOptions":[],"lItems":[],"content":"{\\"sType\\":\\"\\",\\"a\\":[{\\"sValue3\\":\\"\\",\\"sValue2\\":\\"\\",\\"sValue\\":\\"en\\",\\"sType\\":\\"\\",\\"sName3\\":\\"\\",\\"sName2\\":\\"\\",\\"sName\\":\\"language\\",\\"sLabel\\":\\"English\\",\\"sFlow\\":\\"send_options\\",\\"iNumber\\":null},{\\"sValue3\\":\\"\\",\\"sValue2\\":\\"\\",\\"sValue\\":\\"it\\",\\"sType\\":\\"\\",\\"sName3\\":\\"\\",\\"sName2\\":\\"\\",\\"sName\\":\\"language\\",\\"sLabel\\":\\"Italian\\",\\"sFlow\\":\\"send_options\\",\\"iNumber\\":null},{},{},{},{},{},{},{},{}]}"}';
+        v.Context__c = getVisitorContext('options','');
+        update v;
+        Test.startTest();
+        SM031_Nexmo.getMessage();
+        Test.stopTest();
+    }
+
+    @isTest
+    static void TestMessageWOptionsQnA()
+    {
+        RestRequest req = new RestRequest();
+        RestResponse res = new RestResponse();
+
+        req.requestURI = '/services/apexrest/nexmo/';
+        req.httpMethod = 'POST';
+        req.requestBody = getRequestBody('1');
+        RestContext.request = req;
+        RestContext.response = res;
+
+        Visitor__c v = createExistingVisitor('Full Access');
+        v.Context__c = getVisitorContext('options','');
+        update v;
+        Test.startTest();
+        SM031_Nexmo.getMessage();
+        Test.stopTest();
+    }
+
+    @IsTest
+    static void TestMessageNextFlow()
+    {
+        RestRequest req = new RestRequest();
+        RestResponse res = new RestResponse();
+
+        req.requestURI = '/services/apexrest/nexmo/';
+        req.httpMethod = 'POST';
+        req.requestBody = getRequestBody('1');
+        RestContext.request = req;
+        RestContext.response = res;
+
+        Visitor__c v = createExistingVisitor('Full Access');
+        v.Next_Flow__c = 'send_options';
+        update v;
+        Test.startTest();
+        SM031_Nexmo.getMessage();
+        Test.stopTest();
+    }
+
+    @IsTest
+    static void TestMessageInput()
+    {
+        RestRequest req = new RestRequest();
+        RestResponse res = new RestResponse();
+
+        req.requestURI = '/services/apexrest/nexmo/';
+        req.httpMethod = 'POST';
+        req.requestBody = getRequestBody('male');
+        RestContext.request = req;
+        RestContext.response = res;
+
+        Visitor__c v = createExistingVisitor('Full Access');
+        v.Context__c = getVisitorContext('Input','gender__c');
+
+        update v;
+        CVCH__Visitor__c vv;
+        Test.startTest();
+        SM031_Nexmo.getMessage();
+        Test.stopTest();
+    }
+
+
+    @isTest
+    static void TestMessageNoAccessWithOptions()
+    {
+        RestRequest req = new RestRequest();
+        RestResponse res = new RestResponse();
+
+        req.requestURI = '/services/apexrest/nexmo/';
+        req.httpMethod = 'POST';
+        req.requestBody = getRequestBody('2');
+        RestContext.request = req;
+        RestContext.response = res;
+
+        Visitor__c v = createExistingVisitor('No Access');
+        v.Context__c = getVisitorContext('options','');
         update v;
         Test.startTest();
         SM031_Nexmo.getMessage();

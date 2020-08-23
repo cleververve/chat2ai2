@@ -4,9 +4,8 @@ Date:           23.08.2020
 Description:   
 **/
 @IsTest
-public class MessageOptionsTest
+public class MessageOptions_Test
 {
-
 	@IsTest
 	public static void sendWF()
 	{
@@ -135,6 +134,7 @@ public class MessageOptionsTest
 		lMess.add(mess);
 		Test.startTest();
 		mess.content = JSON.serialize(json1);
+		Option.toJSON(json1.a);
 		MessageOptions.sendWF(lMess);
 
 		Test.stopTest();
