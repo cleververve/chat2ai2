@@ -1,114 +1,114 @@
 @RestResource(urlMapping='/nexmo/*')
 global class SM031_Nexmo
 {
-	
+
 	public static list<MessageOptions> getResponse(NexmoMessage__c mess, Visitor__c visr)
 	{
 
 		list<MessageOptions> lret = new list<MessageOptions>();
 		boolean bProceeded = false;
-        boolean TriggerDefaultFlow = false;
-        string translatedText = '';
-        translatedText = SM080_Translate.translate(mess.Text__c);
-        system.debug('Translated input: '+translatedText);
-        SM080_LUIS.LuisResponse respLuis = SM080_LUIS.queryPhrase(translatedText,visr.language__c);
-		SM080_QnA.QnAResponse respQnA = SM080_QnA.queryPhrase(translatedText,visr.language__c);
-        
-        if (respLuis.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) && respQnA.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')))
-        {
-            TriggerDefaultFlow = true; // We will trigger Default Flow, if both scores are below set treshold            
-        }
-        if (visr.Had_First_Interaction__c == false)
-        {
-            bProceeded = true;
-            Map<String, Object> params = new Map<String, Object>();
-            
-            params.put('visphone', visr.Id__c);
-            params.put('ChatNumber', visr.Chat_Number__c);
-            params.put('channel', visr.chanel__c);
-			if(SM010_Utils.getChat2aiValue('Welcome Flow') != null && SM010_Utils.getChat2aiValue('Welcome Flow') != '')
+		boolean TriggerDefaultFlow = false;
+		string translatedText = '';
+		translatedText = SM080_Translate.translate(mess.Text__c);
+		system.debug('Translated input: ' + translatedText);
+		SM080_LUIS.LuisResponse respLuis = SM080_LUIS.queryPhrase(translatedText, visr.language__c);
+		SM080_QnA.QnAResponse respQnA = SM080_QnA.queryPhrase(translatedText, visr.language__c);
+
+		if (respLuis.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) && respQnA.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')))
+		{
+			TriggerDefaultFlow = true; // We will trigger Default Flow, if both scores are below set treshold
+		}
+		if (visr.Had_First_Interaction__c == false)
+		{
+			bProceeded = true;
+			Map<String, Object> params = new Map<String, Object>();
+
+			params.put('visphone', visr.Id__c);
+			params.put('ChatNumber', visr.Chat_Number__c);
+			params.put('channel', visr.chanel__c);
+			if (SM010_Utils.getChat2aiValue('Welcome Flow') != null && SM010_Utils.getChat2aiValue('Welcome Flow') != '')
 			{
 				Flow.Interview chat2aiflow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Welcome Flow'), params);
 				chat2aiflow.Start();
 			}
-        }
-        else if (visr.GDPR_Consent__c == 'No Access' && (visr.Context__c == '' || visr.Context__c == null)) //Restrict Non-GDPR users
-        {
-            bProceeded = true;
-            Map<String, Object> params = new Map<String, Object>();
-            params.put('visitorId', visr.id);
-            params.put('originalmessage', mess.Text__c);
-            
-            Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('GDPR Flow'), params);
-            flow.start();            
-        }
-        else if (visr.GDPR_Consent__c == 'No Access' && visr.Context__c != '' && visr.Context__c != null)
-        {
-            bProceeded = true;
-            Map<String, Object> params = new Map<String, Object>();
-            params.put('visitorId', visr.id);
-            params.put('originalmessage', mess.Text__c);
-            
-            MessageOptions mo = (MessageOptions) JSON.deserialize(visr.Context__c, MessageOptions.class);
-            system.debug('GDPR MessageOptions='+mo);
-            Option opt = mo.mOptions.get(mess.Text__c);
-            if (opt != null && opt.sFlow != null)
-            {
-                if (opt.sName != null)
-                    params.put(opt.sName, opt.sValue);
-                if (opt.sName2 != null)
-                    params.put(opt.sName2, opt.sValue2);
-                if (opt.sName3 != null)
-                    params.put(opt.sName3, opt.sValue3);
-                Flow.Interview flow = Flow.Interview.createInterview(opt.sFlow, params);
-                flow.start();
-            }
-            else
-            {
-                Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('GDPR Flow'), params);
-            	flow.start();
-            }
-        }
-        else if (!TriggerDefaultFlow && respLuis.dScore>respQnA.dScore && respLuis.sIntent == 'exit')
-        {
-            bProceeded = true;
-            Map<String, Object> params = new Map<String, Object>();
-            params.put('visitorId', visr.id);
-            params.put('originalmessage', mess.Text__c);
-            Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Main Menu Flow'), params);
-            flow.start();
-            Visitor__c v = new Visitor__c(Id = visr.id, Next_flow__c = null);
-            update v;
-        }
-        else if (visr.Next_Flow__c != null && visr.Next_Flow__c != '')
-        {
-            bProceeded = true;
-            Map<String, Object> params = new Map<String, Object>();
-            params.put('visitorId', visr.id);
-            params.put('input', mess.Text__c);
-            
-            Flow.Interview flow = Flow.Interview.createInterview(visr.Next_Flow__c, params);
-            flow.start();
-        }
+		}
+		else if (visr.GDPR_Consent__c == 'No Access' && (visr.Context__c == '' || visr.Context__c == null)) //Restrict Non-GDPR users
+		{
+			bProceeded = true;
+			Map<String, Object> params = new Map<String, Object>();
+			params.put('visitorId', visr.id);
+			params.put('originalmessage', mess.Text__c);
+
+			Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('GDPR Flow'), params);
+			flow.start();
+		}
+		else if (visr.GDPR_Consent__c == 'No Access' && visr.Context__c != '' && visr.Context__c != null)
+		{
+			bProceeded = true;
+			Map<String, Object> params = new Map<String, Object>();
+			params.put('visitorId', visr.id);
+			params.put('originalmessage', mess.Text__c);
+
+			MessageOptions mo = (MessageOptions) JSON.deserialize(visr.Context__c, MessageOptions.class);
+			system.debug('GDPR MessageOptions=' + mo);
+			Option opt = mo.mOptions.get(mess.Text__c);
+			if (opt != null && opt.sFlow != null)
+			{
+				if (opt.sName != null)
+					params.put(opt.sName, opt.sValue);
+				if (opt.sName2 != null)
+					params.put(opt.sName2, opt.sValue2);
+				if (opt.sName3 != null)
+					params.put(opt.sName3, opt.sValue3);
+				Flow.Interview flow = Flow.Interview.createInterview(opt.sFlow, params);
+				flow.start();
+			}
+			else
+			{
+				Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('GDPR Flow'), params);
+				flow.start();
+			}
+		}
+		else if (!TriggerDefaultFlow && respLuis.dScore > respQnA.dScore && respLuis.sIntent == 'exit')
+		{
+			bProceeded = true;
+			Map<String, Object> params = new Map<String, Object>();
+			params.put('visitorId', visr.id);
+			params.put('originalmessage', mess.Text__c);
+			Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Main Menu Flow'), params);
+			flow.start();
+			Visitor__c v = new Visitor__c(Id = visr.id, Next_flow__c = null);
+			update v;
+		}
+		else if (visr.Next_Flow__c != null && visr.Next_Flow__c != '')
+		{
+			bProceeded = true;
+			Map<String, Object> params = new Map<String, Object>();
+			params.put('visitorId', visr.id);
+			params.put('input', mess.Text__c);
+
+			Flow.Interview flow = Flow.Interview.createInterview(visr.Next_Flow__c, params);
+			flow.start();
+		}
 		else if (visr.Context__c != null && visr.Context__c != '')
 		{
 			MessageOptions mo = (MessageOptions) JSON.deserialize(visr.Context__c, MessageOptions.class);
-            system.debug('MessageOptions='+mo);
+			system.debug('MessageOptions=' + mo);
 			if (mo.sType == 'Input')
 			{
 				bProceeded = true;
 				Visitor__c v = new Visitor__c(Id = visr.id);
 				v.put(mo.sFieldName, mess.Text__c);
-                v.Context__c = '';
+				v.Context__c = '';
 				update v;
-                if (mo.sFlow != null && mo.sFlow != '')
-                {
-                    Map<String, Object> params = new Map<String, Object>();
-                    params.put('visitorId', visr.id);
+				if (mo.sFlow != null && mo.sFlow != '')
+				{
+					Map<String, Object> params = new Map<String, Object>();
+					params.put('visitorId', visr.id);
 
-                    Flow.Interview flow = Flow.Interview.createInterview(mo.sFlow, params);
-                    flow.start();
-                }
+					Flow.Interview flow = Flow.Interview.createInterview(mo.sFlow, params);
+					flow.start();
+				}
 			}
 			else
 			{
@@ -120,24 +120,25 @@ global class SM031_Nexmo
 					if (opt.sType == 'QnA')
 					{
 						integer qnaid = integer.valueOf(opt.sValue);
-						
-						SM080_QnA.QnAResponse respQnA2 = SM080_QnA.getQNA(qnaid,visr.language__c);
+
+						SM080_QnA.QnAResponse respQnA2 = SM080_QnA.getQNA(qnaid, visr.language__c);
 						lret.add(new MessageOptions(respQnA2));
 						bProceeded = true;
-					}else 
-                    {
+					}
+					else
+					{
 						bProceeded = true;
 						if (opt.sFlow != null)
 						{
 							Map<String, Object> params = new Map<String, Object>();
 							params.put('visitorId', visr.id);
-                            params.put('originalmessage', mess.Text__c);
+							params.put('originalmessage', mess.Text__c);
 							if (opt.sName != null)
 								params.put(opt.sName, opt.sValue);
-                            if (opt.sName2 != null)
-                                params.put(opt.sName2, opt.sValue2);
-                            if (opt.sName3 != null)
-                                params.put(opt.sName3, opt.sValue3);
+							if (opt.sName2 != null)
+								params.put(opt.sName2, opt.sValue2);
+							if (opt.sName3 != null)
+								params.put(opt.sName3, opt.sValue3);
 							Flow.Interview flow = Flow.Interview.createInterview(opt.sFlow, params);
 							flow.start();
 						}
@@ -146,32 +147,32 @@ global class SM031_Nexmo
 			}
 
 		}
-        if (!bProceeded && TriggerDefaultFlow)
-        {
-            bProceeded = true;
-            Map<String, Object> params = new Map<String, Object>();
-            params.put('visitorId', visr.id);
-            params.put('originalmessage', mess.Text__c);
-            
-            Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow'), params);
-            flow.start();// trigger default flow
-        }
+		if (!bProceeded && TriggerDefaultFlow)
+		{
+			bProceeded = true;
+			Map<String, Object> params = new Map<String, Object>();
+			params.put('visitorId', visr.id);
+			params.put('originalmessage', mess.Text__c);
+
+			Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow'), params);
+			flow.start();// trigger default flow
+		}
 		if (!bProceeded)
 		{
-				system.debug('LUIS score=' + respLuis.dScore + ',QnA score=' + respQnA.dScore);
-				if (respLuis.dScore > respQnA.dScore)
-				{
-					Map<String, Object> params = new Map<String, Object>();
-					params.put('visitorId', visr.id);
-					params.put('intent', respLuis.sIntent);
-					params.put('entities', respLuis.getEntities());
-					params.put('originalmessage', mess.Text__c);
-					Flow.Interview chat2aiflow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Chat2ai Flow'), params);
+			system.debug('LUIS score=' + respLuis.dScore + ',QnA score=' + respQnA.dScore);
+			if (respLuis.dScore > respQnA.dScore)
+			{
+				Map<String, Object> params = new Map<String, Object>();
+				params.put('visitorId', visr.id);
+				params.put('intent', respLuis.sIntent);
+				params.put('entities', respLuis.getEntities());
+				params.put('originalmessage', mess.Text__c);
+				Flow.Interview chat2aiflow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Chat2ai Flow'), params);
 //                Flow.Interview.chat2ai chat2aiflow = new Flow.Interview.chat2ai(params);
-					chat2aiflow.Start();
-				}
-				else
-						lret.add(new MessageOptions(respQnA));
+				chat2aiflow.Start();
+			}
+			else
+					lret.add(new MessageOptions(respQnA));
 		}
 		return lret;
 	}
@@ -216,9 +217,9 @@ global class SM031_Nexmo
 		list<Visitor__c> lVisitors = DM080_Visitor.getRecordsbyNumber(sid);
 
 		if (!lVisitors.isEmpty())
-            ret = lVisitors[0];
-        else
-			ret = new Visitor__c(Id__c = sid, Context__c = null, Chat_Number__c = sChatNumber, Chanel__c = channel);
+			ret = lVisitors[0];
+		else
+				ret = new Visitor__c(Id__c = sid, Context__c = null, Chat_Number__c = sChatNumber, Chanel__c = channel);
 		return ret;
 	}
 
@@ -242,30 +243,26 @@ global class SM031_Nexmo
 			visr = getVisitor(mess0.From__c, mess0.To__c, mess0.Channel__c);
 
 			mess0.Received__c = dtBeg;
-			//Use deserializer via maps here
-//            list<NexmoMessage__c> lold = [select id from NexmoMessage__c where Name = :mess0.name];
-//            if(lold.isEmpty())
-			{
-				list<MessageOptions> aRetStr = getResponse(mess0, visr);
-				system.debug(aRetStr);
-				if (aRetStr != null)
-				{
 
-					mess0.Response2__c = String.join(aRetStr, '\t');
-					if (mess0.Response2__c != null && mess0.Response2__c.length() > 32000)
-						mess0.Response2__c = mess0.Response2__c.substring(0, 32000);
-					string sPrevContext = visr.Context__c;
-					for (MessageOptions opt : aRetStr)
-					{
-						opt.send(visr);
-					}
-					if (sPrevContext != visr.Context__c)
-					{
-						Visitor__c v = new Visitor__c(Id = visr.Id, Context__c = visr.Context__c);
-						update v;
-					}
-					lMess.add(mess0);
+			list<MessageOptions> aRetStr = getResponse(mess0, visr);
+			system.debug(aRetStr);
+			if (aRetStr != null)
+			{
+
+				mess0.Response2__c = String.join(aRetStr, '\t');
+				if (mess0.Response2__c != null && mess0.Response2__c.length() > 32000)
+					mess0.Response2__c = mess0.Response2__c.substring(0, 32000);
+				string sPrevContext = visr.Context__c;
+				for (MessageOptions opt : aRetStr)
+				{
+					opt.send(visr);
 				}
+				if (sPrevContext != visr.Context__c)
+				{
+					Visitor__c v = new Visitor__c(Id = visr.Id, Context__c = visr.Context__c);
+					update v;
+				}
+				lMess.add(mess0);
 			}
 		}
 		catch (MyException e)
