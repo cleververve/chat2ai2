@@ -4,14 +4,8 @@ Date:           15.07.2020
 Description:   
 **/
 
-public class MessageOptions implements iMessage
+global class MessageOptions implements iMessage
 {
-	public MessageOptions(id visitorId)
-	{
-		this.visitorId = visitorId;
-		this.sMessage = '';
-	}
-
 	@AuraEnabled @InvocableVariable public string sMessage;
 	@AuraEnabled @InvocableVariable public id visitorId;
 	@AuraEnabled @InvocableVariable public string content;
@@ -120,7 +114,7 @@ public class MessageOptions implements iMessage
 			if (opt != null && opt.sLabel != null && opt.sLabel != '')
 			{
 				opt.iNumber = i;
-				mOptions.put('' + i, opt);
+				mOptions.put(''+i, opt);
 				i += 1;
 			}
 		}
@@ -161,7 +155,17 @@ public class MessageOptions implements iMessage
 					}
 				}
 			}
+
 			SM042_NexmoOut2.sendCarousel(this, sTo, sFrom);
+
+//			SM042_NexmoOut2.sendText(v.Id__c, sMessage, sFrom);
+//			for (string sKey : mOptions.keySet())
+//			{
+//				pause(800);
+//				Option opt = mOptions.get(sKey);
+//				SM042_NexmoOut2.sendImage(sTo, sFrom,  opt.getBody(),opt.sURL);
+////				SM042_NexmoOut2.sendCarousel(sTo, sFrom, opt.sURL, opt.getBody());
+//			}
 		}
 		else
 		{
@@ -176,6 +180,11 @@ public class MessageOptions implements iMessage
 			system.debug('Context__c= ' + v.Context__c);
 		}
 		SM010_Utils.saveTran();
+	}
+
+	public MessageOptions(string sMess)
+	{
+		this.sMessage = sMess;
 	}
 	public MessageOptions(SM080_QnA.QnAResponse respQnA)
 	{
@@ -193,6 +202,13 @@ public class MessageOptions implements iMessage
 		this.sMessage = '';
 	}
 
+	public MessageOptions(id visitorId)
+	{
+		this.visitorId = visitorId;
+		this.sMessage = '';
+	}
+
+
 	public class OptionsJSON
 	{
 		string sType;
@@ -205,7 +221,7 @@ public class MessageOptions implements iMessage
 	}
 
 	@InvocableMethod(label='Send Message with Options' description='Send Message with Options')
-	public static void sendWF(list<MessageOptions> messages)
+	global static void sendWF(list<MessageOptions> messages)
 	{
 		system.debug('sendWF.messages=' + messages);
 		set<id>sVisitorIds = new set<id>();
@@ -266,4 +282,22 @@ public class MessageOptions implements iMessage
 		system.debug('sendWF update = ' + mUpdate.values());
 		update mUpdate.values();
 	}
+
+//	public static MessageOptions inputMessage(id visitorId, string sMessage, string sFlow, string sFieldName)
+//	{
+//		MessageOptions mo = new MessageOptions(visitorId);
+//		mo.sType = 'Input';
+//		mo.sMessage = sMessage;
+//		mo.sFlow = sFlow;
+//		mo.sFieldName = sFieldName;
+//		return mo;
+//	}
+
+	public static MessageOptions message(id visitorId, string sMessage)
+	{
+		MessageOptions mo = new MessageOptions(visitorId);
+		mo.sMessage = sMessage;
+		return mo;
+	}
+
 }

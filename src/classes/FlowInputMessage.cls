@@ -4,7 +4,7 @@ Date:           21.07.2020
 Description:   
 **/
 
-public with sharing class FlowInputMessage
+global class FlowInputMessage
 {
 	@AuraEnabled @InvocableVariable public string sMessage;
 	@AuraEnabled @InvocableVariable public string sFieldName;
@@ -15,7 +15,7 @@ public with sharing class FlowInputMessage
 
 
 	@InvocableMethod(label='Input Message' description='Prompts Visitor to input data and saves the input in Visitor object field')
-	public static void send(list<FlowInputMessage> lMessages)
+	global static void send(list<FlowInputMessage> lMessages)
 	{
 		list<MessageOptions> lmo = new list<MessageOptions>();
 		for(FlowInputMessage mess: lMessages)

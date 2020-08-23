@@ -50,6 +50,10 @@ public with sharing class SM080_QnA
 	{
 		QnAResponse ret = new QnAResponse();
 		string sURL = 'callout:QnA';
+		//if(language != null && language != '' && language != 'en')
+		//{
+		//	sURL = sURL+'_'+language;
+		//}
 		system.debug('qna url='+sURL);
 		HttpResponse resp = SM003_Http.request(
 				sURL

@@ -4,7 +4,7 @@ Date:           15.07.2020
 Description:   
 **/
 
-public class Option
+global class Option
 {
 	@AuraEnabled @InvocableVariable public string sLabel='';
 	@AuraEnabled @InvocableVariable public string sName='';
@@ -15,12 +15,13 @@ public class Option
 	@AuraEnabled @InvocableVariable public string sValue2='';
 	@AuraEnabled @InvocableVariable public string sName3='';
 	@AuraEnabled @InvocableVariable public string sValue3='';
+	//	@AuraEnabled @InvocableVariable public string sURL;
 
 	public integer iNumber;
 
 	public string getBody()
 	{
-		return ''+iNumber+') '+sLabel;
+		return ''+'*'+iNumber+')* '+sLabel;
 	}
 	public Option()
 	{
@@ -36,13 +37,18 @@ public class Option
 	}
 
 	@InvocableMethod(label='Option JSON' description='converts Option to JSON')
-	public static list<string> toJSON(list<Option> loption)
+	global static list<string> toJSON(list<Option> loption)
 	{
 		system.debug('Option JSON.start '+loption);
 		list<string>lret = new list<string>();
 
 		for(Option opt: loption)
 		{
+//			if(opt.sName == '') opt.sName = null;
+//			if(opt.sValue == '') opt.sValue = null;
+//			if(opt.sFlow == '') opt.sFlow = null;
+//			if(opt.sType == null) opt.sType = null;
+
 			lret.add(JSON.serialize(opt));
 		}
 		system.debug('Option JSON.return '+lret);

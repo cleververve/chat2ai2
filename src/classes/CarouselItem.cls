@@ -4,7 +4,7 @@ Date:           04.08.2020
 Description:   
 **/
 
-public with sharing class CarouselItem
+global with sharing class CarouselItem
 {
 	@AuraEnabled @InvocableVariable public string imageURL;
 	@AuraEnabled @InvocableVariable public string title;
@@ -32,7 +32,7 @@ public with sharing class CarouselItem
 	}
 
 	@InvocableMethod(label='CarouselItem to JSON' description='converts Item to JSON')
-	public static list<string> toJSON(list<CarouselItem> lItems)
+	global static list<string> toJSON(list<CarouselItem> lItems)
 	{
 		system.debug('toJSON.start '+lItems);
 		list<string>lret = new list<string>();

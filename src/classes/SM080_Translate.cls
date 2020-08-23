@@ -12,7 +12,7 @@ public class SM080_Translate
 		string sRet = SM010_Utils.translateAPI(sText); // ищем в кеше
 		if(sRet == null) // если в кеше не нашли
 		{ // то вызываем API
-			string sURL = SM010_Utils.getValue('MTTranslateURL');
+			string sURL = SM010_Utils.getChat2aiValue('Microsoft Translator URL');
 			sURL = sURL+'&to=en';
 			HttpResponse resp = SM003_Http.request(sURL,'POST', getHeaders(),getBody(sText), 'MS translate', NULL, 'SM080_TranslateMock');
 			string sResp = resp.getBody();
@@ -28,7 +28,7 @@ public class SM080_Translate
 	{
 		map<string, string> ret = new map<string, string>();
 		ret.put('Content-Type', 'application/json');
-		ret.put('Ocp-Apim-Subscription-Key', SM010_Utils.getValue('MTTranslateKey'));
+		ret.put('Ocp-Apim-Subscription-Key', SM010_Utils.getChat2aiValue('Microsoft Translator Key'));
 		return ret;
 	}
 

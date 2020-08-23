@@ -59,8 +59,11 @@ public class SM005_Logs
             sURL = sURL.substring(255);
         c.URL__c = sURL;
         c.Authorization__c = sAuth;
+
+        
 		add(c);
         return c;
+//        insert  c;       
     }
     
     
