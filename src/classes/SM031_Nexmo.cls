@@ -26,8 +26,11 @@ global class SM031_Nexmo
             params.put('visphone', visr.Id__c);
             params.put('ChatNumber', visr.Chat_Number__c);
             params.put('channel', visr.chanel__c);
-            Flow.Interview chat2aiflow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Welcome Flow'), params);
-            chat2aiflow.Start();
+			if(SM010_Utils.getChat2aiValue('Welcome Flow') != null && SM010_Utils.getChat2aiValue('Welcome Flow') != '')
+			{
+				Flow.Interview chat2aiflow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Welcome Flow'), params);
+				chat2aiflow.Start();
+			}
         }
         else if (visr.GDPR_Consent__c == 'No Access' && (visr.Context__c == '' || visr.Context__c == null)) //Restrict Non-GDPR users
         {

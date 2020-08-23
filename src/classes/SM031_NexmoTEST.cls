@@ -26,7 +26,7 @@ public class SM031_NexmoTEST {
 
         chat2ai__c cust6 = new chat2ai__c();
         cust6.name = 'Welcome Flow';
-        cust6.value__c = 'send_options';
+//        cust6.value__c = 'send_options';
         
         lcust.add(cust1);
         lcust.add(cust2);
@@ -52,6 +52,7 @@ public class SM031_NexmoTEST {
     @isTest
     static void TestNewVisitor()
     {
+
         RestRequest req = new RestRequest();
         RestResponse res = new RestResponse();
         
