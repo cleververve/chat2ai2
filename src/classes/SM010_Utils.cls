@@ -82,31 +82,32 @@ public class SM010_Utils
         return ret;
     }
 
+//
+//    public static string getParam(string sparamName)
+//    {
+//        string sRet = ApexPages.currentPage().getParameters().get(sParamName);
+//        if (sRet == null)
+//        {
+//            sRet = '';
+//        }
+//        sRet = sRet.trim();
+//        if(sRet == 'null')
+//            sRet = '';
+//        return sRet;
+//    }
+//
+//    public static string getRestParam(string sParamName)
+//    {
+//        string sRet = (string)RestContext.request.params.get(sParamName);
+//        if(sRet == null)
+//            sRet = '';
+//        sRet = sRet.trim();
+//        if(sRet == 'null' || sRet == 'empty')
+//            sRet = '';
+//        return sRet;
+//    }
 
-    public static string getParam(string sparamName)
-    {
-        string sRet = ApexPages.currentPage().getParameters().get(sParamName);
-        if (sRet == null)
-        {
-            sRet = '';
-        }
-        sRet = sRet.trim();
-        if(sRet == 'null')
-            sRet = '';       
-        return sRet;
-    }
-    
-    public static string getRestParam(string sParamName)
-    {
-        string sRet = (string)RestContext.request.params.get(sParamName);
-        if(sRet == null)
-            sRet = '';
-        sRet = sRet.trim();
-        if(sRet == 'null' || sRet == 'empty')
-            sRet = '';
-        return sRet;
-    }
-    
+
     public static string getValue(string sName)
     {
         Values__c val = Values__c.getInstance(sName);

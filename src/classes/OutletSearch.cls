@@ -6,10 +6,10 @@ Description:
 
 global class OutletSearch
 {
-	public string sSearchFlow = 'search';
-	public string sDefaultDetailsFlow = 'get_outlet_info';
-	public string sDefaultBackFlow = 'Main_Menu';
-	public string sGenderFlow = 'search_select_gender';
+	string sSearchFlow = SM010_Utils.getChat2aiValue('search');
+	string sDefaultDetailsFlow = SM010_Utils.getChat2aiValue('get_outlet_info');
+	string sDefaultBackFlow = SM010_Utils.getChat2aiValue('Main_Menu');
+	string sGenderFlow = SM010_Utils.getChat2aiValue('search_select_gender');
 
 	@AuraEnabled @InvocableVariable public id visitorId;
 	@AuraEnabled @InvocableVariable public string keyword;
@@ -17,9 +17,9 @@ global class OutletSearch
 	@AuraEnabled @InvocableVariable public string detailsFlow;
 	@AuraEnabled @InvocableVariable public string backFlow;
 	@AuraEnabled @InvocableVariable public integer pageNum;
-    @AuraEnabled @InvocableVariable public string entities;
-    @AuraEnabled @InvocableVariable public string type;
-	public Visitor__c vis;
+	@AuraEnabled @InvocableVariable public string entities;
+	@AuraEnabled @InvocableVariable public string type;
+	Visitor__c vis;
 
 
 	@InvocableMethod(label='search outlets by category' description='')
@@ -27,7 +27,7 @@ global class OutletSearch
 	{
 		set<id>sids = new set<id>();
 
-        system.debug('Search flow start');
+		system.debug('Search flow start');
 		for (OutletSearch s : search)
 		{
 			if (s.visitorId != null)
@@ -44,49 +44,46 @@ global class OutletSearch
 		for (OutletSearch srch : search)
 		{
 			srch.vis = mVis.get(srch.visitorId);
-            system.debug('gender: '+srch.gender);
-        	system.debug('keyword: '+srch.keyword);
-            Map<string,object> mEntities = new map<string,object>();
-            if (srch.entities != null && srch.entities != '')
-            {
-                mEntities = (Map<string,object>)JSON.deserializeUntyped(srch.entities);
-                system.debug(mEntities);
-                if (mEntities.get('gender') != null)
-                    srch.gender = String.valueOf(((list<object>)mEntities.get('gender'))[0]);   
+			system.debug('gender: ' + srch.gender);
+			system.debug('keyword: ' + srch.keyword);
+			Map<string, object> mEntities = new map<string, object>();
+			if (srch.entities != null && srch.entities != '')
+			{
+				mEntities = (Map<string, object>) JSON.deserializeUntyped(srch.entities);
+				system.debug(mEntities);
+				if (mEntities.get('gender') != null)
+					srch.gender = String.valueOf(((list<object>) mEntities.get('gender'))[0]);
 				if (mEntities.get('shops') != null)
-                    srch.keyword = String.valueOf(((list<object>)mEntities.get('shops'))[0]);
-                if (mEntities.get('item') != null)
-                    srch.keyword = String.valueOf(((list<object>)mEntities.get('item'))[0]); 
-                if (mEntities.get('fashion men') != null)
-                    srch.keyword = String.valueOf(((list<object>)mEntities.get('fashion men'))[0]);
-                else if (mEntities.get('fashion women') != null)
-                    srch.keyword = String.valueOf(((list<object>)mEntities.get('fashion women'))[0]);
-                else if (mEntities.get('fashion kids') != null)
-                    srch.keyword = string.valueOf(((list<object>)mEntities.get('fashion kids'))[0]);
-            }
-            system.debug('gender2: '+srch.gender);
-        	system.debug('keyword2: '+srch.keyword);
+					srch.keyword = String.valueOf(((list<object>) mEntities.get('shops'))[0]);
+				if (mEntities.get('item') != null)
+					srch.keyword = String.valueOf(((list<object>) mEntities.get('item'))[0]);
+				if (mEntities.get('fashion men') != null)
+					srch.keyword = String.valueOf(((list<object>) mEntities.get('fashion men'))[0]);
+				else if (mEntities.get('fashion women') != null)
+					srch.keyword = String.valueOf(((list<object>) mEntities.get('fashion women'))[0]);
+				else if (mEntities.get('fashion kids') != null)
+					srch.keyword = string.valueOf(((list<object>) mEntities.get('fashion kids'))[0]);
+			}
+			system.debug('gender2: ' + srch.gender);
+			system.debug('keyword2: ' + srch.keyword);
 			MessageOptions opt = srch.OutletSearch();
 			if (opt != null)
 			{
 				opt.send(srch.vis);
-            
+
 				Visitor__c vis2 = new Visitor__c
 						(
 								keyword__c = srch.keyword
 								, id = srch.vis.id
-								,Context__c = srch.vis.Context__c
+								, Context__c = srch.vis.Context__c
 						);
 				mUpdate.put(vis2.id, vis2);
-            }else
-            {
-                Visitor__c vis2 = new Visitor__c
-						(
-								keyword__c = srch.keyword
-								, id = srch.vis.id
-						);
+			}
+			else
+			{
+				Visitor__c vis2 = new Visitor__c(keyword__c = srch.keyword, id = srch.vis.id);
 				mUpdate.put(vis2.id, vis2);
-            }
+			}
 		}
 		update mUpdate.values();
 	}
@@ -99,9 +96,9 @@ global class OutletSearch
 		if (keyword == null || keyword == '')
 			throw new MyException('The search key is not specified');
 
-        system.debug(keyword);
+		system.debug(keyword);
 		keyword = keyword.replaceAll('_', ' ').replaceAll('-', '&');
-        system.debug(keyword);
+		system.debug(keyword);
 		string sKeyword = keyword;
 		if (genderSpecific(keyword))
 		{
@@ -119,20 +116,20 @@ global class OutletSearch
 		}
 
 		list<account>lAcc = new list<account>();
-        if (type == 'outlet')
+		if (type == 'outlet')
 			lAcc = searchAccByKeyWord(sKeyword, false, true);
-        else
-            lAcc = searchAccByKeyWord(sKeyword, true, false);
-        
-            
+		else
+				lAcc = searchAccByKeyWord(sKeyword, true, false);
+
+
 		if (lAcc.isEmpty())
 			ret = MessageOptions.message(vis.id, SM010_Utils.translate('There is no any shops by keyword ', vis.language__c) + sKeyWord);
 		else if (lAcc.size() == 1 && Test.isRunningTest() == false)
 			ret = getOutletInfo(vis, lAcc[0].Id);
-		else if (vis.Chanel__c == 'whatsapp')
+//		else if (vis.Chanel__c == 'whatsapp')
 			ret = options(lAcc);
-		else
-				ret = carousel (lAcc);
+//		else
+//				ret = carousel (lAcc);
 		return ret;
 	}
 
@@ -147,7 +144,6 @@ global class OutletSearch
 				where id = :accountId
 		];
 	}
-	
 
 
 	public list<account> searchAccByKeyWord(string sKeyWord0, boolean srchCat, boolean srchName)
@@ -177,9 +173,10 @@ global class OutletSearch
 		list<sobject> lobj = new list<sobject>();
 		string sQuery = '';
 		if (srchName)
-			sQuery = 'select id,Name,Image__c,phone,website,location__c, ' + langname + ', url__c from account where (id in :mrkeySet or ' + langname + ' like :sKeyWord or name like :sKeyWord or location__c = :sKeyWord0) and (recordType.name = \'Outlet\' or recordType.name = \'Location\') order by name';
+			sQuery = 'select id,Name,Image__c,phone,website,location__c, ' + langname + ', url__c from account where (id in :mrkeySet or ' + langname + ' like :sKeyWord or name like :sKeyWord or location__c = :sKeyWord0)  order by name';
+			//and (recordType.name = 'Outlet' or recordType.name = 'Location')
 		else
-				sQuery = 'select id,Name,Image__c,phone,website,location__c, ' + langname + ', url__c from account where id in :mrkeySet and (recordType.name = \'Outlet\' or recordType.name = \'Location\') order by '+langname;
+				sQuery = 'select id,Name,Image__c,phone,website,location__c, ' + langname + ', url__c from account where id in :mrkeySet order by ' + langname;
 		system.debug(sQuery);
 		lobj = Database.query(sQuery);
 		system.debug(lObj);
@@ -216,11 +213,11 @@ global class OutletSearch
 
 	public static string getName(account acc, string lang)
 	{
-		system.debug('getName('+lang+').'+acc);
+		system.debug('getName(' + lang + ').' + acc);
 		string sRet = (string) acc.get(getNameFieldName(lang));
-		if(sRet == null || sRet == '')
+		if (sRet == null || sRet == '')
 			sRet = acc.Name;
-		system.debug('getName.ret='+sRet);
+		system.debug('getName.ret=' + sRet);
 		return sRet;
 	}
 
@@ -251,27 +248,27 @@ global class OutletSearch
 			Option opt = new Option();
 			opt.sLabel = SM010_Utils.translate('Next', vis.language__c);
 			opt.sFlow = sSearchFlow;//SM010_Utils.getFlowId('getOutletsNext', null, vis.language__c);
-            opt.sName = 'pageNum';
-            opt.sValue = String.valueOf(pageNum+1);
-            opt.sName2 = 'keyword';
-            opt.sValue2 = keyword;
-            opt.sName3 = 'gender';
-            opt.sValue3 = gender;
+			opt.sName = 'pageNum';
+			opt.sValue = String.valueOf(pageNum + 1);
+			opt.sName2 = 'keyword';
+			opt.sValue2 = keyword;
+			opt.sName3 = 'gender';
+			opt.sValue3 = gender;
 			ret.lOptions.add(opt);
 		}
-        if (page.bBegin == false)
-        {
-            Option opt = new Option();
+		if (page.bBegin == false)
+		{
+			Option opt = new Option();
 			opt.sLabel = SM010_Utils.translate('Previous', vis.language__c);
 			opt.sFlow = sSearchFlow;//SM010_Utils.getFlowId('getOutletsNext', null, vis.language__c);
-            opt.sName = 'pageNum';
-            opt.sValue = String.valueOf(pageNum-1);
-            opt.sName2 = 'keyword';
-            opt.sValue2 = keyword;
-            opt.sName3 = 'gender';
-            opt.sValue3 = gender;
+			opt.sName = 'pageNum';
+			opt.sValue = String.valueOf(pageNum - 1);
+			opt.sName2 = 'keyword';
+			opt.sValue2 = keyword;
+			opt.sName3 = 'gender';
+			opt.sValue3 = gender;
 			ret.lOptions.add(opt);
-        }
+		}
 		if (backFlow != '' && backFlow != null)
 		{
 			Option opt = new Option();
@@ -284,29 +281,29 @@ global class OutletSearch
 	}
 
 
-	public MessageOptions carousel(list<account>lacc)
-	{
-		MessageOptions ret = new MessageOptions();
-		ret.sType = 'carousel';
-
-		SM010_Utils.pageReturn page = SM010_Utils.getPage(lacc, pageNum, iSize, true, true);
-
-		string sCall = SM010_Utils.getRestParam('sCall');
-		boolean bCall = true;
-		if (sCall == 'false')
-			bCall = false;
-		if (page.bBegin == false)
-			ret.lItems.add(getOutletsPrev());
-		for (object obj : page.lObj)
-		{
-			ret.lItems.add(getTemplate((account) obj, vis.language__c, true, backFlow));
-		}
-
-		if (page.bEnd == false || Test.isRunningTest())
-			ret.lItems.add(getOutletsNext());
-
-		return ret;
-	}
+//	public MessageOptions carousel(list<account>lacc)
+//	{
+//		MessageOptions ret = new MessageOptions();
+//		ret.sType = 'carousel';
+//
+//		SM010_Utils.pageReturn page = SM010_Utils.getPage(lacc, pageNum, iSize, true, true);
+//
+////		string sCall = SM010_Utils.getRestParam('sCall');
+////		boolean bCall = true;
+////		if (sCall == 'false')
+////			bCall = false;
+//		if (page.bBegin == false)
+//			ret.lItems.add(getOutletsPrev());
+//		for (object obj : page.lObj)
+//		{
+//			ret.lItems.add(getTemplate((account) obj, vis.language__c, true, backFlow));
+//		}
+//
+//		if (page.bEnd == false || Test.isRunningTest())
+//			ret.lItems.add(getOutletsNext());
+//
+//		return ret;
+//	}
 
 	public static MessageOptions getOutletInfo(Visitor__c vis, id outletId)
 	{
@@ -358,45 +355,45 @@ global class OutletSearch
 		ret.sFlow = sFlow;
 		ret.sName = 'outletId';
 		ret.sValue = acc.Id;
-		system.debug('getOption.return='+ret);
+		system.debug('getOption.return=' + ret);
 		return ret;
 	}
 
-	public Option getOutletsNextOption()
-	{
-		Option but = new Option();
-		but.sFlow = sSearchFlow;
-		but.sName = 'keyword';
-		but.sValue = keyword;
-		but.sName2 = 'gender';
-		but.sValue2 = gender;
-		but.sName3 = 'pageNum';
-		but.sValue3 = '' + (pageNum + 1);
-		but.sLabel = SM010_Utils.translate('Next', vis.language__c);
-		return but;
-	}
-	public CarouselItem getOutletsNext()
-	{
-		CarouselItem ret = new CarouselItem();
-		ret.title = SM010_Utils.translate('Next', vis.language__c);
-		ret.imageURL = SM010_Utils.getValue('nextImage');
-		ret.button1 = getOutletsNextOption();
-		return ret;
-	}
-	public CarouselItem getOutletsPrev()
-	{
-		CarouselItem ret = new CarouselItem();
-		ret.title = SM010_Utils.translate('Prev', vis.language__c);
-		ret.imageURL = SM010_Utils.getValue('prevImage');
-		Option but = new Option();
-		but.sFlow = sSearchFlow;
-		but.sValue = keyword;
-		but.sName2 = 'gender';
-		but.sValue2 = gender;
-		but.sName3 = 'pageNum';
-		but.sValue3 = '' + (pageNum - 1);
-		but.sLabel = SM010_Utils.translate('Prev', vis.language__c);
-		ret.button1 = but;
-		return ret;
-	}
+//	public Option getOutletsNextOption()
+//	{
+//		Option but = new Option();
+//		but.sFlow = sSearchFlow;
+//		but.sName = 'keyword';
+//		but.sValue = keyword;
+//		but.sName2 = 'gender';
+//		but.sValue2 = gender;
+//		but.sName3 = 'pageNum';
+//		but.sValue3 = '' + (pageNum + 1);
+//		but.sLabel = SM010_Utils.translate('Next', vis.language__c);
+//		return but;
+//	}
+//	public CarouselItem getOutletsNext()
+//	{
+//		CarouselItem ret = new CarouselItem();
+//		ret.title = SM010_Utils.translate('Next', vis.language__c);
+//		ret.imageURL = SM010_Utils.getValue('nextImage');
+//		ret.button1 = getOutletsNextOption();
+//		return ret;
+//	}
+//	public CarouselItem getOutletsPrev()
+//	{
+//		CarouselItem ret = new CarouselItem();
+//		ret.title = SM010_Utils.translate('Prev', vis.language__c);
+//		ret.imageURL = SM010_Utils.getValue('prevImage');
+//		Option but = new Option();
+//		but.sFlow = sSearchFlow;
+//		but.sValue = keyword;
+//		but.sName2 = 'gender';
+//		but.sValue2 = gender;
+//		but.sName3 = 'pageNum';
+//		but.sValue3 = '' + (pageNum - 1);
+//		but.sLabel = SM010_Utils.translate('Prev', vis.language__c);
+//		ret.button1 = but;
+//		return ret;
+//	}
 }
