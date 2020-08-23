@@ -181,11 +181,7 @@ global class MessageOptions implements iMessage
 		}
 		SM010_Utils.saveTran();
 	}
-	
-//	public MessageOptions(string sMess)
-//	{
-//		this.sMessage = sMess;
-//	}
+
 	public MessageOptions(SM080_QnA.QnAResponse respQnA)
 	{
 		this.sMessage = respQnA.sAnswer;
@@ -196,7 +192,7 @@ global class MessageOptions implements iMessage
 		}
 	}
 
-	public MessageOptions()
+	global MessageOptions()
 	{
 		this.sMessage = '';
 	}
@@ -210,8 +206,8 @@ global class MessageOptions implements iMessage
 
 	public class OptionsJSON
 	{
-		string sType;
-		list<Option> a;
+		public string sType;
+		public list<Option> a;
 	}
 
 	public class CarouselJSON
