@@ -2,19 +2,6 @@
 global class SM031_Nexmo
 {
 
-	//       public static boolean skipLoyalty = true;
-	public static boolean skipLoyalty()
-	{
-		string sSkip = null;
-		try
-		{
-			sSkip = SM010_Utils.getValue('skipLoyalty');
-		}
-		catch (Exception e)
-		{
-		}
-		return sSkip == 'TRUE';
-	}
 	public static list<MessageOptions> getResponse(NexmoMessage__c mess, Visitor__c visr)
 	{
 

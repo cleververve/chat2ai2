@@ -10,7 +10,6 @@ public class MessageOptionsTest
 	@IsTest
 	public static void sendWF()
 	{
-		CVCH.MessageOptions mo = new CVCH.MessageOptions();
 		TestDataFactory data1 = new TestDataFactory();
 
 		list<MessageOptions> lMess = new list<MessageOptions>();
