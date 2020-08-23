@@ -181,7 +181,7 @@ global class MessageOptions implements iMessage
 		}
 		SM010_Utils.saveTran();
 	}
-
+	
 //	public MessageOptions(string sMess)
 //	{
 //		this.sMessage = sMess;
@@ -206,6 +206,7 @@ global class MessageOptions implements iMessage
 		this.visitorId = visitorId;
 		this.sMessage = '';
 	}
+
 
 	public class OptionsJSON
 	{

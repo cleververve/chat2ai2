@@ -317,7 +317,7 @@ public class SM010_Utils
         }
         return mRet;
     }
-/*
+
     public static string phone(string sPhone)
     {
         if(sPhone == null)
@@ -332,7 +332,7 @@ public class SM010_Utils
         }
         return sPhone;
     }
-
+/*
     public static decimal toCurr(string str)
     {
         decimal ret = null;
