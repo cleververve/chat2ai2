@@ -15,7 +15,6 @@ public class Option
 	@AuraEnabled @InvocableVariable public string sValue2='';
 	@AuraEnabled @InvocableVariable public string sName3='';
 	@AuraEnabled @InvocableVariable public string sValue3='';
-	//	@AuraEnabled @InvocableVariable public string sURL;
 
 	public integer iNumber;
 
@@ -44,11 +43,6 @@ public class Option
 
 		for(Option opt: loption)
 		{
-//			if(opt.sName == '') opt.sName = null;
-//			if(opt.sValue == '') opt.sValue = null;
-//			if(opt.sFlow == '') opt.sFlow = null;
-//			if(opt.sType == null) opt.sType = null;
-
 			lret.add(JSON.serialize(opt));
 		}
 		system.debug('Option JSON.return '+lret);

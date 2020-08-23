@@ -6,6 +6,12 @@ Description:
 
 public class MessageOptions implements iMessage
 {
+	public MessageOptions(id visitorId)
+	{
+		this.visitorId = visitorId;
+		this.sMessage = '';
+	}
+
 	@AuraEnabled @InvocableVariable public string sMessage;
 	@AuraEnabled @InvocableVariable public id visitorId;
 	@AuraEnabled @InvocableVariable public string content;
@@ -155,17 +161,7 @@ public class MessageOptions implements iMessage
 					}
 				}
 			}
-
 			SM042_NexmoOut2.sendCarousel(this, sTo, sFrom);
-
-//			SM042_NexmoOut2.sendText(v.Id__c, sMessage, sFrom);
-//			for (string sKey : mOptions.keySet())
-//			{
-//				pause(800);
-//				Option opt = mOptions.get(sKey);
-//				SM042_NexmoOut2.sendImage(sTo, sFrom,  opt.getBody(),opt.sURL);
-////				SM042_NexmoOut2.sendCarousel(sTo, sFrom, opt.sURL, opt.getBody());
-//			}
 		}
 		else
 		{
@@ -180,11 +176,6 @@ public class MessageOptions implements iMessage
 			system.debug('Context__c= ' + v.Context__c);
 		}
 		SM010_Utils.saveTran();
-	}
-
-	public MessageOptions(string sMess)
-	{
-		this.sMessage = sMess;
 	}
 	public MessageOptions(SM080_QnA.QnAResponse respQnA)
 	{
@@ -201,13 +192,6 @@ public class MessageOptions implements iMessage
 	{
 		this.sMessage = '';
 	}
-
-	public MessageOptions(id visitorId)
-	{
-		this.visitorId = visitorId;
-		this.sMessage = '';
-	}
-
 
 	public class OptionsJSON
 	{
@@ -282,22 +266,4 @@ public class MessageOptions implements iMessage
 		system.debug('sendWF update = ' + mUpdate.values());
 		update mUpdate.values();
 	}
-
-//	public static MessageOptions inputMessage(id visitorId, string sMessage, string sFlow, string sFieldName)
-//	{
-//		MessageOptions mo = new MessageOptions(visitorId);
-//		mo.sType = 'Input';
-//		mo.sMessage = sMessage;
-//		mo.sFlow = sFlow;
-//		mo.sFieldName = sFieldName;
-//		return mo;
-//	}
-
-	public static MessageOptions message(id visitorId, string sMessage)
-	{
-		MessageOptions mo = new MessageOptions(visitorId);
-		mo.sMessage = sMessage;
-		return mo;
-	}
-
 }

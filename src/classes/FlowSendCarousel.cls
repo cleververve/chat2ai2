@@ -31,12 +31,7 @@ public class FlowSendCarousel
                 SM042_NexmoOut2.pause(800);
         	}
             else
-            {
                 sm042_nexmoout2.sendCarouselAsync(vis.id__c,vis.Chat_Number__c, inp.imageurl, inp.caption);
-            }
-			
-            
 		}
 	}
-
 }
