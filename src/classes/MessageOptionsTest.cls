@@ -6,7 +6,6 @@ Description:
 @IsTest
 public class MessageOptionsTest
 {
-
 	@IsTest
 	public static void sendWF()
 	{

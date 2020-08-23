@@ -165,20 +165,20 @@ public class SM042_NexmoOut2 implements Queueable
 		return JSON.serialize(mret);
 	}
 
-	@future(CallOut=true)
-	public static void sendTextAsync(string sTo, string messageText)
-	{
-		try
-		{
-			sendText(sTo, messageText);
-		}
-		catch (Exception e)
-		{
-			if (test.isRunningTest())
-				throw e;
-		}
-		SM005_Logs.save();
-	}
+//	@future(CallOut=true)
+//	public static void sendTextAsync(string sTo, string messageText)
+//	{
+//		try
+//		{
+//			sendText(sTo, messageText);
+//		}
+//		catch (Exception e)
+//		{
+//			if (test.isRunningTest())
+//				throw e;
+//		}
+//		SM005_Logs.save();
+//	}
 	public static void sendText(string sTo, string messageText)
 	{
 		sendText2(sTo, '97144099000', messageText);
@@ -191,11 +191,11 @@ public class SM042_NexmoOut2 implements Queueable
 		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBody(sTo, messageText, sFrom), 'NexmoOut2', null);
 	}
     
-    @future(Callout=true)
-    public static void sendText2Async(string sTo, string sFrom, string messageText)
-    {
-        sendText2(sTo,sFrom,messageText);
-    }
+//    @future(Callout=true)
+//    public static void sendText2Async(string sTo, string sFrom, string messageText)
+//    {
+//        sendText2(sTo,sFrom,messageText);
+//    }
 
 //	@Future(callout = true)
 //	public static void sendImageFuture(string sTo, string sFrom, string imageurl, string caption)

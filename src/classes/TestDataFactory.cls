@@ -15,6 +15,16 @@ public class TestDataFactory
 		vis.CVCH__language__c = 'it';
 		insert vis;
 
+		account acc = new account();
+		acc.Name = 'location1';
+		acc.CVCH__Location__c = 'location1';
+		insert acc;
+
+		CVCH__Category__c cat = new CVCH__Category__c();
+		cat.CVCH__Category__c = 'location1';
+		cat.CVCH__Account__c = acc.Id;
+		insert cat;
+
 		CVCH__Values__c val = new CVCH__Values__c();
 		val.Name = 'Insert Translations';
 		val.CVCH__Value__c = 'TRUE';

@@ -128,7 +128,7 @@ global class FlowGetDirection {
             langname = 'name_ar__c';
         if (language == 'it')
             langname = 'name_it__c';
-        list<sobject> lobj = Database.query('select id, name,Image__c,phone,website,location__c, name_ar__c, name_en__c, name_it__c, url__c from account where Loy_Program__c =:programId and (id in :mrkeySet or '+langname+' like :sKeyWord or name like :sKeyWord or location__c = :sKeyWord0) and (recordType.name = \'Outlet\' or recordType.name = \'Location\') order by name');
+        list<sobject> lobj = Database.query('select id, name,Image__c,phone,website,location__c, name_ar__c, name_en__c, name_it__c, url__c from account where (id in :mrkeySet or '+langname+' like :sKeyWord or name like :sKeyWord or location__c = :sKeyWord0) order by name');
         // or '+langname+' like :sKeyWord or name like :sKeyWord
         list<account> lacc = new list<account>();
         for (sobject o: lobj){
