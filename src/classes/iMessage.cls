@@ -4,7 +4,7 @@ Date:           15.07.2020
 Description:   
 **/
 
-public interface iMessage
+global interface iMessage
 {
 	string getBody();
 }

@@ -4,7 +4,7 @@ Date:           18.07.2020
 Description:   
 **/
 
-public with sharing class DM080_Visitor
+public class DM080_Visitor
 {
 
 	public static list <CVCH__Visitor__c> getRecords(set<id> sid)

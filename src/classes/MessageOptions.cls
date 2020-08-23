@@ -197,20 +197,20 @@ global class MessageOptions implements iMessage
 		this.sMessage = '';
 	}
 
-	public MessageOptions(id visitorId)
+	global MessageOptions(id visitorId)
 	{
 		this.visitorId = visitorId;
 		this.sMessage = '';
 	}
 
 
-	public class OptionsJSON
+	global class OptionsJSON
 	{
 		public string sType;
 		public list<Option> a;
 	}
 
-	public class CarouselJSON
+	global class CarouselJSON
 	{
 		public list<CarouselItem> items;
 	}

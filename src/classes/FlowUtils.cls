@@ -4,7 +4,7 @@ Date:           18.07.2020
 Description:   
 **/
 
-global with sharing class FlowUtils
+global class FlowUtils
 {
     global class getEntityParam
 	{

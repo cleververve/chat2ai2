@@ -4,7 +4,7 @@ Date:           04.08.2020
 Description:   
 **/
 
-global with sharing class CarouselItem
+global class CarouselItem
 {
 	@AuraEnabled @InvocableVariable public string imageURL;
 	@AuraEnabled @InvocableVariable public string title;
