@@ -1,7 +1,7 @@
 @RestResource(urlMapping='/nexmo/*')
 global class SM031_Nexmo
 {
-
+	
 	public static list<MessageOptions> getResponse(NexmoMessage__c mess, Visitor__c visr)
 	{
 
