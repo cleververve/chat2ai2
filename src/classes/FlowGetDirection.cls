@@ -2,15 +2,15 @@ global class FlowGetDirection {
     
 	global class FlowInput
 	{
-		@AuraEnabled @InvocableVariable global id visitorId;
-		@AuraEnabled @InvocableVariable global string location;
-        @AuraEnabled @InvocableVariable global string type;
-        @AuraEnabled @InvocableVariable global string programId;
-        @AuraEnabled @InvocableVariable global string sLang;
-        @AuraEnabled @InvocableVariable global string entities;
+		/*moved*/@AuraEnabled @InvocableVariable global id visitorId;
+        /*moved*/@AuraEnabled @InvocableVariable global string location;
+        /*moved*/@AuraEnabled @InvocableVariable global string type;
+        /*moved*/@AuraEnabled @InvocableVariable global string programId;
+        /*moved*/@AuraEnabled @InvocableVariable global string sLang;
+        /*moved*/@AuraEnabled @InvocableVariable global string entities;
 	}
-    
-    @InvocableMethod(label='Get Direction' description='Takes current/desired location and gives link to the google maps')
+
+    /*moved*/@InvocableMethod(label='old do not use' description='Takes current/desired location and gives link to the google maps')
 	global static void send(list<FlowInput> lParam)
 	{
         system.debug('FlowGetDirection.start');

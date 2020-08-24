@@ -2,12 +2,12 @@ global class FlowSendFile
 {
 	global class SendFileInput
     {
-        @AuraEnabled @InvocableVariable global id visitorId;
-        @AuraEnabled @InvocableVariable global string fileURL;
-        @AuraEnabled @InvocableVariable global string caption;
+        @AuraEnabled @InvocableVariable public id visitorId;
+        @AuraEnabled @InvocableVariable public string fileURL;
+        @AuraEnabled @InvocableVariable public string caption;
     }
     
-    @InvocableMethod(label='Send File' description='sends a file')
+    @InvocableMethod(label='old do not use' description='sends a file')
 	global static void sendFile(list<SendFileInput> lParam)
 	{
         system.debug('FlowSendFile.start');

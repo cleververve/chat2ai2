@@ -6,13 +6,13 @@ Description:
 
 global class CarouselItem
 {
-	@AuraEnabled @InvocableVariable global string imageURL;
-	@AuraEnabled @InvocableVariable global string title;
-	@AuraEnabled @InvocableVariable global string subtitle;
-	@AuraEnabled @InvocableVariable global string subtitle2;
-	@AuraEnabled @InvocableVariable global Option button1;
-	@AuraEnabled @InvocableVariable global Option button2;
-	@AuraEnabled @InvocableVariable global Option button3;
+	@AuraEnabled @InvocableVariable public string imageURL;
+	@AuraEnabled @InvocableVariable public string title;
+	@AuraEnabled @InvocableVariable public string subtitle;
+	@AuraEnabled @InvocableVariable public string subtitle2;
+	@AuraEnabled @InvocableVariable public Option button1;
+	@AuraEnabled @InvocableVariable public Option button2;
+	@AuraEnabled @InvocableVariable public Option button3;
 	public string getBody()
 	{
 		string sRet = '';

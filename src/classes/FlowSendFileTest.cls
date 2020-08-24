@@ -18,4 +18,16 @@ public class FlowSendFileTest
 		Test.stopTest();
 	}
 
+	@IsTest
+	public static void send2()
+	{
+		TestDataFactory data1 = new TestDataFactory();
+		FlowSendFile2 inp = new FlowSendFile2();
+		inp.visitorId = data1.vis.Id;
+		inp.caption = 'caption';
+		Test.startTest();
+		FlowSendFile2.sendFile(new list<FlowSendFile2>{inp});
+		Test.stopTest();
+	}
+
 }

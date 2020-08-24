@@ -3,13 +3,13 @@ global class FlowSendCarousel
 
 	global class SendCrsInput
 	{
-		@AuraEnabled @InvocableVariable global id visitorId;
-        @AuraEnabled @InvocableVariable global string imageurl;
-        @AuraEnabled @InvocableVariable global string caption;
-        @AuraEnabled @InvocableVariable global boolean async;
+		/*moved*/@AuraEnabled @InvocableVariable global id visitorId;
+		/*moved*/@AuraEnabled @InvocableVariable global string imageurl;
+		/*moved*/@AuraEnabled @InvocableVariable global string caption;
+		/*moved*/@AuraEnabled @InvocableVariable global boolean async;
 	}
 
-	@InvocableMethod(label='Send Carousel' description='sends a carousel')
+	/*moved*/@InvocableMethod(label='Send Carousel' description='sends a carousel')
 	global static void sendMessage(list<SendcrsInput> lParam)
 	{
 		system.debug('FlowSendCarousel.start');
@@ -34,8 +34,6 @@ global class FlowSendCarousel
             {
                 sm042_nexmoout2.sendCarouselAsync(vis.id__c,vis.Chat_Number__c, inp.imageurl, inp.caption);
             }
-			
-            
 		}
 	}
 

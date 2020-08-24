@@ -3,14 +3,14 @@ global class FlowSendWelcomeCarousel
 
 	global class SendCrsInput
 	{
-        @AuraEnabled @InvocableVariable global string imageurl;
-        @AuraEnabled @InvocableVariable global string caption;
-        @AuraEnabled @InvocableVariable global boolean async;
-        @AuraEnabled @InvocableVariable global string visphone;
-        @AuraEnabled @InvocableVariable global string ChatNumber;
+        @AuraEnabled @InvocableVariable public string imageurl;
+        @AuraEnabled @InvocableVariable public string caption;
+        @AuraEnabled @InvocableVariable public boolean async;
+        @AuraEnabled @InvocableVariable public string visphone;
+        @AuraEnabled @InvocableVariable public string ChatNumber;
 	}
 
-	@InvocableMethod(label='Send Welcome Carousel' description='sends a carousel')
+	@InvocableMethod(label='old do not use' description='sends a carousel')
 	global static void sendMessage(list<SendcrsInput> lParam)
 	{
 		system.debug('FlowSendWelcomeCarousel.start');

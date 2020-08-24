@@ -21,4 +21,17 @@ public class FlowSendMessageTest
 		});
 		Test.stopTest();
 	}
+
+	@IsTest
+	public static void send2()
+	{
+		TestDataFactory data = new TestDataFactory();
+		FlowSendMessage2 inp = new FlowSendMessage2();
+		inp.visitorId = data.vis.id;
+		inp.async = false;
+		inp.message = 'mess';
+		Test.startTest();
+		FlowSendMessage2.sendMessage(new list<FlowSendMessage2>{inp});
+		Test.stopTest();
+	}
 }

@@ -1,25 +1,21 @@
 /**
 Author:         serhiivolynets
-Date:           10.08.2020
+Date:           24.08.2020
 Description:   
 **/
 
-global class OutletInfo
+global class OutletInfo3
 {
-	global class OutletInfoRequest
-	{
-		@AuraEnabled @InvocableVariable global id visitorId;
-		@AuraEnabled @InvocableVariable global id outletId;
-	}
+	@AuraEnabled @InvocableVariable global id visitorId;
+	@AuraEnabled @InvocableVariable global id outletId;
 
-
-	@InvocableMethod(label='old do not use' description='')
-	global static void getOutlet(list<OutletInfoRequest> lRec)
+	@InvocableMethod(label='get outlet info' description='')
+	global static void getOutlet(list<OutletInfo3> lRec)
 	{
 		set<id>sids = new set<id>();
 		set<id>soutletids = new set<id>();
 
-		for (OutletInfoRequest rec : lRec)
+		for (OutletInfo3 rec : lRec)
 		{
 			if (rec.visitorId != null)
 				sids.add(rec.visitorId);
@@ -29,7 +25,7 @@ global class OutletInfo
 		map<id,Visitor__c> mVis = new map<id,Visitor__c>(DM080_Visitor.getRecords(sids));
 
 		map<id,Visitor__c> mUpdate = new map<id,Visitor__c>();
-		for(OutletInfoRequest rec : lRec)
+		for(OutletInfo3 rec : lRec)
 		{
 			Visitor__c vis = mVis.get(rec.visitorId);
 			if(vis != null)

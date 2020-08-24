@@ -9,12 +9,12 @@ global class FlowSendMessage
 
 	global class SendMsgInput
 	{
-		@AuraEnabled @InvocableVariable global id visitorId;
-		@AuraEnabled @InvocableVariable global string message;
-        @AuraEnabled @InvocableVariable global boolean async;
+		@AuraEnabled @InvocableVariable public id visitorId;
+		@AuraEnabled @InvocableVariable public string message;
+        @AuraEnabled @InvocableVariable public boolean async;
 	}
 
-	@InvocableMethod(label='Send Message' description='sends a chat message ')
+	@InvocableMethod(label='old do not use' description='sends a chat message ')
 	global static void sendMessage(list<SendMsgInput> lParam)
 	{
 		system.debug('FlowSendMessage.start');

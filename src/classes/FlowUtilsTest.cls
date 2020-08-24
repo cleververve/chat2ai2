@@ -14,4 +14,14 @@ public with sharing class FlowUtilsTest
 		par.sEntityName = 'aaa';
 		FlowUtils.getEntityString(new list<FlowUtils.getEntityParam>{par});
 	}
+
+	@IsTest
+	public static void testIt2()
+	{
+		FlowUtils2 par = new FlowUtils2();
+		par.sEntities = '{"aaa":"bbb"}';
+		par.sEntityName = 'aaa';
+		FlowUtils2.getEntityString(new list<FlowUtils2>{par});
+	}
+
 }

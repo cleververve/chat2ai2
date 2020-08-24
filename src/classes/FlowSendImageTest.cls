@@ -21,5 +21,18 @@ public class FlowSendImageTest
 		Test.stopTest();
 	}
 
-
+	@IsTest
+	public static void test2()
+	{
+		TestDataFactory data = new TestDataFactory();
+		FlowSendImage2 inp = new FlowSendImage2();
+		inp.visitorId = data.vis.id;
+		inp.imageURL = 'google.com';
+		inp.async = false;
+		Test.startTest();
+		FlowSendImage2.sendImage(new list<FlowSendImage2>{inp});
+		inp.async = true;
+		FlowSendImage2.sendImage(new list<FlowSendImage2>{inp});
+		Test.stopTest();
+	}
 }

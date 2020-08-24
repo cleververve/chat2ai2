@@ -1,32 +1,30 @@
 /**
 Author:         serhiivolynets
-Date:           18.07.2020
+Date:           24.08.2020
 Description:   
 **/
 
-global class FlowUtils
+global class FlowUtils2
 {
-    global class getEntityParam
-	{
+
 		@AuraEnabled @InvocableVariable global String sEntityName;
 		@AuraEnabled @InvocableVariable global String sEntities;
-	}
-	@InvocableMethod(label='old do not use' description='returns Entity Value from the json string of map of entities')
-	global static list<string> getEntityString(list<getEntityParam> lParam)
+
+	@InvocableMethod(label='Get Entity String' description='returns Entity Value from the json string of map of entities')
+	global static list<string> getEntityString(list<FlowUtils2> lParam)
 	{
 		list<string>lret = new list<string>();
-		for(getEntityParam param: lParam)
+		for(FlowUtils2 param: lParam)
 		{
 			lret.add((string)getEntity(param));
 		}
 		return lret;
 	}
-	
-	public static object getEntity(getEntityParam param)
+
+	public static object getEntity(FlowUtils2 param)
 	{
 
 		map<string, object> mObj = (map<string, object>) json.deserializeUntyped(param.sEntities);
 		return mobj.get(param.sEntityName);
 	}
-	
 }

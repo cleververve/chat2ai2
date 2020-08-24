@@ -15,7 +15,6 @@ global class Option
 	@AuraEnabled @InvocableVariable global string sValue2='';
 	@AuraEnabled @InvocableVariable global string sName3='';
 	@AuraEnabled @InvocableVariable global string sValue3='';
-	//	@AuraEnabled @InvocableVariable public string sURL;
 
 	public integer iNumber;
 	public string getBody()

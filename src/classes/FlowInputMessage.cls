@@ -11,7 +11,7 @@ global class FlowInputMessage
 	@AuraEnabled @InvocableVariable global string sFlow;
     @AuraEnabled @InvocableVariable global string sConfirmMessage;
 	@AuraEnabled @InvocableVariable global id visitorId;
-
+	
 	@InvocableMethod(label='Input Message' description='Prompts Visitor to input data and saves the input in Visitor object field')
 	global static void send(list<FlowInputMessage> lMessages)
 	{

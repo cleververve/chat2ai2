@@ -21,4 +21,20 @@ public class FlowSendCarouselTest
 		FlowSendCarousel.sendMessage(linp);
 		Test.stopTest();
 	}
+
+	@IsTest
+	public static void send2()
+	{
+		TestDataFactory data1 = new TestDataFactory();
+		FlowSendCarousel2 mess = new FlowSendCarousel2();
+		mess.visitorId = data1.vis.id;
+		mess.caption = 'mess';
+		mess.imageurl = 'http://google.com';
+
+		Test.startTest();
+		list<FlowSendCarousel2> linp = new list<FlowSendCarousel2>();
+		linp.add(mess);
+		FlowSendCarousel2.sendMessage(linp);
+		Test.stopTest();
+	}
 }
