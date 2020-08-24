@@ -21,7 +21,6 @@ global class OutletSearch
 	@AuraEnabled @InvocableVariable global string type;
 	Visitor__c vis;
 
-
 	@InvocableMethod(label='search outlets by category' description='')
 	global static void search(list<OutletSearch> search)
 	{
