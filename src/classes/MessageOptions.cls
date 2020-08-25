@@ -121,13 +121,13 @@ global class MessageOptions implements iMessage
 		return mOptions;
 	}
 
-	public void send(Visitor__c v)
+	public void send(CVCH__Visitor__c v)
 	{
-		string sFrom = v.Chat_Number__c;
-		string sTo = v.Id__c;
+		string sFrom = v.CVCH__Chat_Number__c;
+		string sTo = v.CVCH__Id__c;
 		if(mOptions.isEmpty() && !lOptions.isEmpty())
 			mOptions = MessageOptions.addOptions(mOptions,lOptions);
-		translate(v.language__c);
+		translate(v.CVCH__language__c);
 		if (sType == 'Carousel')
 		{
 			integer i=1;
@@ -176,8 +176,8 @@ global class MessageOptions implements iMessage
 		if (!mOptions.isEmpty() || this.sFieldName != null)
 		{
 			system.debug('mOptions=' + mOptions);
-			v.Context__c = JSON.serialize(this);
-			system.debug('Context__c= ' + v.Context__c);
+			v.CVCH__Context__c = JSON.serialize(this);
+			system.debug('Context__c= ' + v.CVCH__Context__c);
 		}
 		SM010_Utils.saveTran();
 	}
@@ -264,12 +264,12 @@ global class MessageOptions implements iMessage
 				}
 			}
 		}
-		map<id, Visitor__c> mUpdate = new map<id, Visitor__c>();
+		map<id, CVCH__Visitor__c> mUpdate = new map<id, CVCH__Visitor__c>();
 
-		map<id, Visitor__c> mVisitorsByIds = new map<id, Visitor__c>(DM080_Visitor.getRecords(sVisitorIds));
+		map<id, CVCH__Visitor__c> mVisitorsByIds = new map<id, CVCH__Visitor__c>(DM080_Visitor.getRecords(sVisitorIds));
 		for (MessageOptions req : messages)
 		{
-			Visitor__c vis = mVisitorsByIds.get(req.visitorId);
+			CVCH__Visitor__c vis = mVisitorsByIds.get(req.visitorId);
 			if (vis != null)
 				req.send(vis);
 			mUpdate.put(vis.Id, vis);

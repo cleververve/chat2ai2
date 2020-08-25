@@ -11,7 +11,7 @@ public class DM080_Visitor
 	{
         map<string,Schema.SObjectField> mapFld = CVCH__Visitor__c.SObjectType.getDescribe().fields.getMap();
         
-		list<CVCH__Visitor__c> lVisitors = Database.query('select '+string.join(new list<string>(mapFld.keyset()),',')+' from Visitor__c where ID in :sid');//[select id,Context__c,Id__c,Chat_Number__c,language__c, location__c  from Visitor__c where ID = :sid];
+		list<CVCH__Visitor__c> lVisitors = Database.query('select '+string.join(new list<string>(mapFld.keyset()),',')+' from CVCH__Visitor__c where ID in :sid');//[select id,Context__c,Id__c,Chat_Number__c,language__c, location__c  from Visitor__c where ID = :sid];
 		return lVisitors;
 	}
     
@@ -19,7 +19,7 @@ public class DM080_Visitor
 	{
         map<string,Schema.SObjectField> mapFld = CVCH__Visitor__c.SObjectType.getDescribe().fields.getMap();
         
-		list<CVCH__Visitor__c> lVisitors = Database.query('select '+string.join(new list<string>(mapFld.keyset()),',')+' from Visitor__c where ID__c = :sid');//[select id,Context__c,Id__c,Chat_Number__c,language__c, location__c  from Visitor__c where ID__c = :sid];
+		list<CVCH__Visitor__c> lVisitors = Database.query('select '+string.join(new list<string>(mapFld.keyset()),',')+' from CVCH__Visitor__c where ID__c = :sid');//[select id,Context__c,Id__c,Chat_Number__c,language__c, location__c  from Visitor__c where ID__c = :sid];
 		return lVisitors;
 	}
 

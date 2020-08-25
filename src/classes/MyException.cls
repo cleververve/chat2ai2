@@ -1,3 +1,3 @@
-public class MyException extends Exception {
+global class MyException extends Exception {
 
 }

@@ -102,7 +102,12 @@ public class JWT {
         String tokenEndpoint = 'https://api.nexmo.com/v0.1/messages';
         JWT jwt = new JWT();
         if(!Test.isRunningTest())
-            jwt.pkcs8 = [select id, Value__c from Key__c where Active_Flag__c = true limit 1].Value__c;
+        {
+            CVCH__Key__c rec = [select id, CVCH__Value__c,CVCH__Application_Id__c  from CVCH__Key__c where CVCH__Active_Flag__c = true limit 1];
+            jwt.pkcs8 = rec.CVCH__Value__c;
+            if(rec.CVCH__Application_Id__c != '' && rec.CVCH__Application_Id__c != null)
+                jwt.applicationId = rec.CVCH__Application_Id__c;
+        }
         else
             jwt.pkcs8 = 'aaabbb';
         system.debug('jwt.pkcs8=>'+jwt.pkcs8);

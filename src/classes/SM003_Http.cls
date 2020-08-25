@@ -79,7 +79,7 @@ public with sharing class SM003_Http
             sErrorMessage = e.getMessage();
 			if (sErrorMessage != null && sErrorMessage.length() > 254)
                 sErrorMessage = sErrorMessage.substring(0, 253);
-            throw e;
+            throw new MyException(e.getMessage());
         }
         finally
         {

@@ -4,16 +4,16 @@ Date:           08.07.2020
 Description:   
 **/
 
-public with sharing class SM080_QnA
+global class SM080_QnA
 {
-	public class QnAPrompt
+	global class QnAPrompt
 	{
 		public integer displayOrder = 0;
 		public integer qnaId = 0;
 		public string displayText = '';
 
 	}
-	public class QnAResponse
+	global class QnAResponse
 	{
 		public string sAnswer = '';
 		public string sQuery = '';
@@ -36,7 +36,7 @@ public with sharing class SM080_QnA
 				mResp.put('question', sPhrase);
 		return JSON.serialize(mResp);
 	}
-	public static QnAResponse queryPhrase(string sPhrase,string language)
+	global static QnAResponse queryPhrase(string sPhrase,string language)
 	{
 		return queryPhrase(sPhrase, null,language);
 	}
@@ -46,7 +46,7 @@ public with sharing class SM080_QnA
 		return queryPhrase(null, qnaid, language);
 	}
 
-	public static QnAResponse queryPhrase(string sPhrase, integer qnaid, string language)
+	global static QnAResponse queryPhrase(string sPhrase, integer qnaid, string language)
 	{
 		QnAResponse ret = new QnAResponse();
 		string sURL = 'callout:QnA';

@@ -7,9 +7,9 @@ Description:
 global class FlowSendFile2
 {
 
-		@AuraEnabled @InvocableVariable public id visitorId;
-		@AuraEnabled @InvocableVariable public string fileURL;
-		@AuraEnabled @InvocableVariable public string caption;
+		@AuraEnabled @InvocableVariable global id visitorId;
+		@AuraEnabled @InvocableVariable global string fileURL;
+		@AuraEnabled @InvocableVariable global string caption;
 
 
 	@InvocableMethod(label='Send File' description='sends a file')
@@ -21,12 +21,13 @@ global class FlowSendFile2
 		{
 			sids.add((id)inp.visitorId);
 		}
-		map<id,Visitor__c> mVis = new map<id,Visitor__c>(DM080_Visitor.getRecords(sids));
+		map<id,CVCH__Visitor__c> mVis = new map<id,CVCH__Visitor__c>(DM080_Visitor.getRecords(sids));
 		for(FlowSendFile2 inp: lParam)
 		{
-			Visitor__c vis = mVis.get((id)inp.visitorId);
-			SM042_NexmoOut4.sendFile(vis.Id__c,vis.Chat_Number__c,inp.fileURL,inp.caption);
+			CVCH__Visitor__c vis = mVis.get((id)inp.visitorId);
+			SM042_NexmoOut4.sendFile(vis.CVCH__Id__c,vis.CVCH__Chat_Number__c,inp.fileURL,inp.caption);
 			SM042_NexmoOut2.pause(2000);
 		}
 	}
+
 }

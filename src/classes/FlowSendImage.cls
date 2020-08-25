@@ -2,9 +2,9 @@ global class FlowSendImage
 {   
     global class SendImgInput
     {
-        @AuraEnabled @InvocableVariable public id visitorId;
-        @AuraEnabled @InvocableVariable public string imageURL;
-        @AuraEnabled @InvocableVariable public boolean async;
+        @AuraEnabled @InvocableVariable global id visitorId;
+        @AuraEnabled @InvocableVariable global string imageURL;
+        @AuraEnabled @InvocableVariable global boolean async;
     }
     
     @InvocableMethod(label='old do not use' description='sends an image')
@@ -35,4 +35,5 @@ global class FlowSendImage
             SM042_NexmoOut2.pause(1000);
 		}
     }
+
 }

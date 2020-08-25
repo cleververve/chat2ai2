@@ -110,26 +110,26 @@ public class SM010_Utils
 
     public static string getValue(string sName)
     {
-        Values__c val = Values__c.getInstance(sName);
+        CVCH__Values__c val = CVCH__Values__c.getInstance(sName);
         if(val == null)
         {
             if(Test.isRunningTest())
                 return '';
             throw new MyException('Can\'t find '+sName+' in Values custom settings. Please notify admin.');
         }
-        return val.Value__c;
+        return val.CVCH__Value__c;
     }
     
     public static string getChat2aiValue(string sName)
     {
-        Chat2ai__c val = Chat2ai__c.getInstance(sName);
+        CVCH__Chat2ai__c val = CVCH__Chat2ai__c.getInstance(sName);
         if(val == null)
         {
             if(Test.isRunningTest())
                 return '';
             throw new MyException('Can\'t find '+sName+' in Chat2ai 2 custom settings. Please notify admin.');
         }
-        return val.Value__c;
+        return val.CVCH__Value__c;
     }
     
 /*    public static string getFlowId(string flowName,string programId, string language)
@@ -149,13 +149,13 @@ public class SM010_Utils
         return ret;
     }
 */
-    public static list< Translation__c> lTrans = new list< Translation__c>();
+    public static list< CVCH__Translation__c> lTrans = new list< CVCH__Translation__c>();
     public static void saveTran()
     {
         if(!lTrans.isEmpty())
         {
             insert lTrans;
-            lTrans = new list< Translation__c>();
+            lTrans = new list< CVCH__Translation__c>();
         }
     }
     public static string sProgramId=null; 
@@ -175,12 +175,12 @@ public class SM010_Utils
         string sKey = getKey(str);
         if(sKey.length()>254)
             return null;
-        list<Translation__c> sObj = [select Id, key__c, en__c from Translation__c where key__c = :sKey and API_Translation__c = true];
+        list<CVCH__Translation__c> sObj = [select Id, CVCH__key__c, CVCH__en__c from Translation__c where CVCH__key__c = :sKey and CVCH__API_Translation__c = true];
 
         if(!sObj.isEmpty())
         {
-            Translation__c tr = (Translation__c)sObj[0];
-            sRet = tr.en__c;
+            CVCH__Translation__c tr = (CVCH__Translation__c)sObj[0];
+            sRet = tr.CVCH__en__c;
         }
         return sRet;
     }
@@ -191,11 +191,11 @@ public class SM010_Utils
         string sKey = getKey(str);
         if(sKey.length()>254)
             return;
-        Translation__c tr  = new Translation__c();
-        tr.en__c = en;
-        tr.default_value__c = en;
-        tr.key__c = str;
-        tr.API_Translation__c = true;
+        CVCH__Translation__c tr  = new CVCH__Translation__c();
+        tr.CVCH__en__c = en;
+        tr.CVCH__default_value__c = en;
+        tr.CVCH__key__c = str;
+        tr.CVCH__API_Translation__c = true;
         lTrans.add(tr);
     }
     public static string translate(string str, string sLang,boolean bFlow)
@@ -218,31 +218,31 @@ public class SM010_Utils
 //            sQuery = sQuery +' and Loy_Program__c =\''+sPrId+'\'';
         system.debug('translate.sQuery = '+sQuery);
         list<sobject> sObj = Database.query(sQuery);
-        Translation__c tr;
+        CVCH__Translation__c tr;
         system.debug(sObj);
         if(sObj.isEmpty())
         {
-            tr = new Translation__c();         
+            tr = new CVCH__Translation__c();
 //            tr.Loy_Program__c = sPrId;
-            tr.key__c = sKey;
+            tr.CVCH__key__c = sKey;
 
             tr.put(sFieldName,null);
-            tr.bFlow__c = bFlow;
-            if(tr.bFlow__c != true)
-                tr.default_value__c = str;
+            tr.CVCH__bFlow__c = bFlow;
+            if(tr.CVCH__bFlow__c != true)
+                tr.CVCH__default_value__c = str;
             lTrans.add(tr);
  //           insert tr;
             sObj.add(tr);
         }
         else
         {
-            tr = (Translation__c)sObj[0];
+            tr = (CVCH__Translation__c)sObj[0];
         }
         sRet = (string)tr.get(sFieldName);
         if(sRet == null || sRet == '')
         {
-            if((tr.default_value__c != null && tr.default_value__c != '' )|| Test.isRunningTest()) // для флоу, если нет перевода, берем значение по-умолчанию
-                sRet = tr.default_value__c;
+            if((tr.CVCH__default_value__c != null && tr.CVCH__default_value__c != '' )|| Test.isRunningTest()) // для флоу, если нет перевода, берем значение по-умолчанию
+                sRet = tr.CVCH__default_value__c;
             else
                 throw new MyException('Can not find translation for ['+sKey+'] in program ['+sProgramId+']');
         }
@@ -279,30 +279,30 @@ public class SM010_Utils
         string sQuery = 'select Id, key__c, default_value__c, '+sFieldName+' from Translation__c where  key__c in :sKeys and bFlow__c = false';
         system.debug('translate.sQuery = '+sQuery);
         list<sobject> sObj = Database.query(sQuery);
-        map<string,Translation__c>mTr = new map<string,Translation__c>();
+        map<string,CVCH__Translation__c>mTr = new map<string,CVCH__Translation__c>();
         for(sobject obj: sObj)
         {
-            Translation__c tr = (Translation__c)obj;
-            mTr.put(tr.key__c,tr);
+            CVCH__Translation__c tr = (CVCH__Translation__c)obj;
+            mTr.put(tr.CVCH__key__c,tr);
         }
         for(string str : lTranslate)
         {
             string sKey = getKey(str);
-            Translation__c tr = mTr.get(sKey);
+            CVCH__Translation__c tr = mTr.get(sKey);
             if(tr == null)
             {
                 if(bIns)
                 {
-                    tr = new Translation__c();
+                    tr = new CVCH__Translation__c();
 //                tr.Loy_Program__c = sPrId;
-                    tr.key__c = sKey;
+                    tr.CVCH__key__c = sKey;
                     tr.put(sFieldName,null);
-                    tr.bFlow__c = false;
-                    if(tr.bFlow__c != true)
-                        tr.default_value__c = str;
+                    tr.CVCH__bFlow__c = false;
+                    if(tr.CVCH__bFlow__c != true)
+                        tr.CVCH__default_value__c = str;
                     lTrans.add(tr);
                     //           insert tr;
-                    mTr.put(tr.key__c,tr);
+                    mTr.put(tr.CVCH__key__c,tr);
                 }
 
             }

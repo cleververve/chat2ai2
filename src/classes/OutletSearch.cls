@@ -19,7 +19,7 @@ global class OutletSearch
 	@AuraEnabled @InvocableVariable global integer pageNum;
 	@AuraEnabled @InvocableVariable global string entities;
 	@AuraEnabled @InvocableVariable global string type;
-	Visitor__c vis;
+	CVCH__Visitor__c vis;
 
 	@InvocableMethod(label='search outlets by category' description='')
 	global static void search(list<OutletSearch> search)
@@ -38,8 +38,8 @@ global class OutletSearch
 			if (s.backFlow == null || s.backFlow == '')
 				s.backFlow = s.sDefaultBackFlow;
 		}
-		map<id, Visitor__c> mVis = new map<id, Visitor__c>(DM080_Visitor.getRecords(sids));
-		map<id, Visitor__c> mUpdate = new map<id, Visitor__c>();
+		map<id, CVCH__Visitor__c> mVis = new map<id, CVCH__Visitor__c>(DM080_Visitor.getRecords(sids));
+		map<id, CVCH__Visitor__c> mUpdate = new map<id, CVCH__Visitor__c>();
 		for (OutletSearch srch : search)
 		{
 			srch.vis = mVis.get(srch.visitorId);
@@ -70,17 +70,17 @@ global class OutletSearch
 			{
 				opt.send(srch.vis);
 
-				Visitor__c vis2 = new Visitor__c
+				CVCH__Visitor__c vis2 = new CVCH__Visitor__c
 						(
-								keyword__c = srch.keyword
+								CVCH__keyword__c = srch.keyword
 								, id = srch.vis.id
-								, Context__c = srch.vis.Context__c
+								, CVCH__Context__c = srch.vis.CVCH__Context__c
 						);
 				mUpdate.put(vis2.id, vis2);
 			}
 			else
 			{
-				Visitor__c vis2 = new Visitor__c(keyword__c = srch.keyword, id = srch.vis.id);
+				CVCH__Visitor__c vis2 = new CVCH__Visitor__c(CVCH__keyword__c = srch.keyword, id = srch.vis.id);
 				mUpdate.put(vis2.id, vis2);
 			}
 		}
@@ -122,7 +122,7 @@ global class OutletSearch
 
 
 		if (lAcc.isEmpty())
-			ret = MessageOptions.message(vis.id, SM010_Utils.translate('There is no any shops by keyword ', vis.language__c) + sKeyWord);
+			ret = MessageOptions.message(vis.id, SM010_Utils.translate('There is no any shops by keyword ', vis.CVCH__language__c) + sKeyWord);
 		else if (lAcc.size() == 1 && Test.isRunningTest() == false)
 			ret = getOutletInfo(vis, lAcc[0].Id);
 //		else if (vis.Chanel__c == 'whatsapp')
@@ -138,7 +138,7 @@ global class OutletSearch
 		return
 		[
 				select id,
-						name,Image__c,phone,website,location__c, name_ar__c, name_en__c, name_it__c, url__c
+						name,CVCH__Image__c,phone,website,CVCH__location__c, CVCH__name_ar__c, CVCH__name_en__c, CVCH__name_it__c, CVCH__url__c
 				from account
 				where id = :accountId
 		];
@@ -150,16 +150,16 @@ global class OutletSearch
 		map<id, account> mret = new map<id, account>();
 		string sKeyWord = '%' + sKeyWord0 + '%';
 		string sKeyWord1 = sKeyWord0.toUpperCase();
-		list<Category__c> lCat =
+		list<CVCH__Category__c> lCat =
 		[
-				select account__r.id,Account__r.name
-				from Category__c
-				where Category__c = :sKeyWord1 and account__r.id != null
+				select CVCH__account__r.id,CVCH__Account__r.name
+				from CVCH__Category__c
+				where CVCH__Category__c = :sKeyWord1 and CVCH__account__r.id != null
 		];
-		for (category__c cat : lCat)
+		for (CVCH__category__c cat : lCat)
 		{
-			if (cat.account__r.id != null)
-				mret.put(cat.account__r.id, null);
+			if (cat.CVCH__account__r.id != null)
+				mret.put(cat.CVCH__account__r.id, null);
 		}
 		set<id> mrkeyset = new set<id>();
 		if (srchCat)
@@ -168,7 +168,7 @@ global class OutletSearch
 				mrkeyset.add(i);
 		}
 
-		string langname = getNameFieldName(vis.language__c);
+		string langname = getNameFieldName(vis.CVCH__language__c);
 		list<sobject> lobj = new list<sobject>();
 		string sQuery = '';
 		if (srchName)
@@ -225,7 +225,7 @@ global class OutletSearch
 
 	public static boolean genderSpecific(string sKeyWord)
 	{
-		return (GenderCat__c.getInstance(sKeyWord) != null);
+		return (CVCH__GenderCat__c.getInstance(sKeyWord) != null);
 	}
 
 
@@ -239,13 +239,13 @@ global class OutletSearch
 		for (object obj : page.lObj)
 		{
 			account acc = (account) obj;
-			if (acc.location__c != null && acc.location__c != '')
-				ret.lOptions.add(getOption(acc, vis.language__c, detailsFlow));
+			if (acc.CVCH__location__c != null && acc.CVCH__location__c != '')
+				ret.lOptions.add(getOption(acc, vis.CVCH__language__c, detailsFlow));
 		}
 		if (page.bEnd == false)
 		{
 			Option opt = new Option();
-			opt.sLabel = SM010_Utils.translate('Next', vis.language__c);
+			opt.sLabel = SM010_Utils.translate('Next', vis.CVCH__language__c);
 			opt.sFlow = sSearchFlow;//SM010_Utils.getFlowId('getOutletsNext', null, vis.language__c);
 			opt.sName = 'pageNum';
 			opt.sValue = String.valueOf(pageNum + 1);
@@ -258,7 +258,7 @@ global class OutletSearch
 		if (page.bBegin == false)
 		{
 			Option opt = new Option();
-			opt.sLabel = SM010_Utils.translate('Previous', vis.language__c);
+			opt.sLabel = SM010_Utils.translate('Previous', vis.CVCH__language__c);
 			opt.sFlow = sSearchFlow;//SM010_Utils.getFlowId('getOutletsNext', null, vis.language__c);
 			opt.sName = 'pageNum';
 			opt.sValue = String.valueOf(pageNum - 1);
@@ -271,11 +271,11 @@ global class OutletSearch
 		if (backFlow != '' && backFlow != null)
 		{
 			Option opt = new Option();
-			opt.sLabel = SM010_Utils.translate('Back to previous menu', vis.language__c);
+			opt.sLabel = SM010_Utils.translate('Back to previous menu', vis.CVCH__language__c);
 			opt.sFlow = backFlow;
 			ret.lOptions.add(opt);
 		}
-		ret.sMessage = SM010_Utils.translate('Please find your search results:', vis.language__c);
+		ret.sMessage = SM010_Utils.translate('Please find your search results:', vis.CVCH__language__c);
 		return ret;
 	}
 
@@ -304,12 +304,12 @@ global class OutletSearch
 //		return ret;
 //	}
 
-	public static MessageOptions getOutletInfo(Visitor__c vis, id outletId)
+	public static MessageOptions getOutletInfo(CVCH__Visitor__c vis, id outletId)
 	{
 		MessageOptions mo = new MessageOptions(vis.Id);
 		mo.sType = 'carousel';
 		account acc = getAccountRecord(outletId);
-		mo.lItems.add(getTemplate(acc, vis.language__c, true, null));
+		mo.lItems.add(getTemplate(acc, vis.CVCH__language__c, true, null));
 		return mo;
 	}
 
@@ -318,14 +318,14 @@ global class OutletSearch
 		CarouselItem temp = new CarouselItem();
 
 		temp.title = getName(acc, language);
-		temp.imageURL = acc.image__c;
-		if (acc.url__c != null)
-			temp.subtitle = acc.url__c;
+		temp.imageURL = acc.CVCH__image__c;
+		if (acc.CVCH__url__c != null)
+			temp.subtitle = acc.CVCH__url__c;
 
 		if (bCall && acc.Phone != null)
 			temp.subtitle = SM010_Utils.translate('Call Now ', language) + ' ' + acc.Phone;
 
-		string sToId = acc.location__c;
+		string sToId = acc.CVCH__location__c;
 		if (sToId != '' && sToId != null)
 		{
 			Option opt = new Option();

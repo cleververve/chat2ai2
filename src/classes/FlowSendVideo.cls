@@ -2,9 +2,9 @@ global class FlowSendVideo
 {
 	global class SendVideoInput
     {
-        @AuraEnabled @InvocableVariable public id visitorId;
-        @AuraEnabled @InvocableVariable public string fileURL;
-        @AuraEnabled @InvocableVariable public string caption;
+        @AuraEnabled @InvocableVariable global id visitorId;
+        @AuraEnabled @InvocableVariable global string fileURL;
+        @AuraEnabled @InvocableVariable global string caption;
     }
     
     @InvocableMethod(label='old do not use' description='sends a Video')
@@ -16,14 +16,15 @@ global class FlowSendVideo
 		{
 			sids.add((id)inp.visitorId);
 		}
-		map<id,Visitor__c> mVis = new map<id,Visitor__c>(DM080_Visitor.getRecords(sids));
+		map<id,CVCH__Visitor__c> mVis = new map<id,CVCH__Visitor__c>(DM080_Visitor.getRecords(sids));
 		for(SendVideoInput inp: lParam)
 		{
-			Visitor__c vis = mVis.get((id)inp.visitorId);
-            if(vis.language__c != 'en' && vis.language__c != null && vis.language__c != '')
-				inp.caption = SM010_Utils.translate(inp.caption,vis.language__c);
-			SM042_NexmoOut4.sendVideo(vis.Id__c,vis.Chat_Number__c,inp.fileURL, inp.caption);
+			CVCH__Visitor__c vis = mVis.get((id)inp.visitorId);
+            if(vis.CVCH__language__c != 'en' && vis.CVCH__language__c != null && vis.CVCH__language__c != '')
+				inp.caption = SM010_Utils.translate(inp.caption,vis.CVCH__language__c);
+			SM042_NexmoOut4.sendVideo(vis.CVCH__Id__c,vis.CVCH__Chat_Number__c,inp.fileURL, inp.caption);
             SM042_NexmoOut2.pause(800);
 		}
     }
+
 }

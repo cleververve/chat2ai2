@@ -7,9 +7,9 @@ Description:
 global class FlowSendImage2
 {
 
-	@AuraEnabled @InvocableVariable public id visitorId;
-	@AuraEnabled @InvocableVariable public string imageURL;
-	@AuraEnabled @InvocableVariable public boolean async;
+	@AuraEnabled @InvocableVariable global id visitorId;
+	@AuraEnabled @InvocableVariable global string imageURL;
+	@AuraEnabled @InvocableVariable global boolean async;
 
 
 	@InvocableMethod(label='Send Image' description='sends an image')
@@ -21,23 +21,24 @@ global class FlowSendImage2
 		{
 			sids.add((id)inp.visitorId);
 		}
-		map<id,Visitor__c> mVis = new map<id,Visitor__c>(DM080_Visitor.getRecords(sids));
+		map<id,CVCH__Visitor__c> mVis = new map<id,CVCH__Visitor__c>(DM080_Visitor.getRecords(sids));
 		for(FlowSendImage2 inp: lParam)
 		{
 			if(inp.async == null)
 			{
 				inp.async = false;
 			}
-			Visitor__c vis = mVis.get((id)inp.visitorId);
+			CVCH__Visitor__c vis = mVis.get((id)inp.visitorId);
 			if(inp.async)
 			{
-				SM042_NexmoOut4.sendImageAsync(vis.Id__c,vis.Chat_Number__c,inp.imageURL);
+				SM042_NexmoOut4.sendImageAsync(vis.CVCH__Id__c,vis.CVCH__Chat_Number__c,inp.imageURL);
 			}else
 			{
-				SM042_NexmoOut4.sendImage(vis.Id__c,vis.Chat_Number__c,inp.imageURL);
+				SM042_NexmoOut4.sendImage(vis.CVCH__Id__c,vis.CVCH__Chat_Number__c,inp.imageURL);
 			}
 
 			SM042_NexmoOut2.pause(1000);
 		}
 	}
+
 }

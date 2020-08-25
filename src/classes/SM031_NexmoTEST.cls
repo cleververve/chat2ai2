@@ -3,28 +3,28 @@ public class SM031_NexmoTEST {
     @TestSetup
     static void createData()
     {
-        list<chat2ai__c> lcust = new list<chat2ai__c>();
-        chat2ai__c cust1 = new chat2ai__c();
+        list<CVCH__chat2ai__c> lcust = new list<CVCH__chat2ai__c>();
+        CVCH__chat2ai__c cust1 = new CVCH__chat2ai__c();
         cust1.name = 'Chat2ai Flow';
-        cust1.value__c = 'send_options';
-        
-        chat2ai__c cust2 = new chat2ai__c();
-        cust2.name = 'Response minimum score';
-        cust2.value__c = '50';
-        
-        chat2ai__c cust3 = new chat2ai__c();
-        cust3.name = 'Default Flow';
-        cust3.value__c = 'send_options';
-        
-        chat2ai__c cust4 = new chat2ai__c();
-        cust4.name = 'GDPR Flow';
-        cust4.value__c = 'send_options';
-        
-        chat2ai__c cust5 = new chat2ai__c();
-        cust5.name = 'Main Menu Flow';
-        cust5.value__c = 'send_options';
+        cust1.CVCH__value__c = 'send_options';
 
-        chat2ai__c cust6 = new chat2ai__c();
+        CVCH__chat2ai__c cust2 = new CVCH__chat2ai__c();
+        cust2.name = 'Response minimum score';
+        cust2.CVCH__value__c = '50';
+
+        CVCH__chat2ai__c cust3 = new CVCH__chat2ai__c();
+        cust3.name = 'Default Flow';
+        cust3.CVCH__value__c = 'send_options';
+
+        CVCH__chat2ai__c cust4 = new CVCH__chat2ai__c();
+        cust4.name = 'GDPR Flow';
+        cust4.CVCH__value__c = 'send_options';
+
+        CVCH__chat2ai__c cust5 = new CVCH__chat2ai__c();
+        cust5.name = 'Main Menu Flow';
+        cust5.CVCH__value__c = 'send_options';
+
+        CVCH__chat2ai__c cust6 = new CVCH__chat2ai__c();
         cust6.name = 'Welcome Flow';
 //        cust6.value__c = 'send_options';
         
@@ -38,15 +38,15 @@ public class SM031_NexmoTEST {
         
         
     }
-    static Visitor__c createExistingVisitor(string GDPR)
+    static CVCH__Visitor__c createExistingVisitor(string GDPR)
     {
         CVCH__Visitor__c vis = new CVCH__Visitor__c();
-        vis.gdpr_consent__c = gdpr;
-        vis.Had_First_Interaction__c = true;
-        vis.Chat_Number__c = '1234567890';
-        vis.id__c = '009876543211';
-        vis.chanel__c = 'whatsapp';
-        vis.language__c = 'it';
+        vis.CVCH__gdpr_consent__c = gdpr;
+        vis.CVCH__Had_First_Interaction__c = true;
+        vis.CVCH__Chat_Number__c = '1234567890';
+        vis.CVCH__id__c = '009876543211';
+        vis.CVCH__chanel__c = 'whatsapp';
+        vis.CVCH__language__c = 'it';
         insert vis;
         return vis;
     }
@@ -132,8 +132,8 @@ public class SM031_NexmoTEST {
         RestContext.request = req;
         RestContext.response = res;
 
-        Visitor__c v = createExistingVisitor('Full Access');
-        v.Context__c = getVisitorContext('options','');
+        CVCH__Visitor__c v = createExistingVisitor('Full Access');
+        v.CVCH__Context__c = getVisitorContext('options','');
         update v;
         Test.startTest();
         SM031_Nexmo.getMessage();
@@ -152,8 +152,8 @@ public class SM031_NexmoTEST {
         RestContext.request = req;
         RestContext.response = res;
 
-        Visitor__c v = createExistingVisitor('Full Access');
-        v.Context__c = getVisitorContext('options','');
+        CVCH__Visitor__c v = createExistingVisitor('Full Access');
+        v.CVCH__Context__c = getVisitorContext('options','');
         update v;
         Test.startTest();
         SM031_Nexmo.getMessage();
@@ -172,8 +172,8 @@ public class SM031_NexmoTEST {
         RestContext.request = req;
         RestContext.response = res;
 
-        Visitor__c v = createExistingVisitor('Full Access');
-        v.Next_Flow__c = 'send_options';
+        CVCH__Visitor__c v = createExistingVisitor('Full Access');
+        v.CVCH__Next_Flow__c = 'send_options';
         update v;
         Test.startTest();
         SM031_Nexmo.getMessage();
@@ -192,8 +192,8 @@ public class SM031_NexmoTEST {
         RestContext.request = req;
         RestContext.response = res;
 
-        Visitor__c v = createExistingVisitor('Full Access');
-        v.Context__c = getVisitorContext('Input','gender__c');
+        CVCH__Visitor__c v = createExistingVisitor('Full Access');
+        v.CVCH__Context__c = getVisitorContext('Input','gender__c');
 
         update v;
         CVCH__Visitor__c vv;
@@ -215,8 +215,8 @@ public class SM031_NexmoTEST {
         RestContext.request = req;
         RestContext.response = res;
 
-        Visitor__c v = createExistingVisitor('No Access');
-        v.Context__c = getVisitorContext('options','');
+        CVCH__Visitor__c v = createExistingVisitor('No Access');
+        v.CVCH__Context__c = getVisitorContext('options','');
         update v;
         Test.startTest();
         SM031_Nexmo.getMessage();

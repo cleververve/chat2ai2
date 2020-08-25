@@ -6,7 +6,6 @@ Description:
 
 global class FlowUtils2
 {
-
 		@AuraEnabled @InvocableVariable global String sEntityName;
 		@AuraEnabled @InvocableVariable global String sEntities;
 

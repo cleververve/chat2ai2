@@ -9,9 +9,9 @@ global class FlowSendMessage
 
 	global class SendMsgInput
 	{
-		@AuraEnabled @InvocableVariable public id visitorId;
-		@AuraEnabled @InvocableVariable public string message;
-        @AuraEnabled @InvocableVariable public boolean async;
+		@AuraEnabled @InvocableVariable global id visitorId;
+		@AuraEnabled @InvocableVariable global string message;
+        @AuraEnabled @InvocableVariable global boolean async;
 	}
 
 	@InvocableMethod(label='old do not use' description='sends a chat message ')
@@ -45,5 +45,4 @@ global class FlowSendMessage
 
 		}
 	}
-
 }

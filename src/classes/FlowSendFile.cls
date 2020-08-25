@@ -2,9 +2,9 @@ global class FlowSendFile
 {
 	global class SendFileInput
     {
-        @AuraEnabled @InvocableVariable public id visitorId;
-        @AuraEnabled @InvocableVariable public string fileURL;
-        @AuraEnabled @InvocableVariable public string caption;
+        @AuraEnabled @InvocableVariable global id visitorId;
+        @AuraEnabled @InvocableVariable global string fileURL;
+        @AuraEnabled @InvocableVariable global string caption;
     }
     
     @InvocableMethod(label='old do not use' description='sends a file')
@@ -24,4 +24,5 @@ global class FlowSendFile
             SM042_NexmoOut2.pause(2000);
 		}
     }
+
 }

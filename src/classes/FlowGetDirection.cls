@@ -43,8 +43,8 @@ global class FlowGetDirection {
             if(inp.type == 'get TOID')
             {
                 system.debug('type = get TOID');
-                SM042_NexmoOut2.sendText(vis.Id__c,SM010_Utils.translate('Please enter your desired location',vis.language__c),vis.Chat_Number__c);
-                vis.Next_Flow__c = 'Direction_GET_FROMID';
+                SM042_NexmoOut2.sendText(vis.CVCH__Id__c,SM010_Utils.translate('Please enter your desired location',vis.CVCH__language__c),vis.CVCH__Chat_Number__c);
+                vis.CVCH__Next_Flow__c = 'Direction_GET_FROMID';
                 
             }
             if(inp.type == 'get FROMID')
@@ -55,13 +55,13 @@ global class FlowGetDirection {
                 laccto = searchAccByKeyWord(inp.location, inp.programId, inp.sLang);
                 if (!laccto.isEmpty())
                 {
-                    vis.Location__c = laccto[0].location__c;
-                    SM042_NexmoOut2.sendText(vis.Id__c,SM010_Utils.translate('Please enter your current location',vis.language__c),vis.Chat_Number__c);
-                    vis.Next_Flow__c = 'Direction_GET_LINK';
+                    vis.CVCH__Location__c = laccto[0].CVCH__location__c;
+                    SM042_NexmoOut2.sendText(vis.CVCH__Id__c,SM010_Utils.translate('Please enter your current location',vis.CVCH__language__c),vis.CVCH__Chat_Number__c);
+                    vis.CVCH__Next_Flow__c = 'Direction_GET_LINK';
                 }else
                 {
-                    SM042_NexmoOut2.sendText(vis.Id__c,SM010_Utils.translate('Sorry I couldn’t understand that. Please type the correct spelling of the nearby store or type "menu" to go back.',vis.language__c),vis.Chat_Number__c);
-                    vis.Next_Flow__c = 'Direction_GET_FROMID';
+                    SM042_NexmoOut2.sendText(vis.CVCH__Id__c,SM010_Utils.translate('Sorry I couldn’t understand that. Please type the correct spelling of the nearby store or type "menu" to go back.',vis.language__c),vis.Chat_Number__c);
+                    vis.CVCH__Next_Flow__c = 'Direction_GET_FROMID';
                 }     
             }
             if(inp.type == 'get LINK')
@@ -69,19 +69,19 @@ global class FlowGetDirection {
                 system.debug('type = get LINK');
                 list<account> laccfrom = new list<account>();
                 string sFrom;
-                string sTo = vis.Location__c;
+                string sTo = vis.CVCH__Location__c;
                 laccfrom = searchAccByKeyWord(inp.Location, inp.programId, inp.sLang);
                 system.debug(laccfrom);
                 if (!laccfrom.isEmpty())
                 {
-                    sFrom = laccfrom[0].location__c; 
+                    sFrom = laccfrom[0].CVCH__location__c;
                     string directionurl = getFinderURL(sFrom, sTo);
-                    SM042_NexmoOut2.sendText(vis.Id__c,directionurl,vis.Chat_Number__c);
-                    vis.Next_Flow__c = null;     
+                    SM042_NexmoOut2.sendText(vis.CVCH__Id__c,directionurl,vis.CVCH__Chat_Number__c);
+                    vis.CVCH__Next_Flow__c = null;
                 }else
                 {
-                    SM042_NexmoOut2.sendText(vis.Id__c,SM010_Utils.translate('Sorry I couldn’t understand that. Please type the correct spelling of the nearby store or type "menu" to go back.',vis.language__c),vis.Chat_Number__c);
-                    vis.Next_Flow__c = 'Direction_GET_LINK';
+                    SM042_NexmoOut2.sendText(vis.CVCH__Id__c,SM010_Utils.translate('Sorry I couldn’t understand that. Please type the correct spelling of the nearby store or type "menu" to go back.',vis.language__c),vis.Chat_Number__c);
+                    vis.CVCH__Next_Flow__c = 'Direction_GET_LINK';
                 }
             }
         }
@@ -112,11 +112,11 @@ global class FlowGetDirection {
             language = 'en';
         map<id,account> mret = new map<id,account>();
         string sKeyWord = '%'+sKeyWord0+'%';
-        list<Category__c> lCat = [select account__r.id from Category__c where Category__c like :sKeyWord and account__r.id != null];// and account__r.Loy_Program__c = :programId ];
-        for(category__c cat :lCat)
+        list<CVCH__Category__c> lCat = [select CVCH__account__r.id from CVCH__Category__c where CVCH__Category__c like :sKeyWord and CVCH__account__r.id != null];// and account__r.Loy_Program__c = :programId ];
+        for(CVCH__category__c cat :lCat)
         {
-            if(cat.account__r.id != null)
-                mret.put(cat.account__r.id,null);
+            if(cat.CVCH__account__r.id != null)
+                mret.put(cat.CVCH__account__r.id,null);
         }
         set<id> mrkeyset = new set<id>();
         for(id i: mret.keyset())
