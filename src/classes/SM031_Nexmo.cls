@@ -105,23 +105,59 @@ global class SM031_Nexmo
 		}
 		else if (visr.CVCH__Context__c != null && visr.CVCH__Context__c != '')
 		{
-			MessageOptions mo = (MessageOptions) JSON.deserialize(visr.CVCH__Context__c, MessageOptions.class);
-			system.debug('MessageOptions=' + mo);
+			MessageOptions mo = (MessageOptions) JSON.deserialize(visr.Context__c, MessageOptions.class);
+            system.debug('MessageOptions='+mo);
 			if (mo.sType == 'Input')
 			{
 				bProceeded = true;
-				CVCH__Visitor__c v = new CVCH__Visitor__c(Id = visr.id);
-				v.put(mo.sFieldName, mess.CVCH__Text__c);
-				v.CVCH__Context__c = '';
-				update v;
-				if (mo.sFlow != null && mo.sFlow != '')
-				{
-					Map<String, Object> params = new Map<String, Object>();
-					params.put('visitorId', visr.id);
-
-					Flow.Interview flow = Flow.Interview.createInterview(mo.sFlow, params);
-					flow.start();
-				}
+                string input;
+                Map<string,object> mEntities = new map<string,object>();
+                if (respLuis.getentities() != null && respLuis.getentities() != '')
+                {
+                    mEntities = (Map<string,object>)JSON.deserializeUntyped(respLuis.getentities());
+                }
+                //input type check
+                if (mo.sInputType == 'Email')
+                {
+                    if (mEntities.get('email') != null)
+                    	mess.Text__c = String.valueOf(mEntities.get('email'));
+                    else
+                    {
+                        Map<String, Object> params = new Map<String, Object>();
+                        params.put('visitorId', visr.id);
+                        params.put('type', 'Email');
+                        Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Input Validation Error Flow'), params);
+                        flow.start();
+                        return lret;
+                    }     
+                }
+                if (mo.sInputType == 'Name')
+                {
+                    if (mEntities.get('personName') != null)
+                    	mess.Text__c = String.valueOf(mEntities.get('personName'));
+                    else
+                    {
+                        Map<String, Object> params = new Map<String, Object>();
+                        params.put('visitorId', visr.id);
+                        params.put('type', 'Name');
+                        Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Input Validation Error Flow'), params);
+                        flow.start();
+                        return lret;
+                    }
+                }
+                
+                Visitor__c v = new Visitor__c(Id = visr.id);
+                v.put(mo.sFieldName, mess.Text__c);
+                v.Context__c = '';
+                update v;
+                if (mo.sFlow != null && mo.sFlow != '')
+                {
+                    Map<String, Object> params = new Map<String, Object>();
+                    params.put('visitorId', visr.id);
+                    
+                    Flow.Interview flow = Flow.Interview.createInterview(mo.sFlow, params);
+                    flow.start();
+                }				
 			}
 			else
 			{

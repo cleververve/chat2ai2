@@ -10,8 +10,10 @@ global class FlowInputMessage
 	@AuraEnabled @InvocableVariable global string sFieldName;
 	@AuraEnabled @InvocableVariable global string sFlow;
     @AuraEnabled @InvocableVariable global string sConfirmMessage;
+    @AuraEnabled @InvocableVariable global string type;
 	@AuraEnabled @InvocableVariable global id visitorId;
-	
+
+
 	@InvocableMethod(label='Input Message' description='Prompts Visitor to input data and saves the input in Visitor object field')
 	global static void send(list<FlowInputMessage> lMessages)
 	{
@@ -25,6 +27,7 @@ global class FlowInputMessage
 			mo.sMessage = mess.sMessage;
 			mo.visitorId = mess.visitorId;
             mo.sConfirmMessage = mess.sConfirmMessage;
+            mo.sInputType = mess.type;
 			lmo.add(mo);
 		}
 		MessageOptions.sendWF(lmo);

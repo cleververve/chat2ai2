@@ -11,7 +11,7 @@ global class FlowUtils
 		@AuraEnabled @InvocableVariable global String sEntityName;
 		@AuraEnabled @InvocableVariable global String sEntities;
 	}
-	@InvocableMethod(label='old do not use' description='returns Entity Value from the json string of map of entities')
+	@InvocableMethod(label='Get Entity String' description='returns Entity Value from the json string of map of entities')
 	global static list<string> getEntityString(list<getEntityParam> lParam)
 	{
 		list<string>lret = new list<string>();

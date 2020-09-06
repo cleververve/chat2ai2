@@ -18,56 +18,51 @@ public class SM042_NexmoOut2 implements Queueable
 	{
 		SM042_NexmoOut2.executeF(messId);
 	}
+	public static void send(CVCH__NexmoMessage__c mess)
+	{
+		system.debug(mess);
+		if (mess.CVCH__Type__c == 'Carousel')
+		{
+			MessageOptions mo = (MessageOptions) JSON.deserializeStrict(mess.CVCH__JSON__c, MessageOptions.class);
+			if (mo.sMessage != null && mo.sMessage != '')
+			{
+				SM042_nexmoOut4.sendText(mess.CVCH__To__c, mess.CVCH__From__c, mo.sMessage);
+				SM042_NexmoOut2.pause(800);
+			}
+			for (CarouselItem it : mo.lItems)
+			{
+				if (it.imageURL != null && it.imageURL != '')
+				{
+					try
+					{
+						SM042_NexmoOut2.sendCarousel(mess.CVCH__To__c, mess.CVCH__From__c, it.imageURL, it.getBody());
+						SM042_NexmoOut2.pause(800);
+					}
+					catch (Exception e)
+					{
+						SM042_nexmoOut4.sendText(mess.CVCH__To__c, mess.CVCH__From__c, e.getMessage());
+					}
+				}
+			}
+		}
+		else
+				SM042_nexmoOut4.sendText(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c);
+	}
 
 	@future(Callout =true)
 	public static void executeF(id messId)
 	{
-		list<NexmoMessage__c> lMess =
+		list<CVCH__NexmoMessage__c> lMess =
 		[
-				select id, from__c,to__c,Text__c,Status__c,FullText__c,JSON__c,Type__c
-				from NexmoMessage__c
+				select id, CVCH__from__c,CVCH__to__c,CVCH__Text__c,CVCH__Status__c,CVCH__FullText__c,CVCH__JSON__c,CVCH__Type__c
+				from CVCH__NexmoMessage__c
 				where id = :messId
 		];
 		try
 		{
-			for (NexmoMessage__c mess : lMess)
+			for (CVCH__NexmoMessage__c mess : lMess)
 			{
-				system.debug(mess);
-				if (mess.Type__c == 'Carousel')
-				{
-					MessageOptions mo = (MessageOptions) JSON.deserializeStrict(mess.JSON__c, MessageOptions.class);
-					if(mo.sMessage != null && mo.sMessage != '')
-					{
-						SM042_nexmoOut4.sendText(mess.To__c, mess.From__c, mo.sMessage);
-						SM042_NexmoOut2.pause(800);
-					}
-
-
-//					for(integer i=mo.mOptions.size()-1;i>=0;i--)
-					for(CarouselItem it : mo.lItems)
-					{
-//						CarouselItem it = mo.lItems[i];
-						if(it.imageURL != null && it.imageURL != '')
-						{
-							try
-							{
-								SM042_NexmoOut2.sendCarousel(mess.To__c, mess.From__c,  it.imageURL,it.getBody());
-//							if(i<0)
-//								break;
-								SM042_NexmoOut2.pause(800);
-							}catch(Exception e)
-							{
-								SM042_nexmoOut4.sendText(mess.To__c, mess.From__c, e.getMessage());
-							}
-
-						}
-					}
-					SM005_Logs.save();
-
-				}
-				else
-						SM042_nexmoOut4.sendText(mess.To__c, mess.From__c, mess.FullText__c);
-				mess.Status__c = 'Done';
+				send(mess);
 			}
 
 		}
@@ -82,34 +77,58 @@ public class SM042_NexmoOut2 implements Queueable
 		}
 	}
 
+	public static void sendOrEnqueue(CVCH__NexmoMessage__c mess, Boolean async)
+	{
+		system.debug(mess);
+		if (async == true)
+		{
+			insert mess;
+			SM042_NexmoOut2 job = new SM042_NexmoOut2(mess.id);
+			System.enqueueJob(job);
+		}
+		else
+		{
+			try
+			{
+				SM042_NexmoOut2.send(mess);
+				insert mess;
+			}
+			catch (Exception e)
+			{
+				insert mess;
+				SM042_NexmoOut2 job = new SM042_NexmoOut2(mess.id);
+				System.enqueueJob(job);
+			}
+		}
+	}
 	public static void sendText(string sTo, string sText, string sFrom)
 	{
-		NexmoMessage__c mess = new NexmoMessage__c();
-		mess.From__c = sFrom;
-		mess.To__c = sTo;
-		mess.Text__c = sText;
-		if (mess.Text__c != null && mess.Text__c.length() > 254)
-			mess.Text__c = mess.Text__c.substring(0, 254);
-		mess.FullText__c = sText;
-		mess.Status__c = 'Queued';
-
-		insert mess;
-		SM042_NexmoOut2 job = new SM042_NexmoOut2(mess.id);
-		System.enqueueJob(job);
+		sendText(sTo, sText, sFrom, false);
+	}
+	public static void sendText(string sTo, string sText, string sFrom, boolean async)
+	{
+		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
+		mess.CVCH__From__c = sFrom;
+		mess.CVCH__To__c = sTo;
+		mess.CVCH__Text__c = sText;
+		if (mess.CVCH__Text__c != null && mess.CVCH__Text__c.length() > 254)
+			mess.CVCH__Text__c = mess.CVCH__Text__c.substring(0, 254);
+		mess.CVCH__FullText__c = sText;
+		mess.CVCH__Status__c = 'Queued';
+		sendOrEnqueue(mess, async);
 	}
 
 	public static void sendCarousel(MessageOptions opt, string sto, string sFrom)
 	{
-		NexmoMessage__c mess = new NexmoMessage__c();
-		mess.From__c = sFrom;
-		mess.To__c = sTo;
-		mess.Type__c = 'Carousel';
-		mess.JSON__c = JSON.serializePretty(opt);
-		mess.Status__c = 'Queued';
-		system.debug(mess);
-		insert mess;
-		SM042_NexmoOut2 job = new SM042_NexmoOut2(mess.id);
-		System.enqueueJob(job);
+		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
+		mess.CVCH__From__c = sFrom;
+		mess.CVCH__To__c = sTo;
+		mess.CVCH__Type__c = 'Carousel';
+		mess.CVCH__JSON__c = JSON.serializePretty(opt);
+		mess.CVCH__Status__c = 'Queued';
+
+		sendOrEnqueue(mess, opt.async);
+
 	}
 
 //	public static void sendImage(string sTo, string sFrom, string sText, string sImageURL)
@@ -190,7 +209,7 @@ public class SM042_NexmoOut2 implements Queueable
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
 		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBody(sTo, messageText, sFrom), 'NexmoOut2', null);
 	}
-    
+
 //    @future(Callout=true)
 //    public static void sendText2Async(string sTo, string sFrom, string messageText)
 //    {
@@ -212,12 +231,12 @@ public class SM042_NexmoOut2 implements Queueable
 //		SM005_Logs.save();
 //	}
 
-    @future(callout=true)
-    public static void sendCarouselAsync(string sTo, string sFrom, string imageurl, string caption)
-    {
-        sendCarousel(Sto,sFrom,imageurl,caption);
-    }
-    
+	@future(callout=true)
+	public static void sendCarouselAsync(string sTo, string sFrom, string imageurl, string caption)
+	{
+		sendCarousel(Sto, sFrom, imageurl, caption);
+	}
+
 	public static void sendCarousel(string sTo, string sFrom, string imageurl, string caption)
 	{
 		if (Test.isRunningTest())

@@ -10,9 +10,11 @@ global class MessageOptions implements iMessage
 	@AuraEnabled @InvocableVariable global id visitorId;
 	@AuraEnabled @InvocableVariable global string content;
 	@AuraEnabled @InvocableVariable global string sType;
+	@AuraEnabled @InvocableVariable global boolean async;
 	public string sFieldName;
 	public string sFlow;
     public string sConfirmMessage;
+    public string sInputType;
 	public list<CarouselItem> lItems = new list<CarouselItem>();
 	public map<string, Option> mOptions = new map<string, Option>();
 	public list<Option> lOptions = new list<Option>();
@@ -170,7 +172,7 @@ global class MessageOptions implements iMessage
 		else
 		{
 			system.debug('start MessageOptions.send ' + getBody());
-			SM042_NexmoOut2.sendText(sTo, getBody(), sFrom);
+			SM042_NexmoOut2.sendText(sTo, getBody(), sFrom,this.async);
 		}
 
 		if (!mOptions.isEmpty() || this.sFieldName != null)
@@ -223,7 +225,6 @@ global class MessageOptions implements iMessage
 
 		for (MessageOptions req : messages)
 		{
-
 			sVisitorIds.add(req.visitorId);
 
 			if (req.content != '' && req.content != null)

@@ -12,7 +12,7 @@ global class OutletInfo
 		@AuraEnabled @InvocableVariable global id outletId;
 	}
 
-
+	
 	@InvocableMethod(label='old do not use' description='')
 	global static void getOutlet(list<OutletInfoRequest> lRec)
 	{
@@ -26,19 +26,19 @@ global class OutletInfo
 			if (rec.outletId != null)
 				soutletids.add(rec.outletId);
 		}
-		map<id,CVCH__Visitor__c> mVis = new map<id,CVCH__Visitor__c>(DM080_Visitor.getRecords(sids));
+		map<id,Visitor__c> mVis = new map<id,Visitor__c>(DM080_Visitor.getRecords(sids));
 
-		map<id,CVCH__Visitor__c> mUpdate = new map<id,CVCH__Visitor__c>();
+		map<id,Visitor__c> mUpdate = new map<id,Visitor__c>();
 		for(OutletInfoRequest rec : lRec)
 		{
-			CVCH__Visitor__c vis = mVis.get(rec.visitorId);
+			Visitor__c vis = mVis.get(rec.visitorId);
 			if(vis != null)
 			{
 				MessageOptions mo = OutletSearch.getOutletInfo(vis,rec.outletId);
 				system.debug('getOutlet.mo'+mo);
 				mo.send(vis);
-				CVCH__Visitor__c vis2 = new CVCH__Visitor__c();
-				vis2.CVCH__Context__c = vis.CVCH__Context__c;
+				Visitor__c vis2 = new Visitor__c();
+				vis2.Context__c = vis.Context__c;
 				vis2.id = vis.Id;
 				mUpdate.put(vis2.id,vis2);
 			}
