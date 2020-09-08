@@ -23,24 +23,32 @@ public class SM042_NexmoOut2 implements Queueable
 		system.debug(mess);
 		if (mess.CVCH__Type__c == 'Carousel')
 		{
+
 			MessageOptions mo = (MessageOptions) JSON.deserializeStrict(mess.CVCH__JSON__c, MessageOptions.class);
-			if (mo.sMessage != null && mo.sMessage != '')
+			if(mess.CVCH__Type__c == 'Azure')
 			{
-				SM042_nexmoOut4.sendText(mess.CVCH__To__c, mess.CVCH__From__c, mo.sMessage);
-				SM042_NexmoOut2.pause(800);
+				SM081_sendCard.sendIt(mess,mo.lItems);
 			}
-			for (CarouselItem it : mo.lItems)
+			else
 			{
-				if (it.imageURL != null && it.imageURL != '')
+				if (mo.sMessage != null && mo.sMessage != '')
 				{
-					try
+					SM042_nexmoOut4.sendText(mess.CVCH__To__c, mess.CVCH__From__c, mo.sMessage);
+					SM042_NexmoOut2.pause(800);
+				}
+				for (CarouselItem it : mo.lItems)
+				{
+					if (it.imageURL != null && it.imageURL != '')
 					{
-						SM042_NexmoOut2.sendCarousel(mess.CVCH__To__c, mess.CVCH__From__c, it.imageURL, it.getBody());
-						SM042_NexmoOut2.pause(800);
-					}
-					catch (Exception e)
-					{
-						SM042_nexmoOut4.sendText(mess.CVCH__To__c, mess.CVCH__From__c, e.getMessage());
+						try
+						{
+							SM042_NexmoOut2.sendCarousel(mess.CVCH__To__c, mess.CVCH__From__c, it.imageURL, it.getBody());
+							SM042_NexmoOut2.pause(800);
+						}
+						catch (Exception e)
+						{
+							SM042_nexmoOut4.sendText(mess.CVCH__To__c, mess.CVCH__From__c, e.getMessage());
+						}
 					}
 				}
 			}
@@ -105,11 +113,39 @@ public class SM042_NexmoOut2 implements Queueable
 	{
 		sendText(sTo, sText, sFrom, false);
 	}
-	public static void sendText(string sTo, string sText, string sFrom, boolean async)
+	public static CVCH__NexmoMessage__c inboundMess;
+
+	public static void setInboundMessage(CVCH__NexmoMessage__c mess)
+	{
+		inboundMess = mess;
+	}
+	public static CVCH__NexmoMessage__c initMessage(string sTo,string sFrom)
 	{
 		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
-		mess.CVCH__From__c = sFrom;
-		mess.CVCH__To__c = sTo;
+		if(inboundMess != null)
+		{
+			mess.CVCH__To__c = inboundMess.CVCH__From__c;
+			mess.CVCH__To_Name__c = inboundMess.CVCH__From_Name__c;
+
+			mess.CVCH__From__c = inboundMess.CVCH__To__c;
+			mess.CVCH__From_Name__c = inboundMess.CVCH__To_Name__c;
+			mess.CVCH__conversationId__c = inboundMess.CVCH__conversationId__c;
+			mess.CVCH__conversationName__c = inboundMess.CVCH__conversationName__c;
+			mess.CVCH__activityId__c = inboundMess.Name;
+			mess.CVCH__Channel__c = inboundMess.CVCH__Channel__c;
+			mess.CVCH__ChannelId__c = inboundMess.CVCH__ChannelId__c;
+		}
+		else
+		{
+			mess.CVCH__From__c = sFrom;
+			mess.CVCH__To__c = sTo;
+		}
+		return mess;
+	}
+	public static void sendText(string sTo, string sText, string sFrom, boolean async)
+	{
+		CVCH__NexmoMessage__c mess = initMessage(sto,sFrom);
+
 		mess.CVCH__Text__c = sText;
 		if (mess.CVCH__Text__c != null && mess.CVCH__Text__c.length() > 254)
 			mess.CVCH__Text__c = mess.CVCH__Text__c.substring(0, 254);
@@ -120,9 +156,8 @@ public class SM042_NexmoOut2 implements Queueable
 
 	public static void sendCarousel(MessageOptions opt, string sto, string sFrom)
 	{
-		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
-		mess.CVCH__From__c = sFrom;
-		mess.CVCH__To__c = sTo;
+		CVCH__NexmoMessage__c mess = initMessage(sto,sFrom);
+
 		mess.CVCH__Type__c = 'Carousel';
 		mess.CVCH__JSON__c = JSON.serializePretty(opt);
 		mess.CVCH__Status__c = 'Queued';

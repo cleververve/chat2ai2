@@ -107,6 +107,7 @@ global class MessageOptions implements iMessage
 			}
 		}
 	}
+
 	public static map<string,Option> addOptions(map<string,Option>mOptions, list<Option>lOptions)
 	{
 		integer i=1;

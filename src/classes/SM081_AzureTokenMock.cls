@@ -1,0 +1,20 @@
+/**
+Author:         serhiivolynets
+Date:           07.09.2020
+Description:   
+**/
+
+global class SM081_AzureTokenMock implements HttpCalloutMock
+{
+
+	global static HTTPResponse respond(HTTPRequest req)
+	{
+		HttpResponse res = new HttpResponse();
+		res.setStatus('OK');
+		res.setStatusCode(200);
+		String reqBody = '{"token_type":"Bearer","expires_in":86397,"ext_expires_in":86397,"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImppYk5ia0ZTU2JteFBZck45Q0ZxUms0SzRndyIsImtpZCI6ImppYk5ia0ZTU2JteFBZck45Q0ZxUms0SzRndyJ9.eyJhdWQiOiJodHRwczovL2FwaS5ib3RmcmFtZXdvcmsuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvZDZkNDk0MjAtZjM5Yi00ZGY3LWExZGMtZDU5YTkzNTg3MWRiLyIsImlhdCI6MTU5OTQyNzM2NywibmJmIjoxNTk5NDI3MzY3LCJleHAiOjE1OTk1MTQwNjcsImFpbyI6IkUyQmdZUGoyNmQxUnZiZjV5elFxSkRLazkvcnZBQUE9IiwiYXBwaWQiOiIxMzQwYWI1NS1iYTU5LTQ2ZDktYTNjMS1mZTlkNDZiMTk1NGUiLCJhcHBpZGFjciI6IjEiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9kNmQ0OTQyMC1mMzliLTRkZjctYTFkYy1kNTlhOTM1ODcxZGIvIiwicmgiOiIwLkFBQUFJSlRVMXB2ejkwMmgzTldhazFoeDIxV3JRQk5adXRsR284SC1uVWF4bFU1dUFBQS4iLCJ0aWQiOiJkNmQ0OTQyMC1mMzliLTRkZjctYTFkYy1kNTlhOTM1ODcxZGIiLCJ1dGkiOiJfajlkNVVUMHBFcTNyZDI1MzdBa0FBIiwidmVyIjoiMS4wIn0.hrgyMbT4ENdeSed9JQB_n3wm-bIPjJ7nVP6XICxfUZhq552OxcwHG2fcnNbFAhbus5niqj10T9kxqxLDQbnzCYI-dE2vmsrF3SDDxX1TbFaBPD0Ux3qijVBO21l9fzPq3A9hv02KUj9E830gIKy5ZSuWUx6EkmKqnTeovtgeClm0eSApP0c5T0XvZDybylnfBzcPAYk-fzv-8MkzexB1IKKYC6jBykLn1nBD6SoPuiXoHorJqeNSRb72aravsdukzrIkgiRCUuwOpkRF153f0kltPAgLSq2nrLhIrHvNcGFi-dpWnimIvxI3wStcLHjGPBXFYel6_KdZYoz_zHlVNg"}';
+		res.setBody(reqBody);
+		return res;
+	}
+
+}

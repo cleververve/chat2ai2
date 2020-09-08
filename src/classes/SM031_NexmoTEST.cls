@@ -35,9 +35,9 @@ public class SM031_NexmoTEST {
         lcust.add(cust5);
         lcust.add(cust6);
         insert lcust;
-        
-        
     }
+
+
     static CVCH__Visitor__c createExistingVisitor(string GDPR)
     {
         CVCH__Visitor__c vis = new CVCH__Visitor__c();
@@ -68,6 +68,24 @@ public class SM031_NexmoTEST {
         SM031_Nexmo.getMessage();
         Test.stopTest();
     }
+
+    @isTest
+    static void testAzure()
+    {
+        RestRequest req = new RestRequest();
+        RestResponse res = new RestResponse();
+
+        req.requestURI = '/services/apexrest/nexmo/';
+        req.httpMethod = 'POST';
+        req.requestBody = Blob.ValueOf('{"type":"message","id":"bf3cc9a2f5de","timestamp":"2016-10-19T20:17:52.2891902Z","serviceUrl":"https://smba.trafficmanager.net/apis","channelId":"channel","from":{"id":"1234abcd","name":"username"},"conversation":{"id":"abcd1234","name":"conversation name"},"recipient":{"id":"12345678","name":"bot name"},"text":"Haircut on Saturday"}');
+
+        RestContext.request = req;
+        RestContext.response = res;
+        Test.startTest();
+        SM031_Nexmo.getMessage();
+        Test.stopTest();
+    }
+
     
     @isTest
     static void TestReturningVisitorGDPRNotAccepted()
