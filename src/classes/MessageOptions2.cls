@@ -1,4 +1,3 @@
-
 global class MessageOptions2
 {
 	@AuraEnabled @InvocableVariable global string sMessage;
@@ -33,7 +32,7 @@ global class MessageOptions2
 			addOpt(mess.option8,mo.lOptions);
 			addOpt(mess.option9,mo.lOptions);
 			addOpt(mess.option10,mo.lOptions);
-			mo.sType = 'options';
+			mo.sType = 'Options';
 			mo.visitorId = mess.visitorId;
 			mo.sMessage = mess.sMessage;
 			mo.async = mess.async;

@@ -26,7 +26,7 @@ public class SM031_NexmoTEST {
 
         CVCH__chat2ai__c cust6 = new CVCH__chat2ai__c();
         cust6.name = 'Welcome Flow';
-//        cust6.value__c = 'send_options';
+        cust6.CVCH__value__c = 'test';
         
         lcust.add(cust1);
         lcust.add(cust2);
@@ -70,6 +70,25 @@ public class SM031_NexmoTEST {
     }
 
     @isTest
+    static void TestGet()
+    {
+
+        RestRequest req = new RestRequest();
+        RestResponse res = new RestResponse();
+
+        req.requestURI = '/services/apexrest/nexmo/';
+        req.httpMethod = 'GET';
+        req.requestBody = Blob.ValueOf('{"message_uuid":"3315e684-4491-47b9-88a2-3990e543ce6e","to":{"type":"whatsapp","number":"1234567890"},"from":{"type":"whatsapp","number":"09876543211"},"timestamp":"2020-08-22T11:13:21.798Z","message":{"content":{"type":"text","text":"hi"}},"direction":"inbound"}');
+
+        RestContext.request = req;
+        RestContext.response = res;
+        Test.startTest();
+        SM031_Nexmo.testIt();
+        Test.stopTest();
+    }
+
+
+    @isTest
     static void testAzure()
     {
         RestRequest req = new RestRequest();
@@ -83,6 +102,10 @@ public class SM031_NexmoTEST {
         RestContext.response = res;
         Test.startTest();
         SM031_Nexmo.getMessage();
+        list<CVCH__NexmoMessage__c> lmess = [select id, CVCH__Channel__c from CVCH__NexmoMessage__c where CVCH__Channel__c = 'Azure'];
+        system.assert(lmess.size()>1);
+        list<CVCH__NexmoMessage__c> lmess2 = [select id, CVCH__Channel__c from CVCH__NexmoMessage__c where CVCH__Channel__c <> 'Azure'];
+        system.assertEquals(lmess2.size(),0);
         Test.stopTest();
     }
 

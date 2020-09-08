@@ -38,6 +38,10 @@ global class FlowSendMessage2
 			}else
 					SM042_NexmoOut4.sendText(vis.CVCH__Id__c,vis.CVCH__Chat_Number__c,inp.message);
 			//SM042_NexmoOut2.sendText(vis.Id__c,inp.message,vis.Chat_Number__c);
+			if (inp.async == true)
+            {
+                SM010_Utils.saveTran();
+            }
 			SM042_NexmoOut2.pause(800);
 //			SM033_NexmoOut.sendTextAsync(vis.Id__c,inp.message,vis.Chat_Number__c,vis.Chat_Number__c);
 

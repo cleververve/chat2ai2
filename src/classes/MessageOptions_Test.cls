@@ -15,7 +15,7 @@ public class MessageOptions_Test
 		MessageOptions mess = new MessageOptions();
 		mess.visitorId = data1.vis.id;
 		mess.sMessage = 'message';
-		mess.sType = 'carousel';
+		mess.sType = 'Carousel';
 
 		MessageOptions.CarouselJSON car = new MessageOptions.CarouselJSON();
 		CarouselItem item = new CarouselItem();

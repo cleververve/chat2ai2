@@ -6,7 +6,7 @@ global class SM031_Nexmo
     global static decimal scoreQnA = 0;
     global static string intentLUIS = '';
     global static string triggeredFlow = '';
-
+    
 	@HttpPost
 	global static list<CVCH__NexmoMessage__c> getMessage()
 	{
@@ -35,19 +35,29 @@ global class SM031_Nexmo
         scoreLUIS = respLuis.dScore;
         scoreQnA = respQnA.dScore;
         intentLUIS = respLuis.sIntent;
-
+        
 		if (respLuis.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) && respQnA.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')))
 		{
 			TriggerDefaultFlow = true; // We will trigger Default Flow, if both scores are below set treshold
 		}
 		if (visr.CVCH__Had_First_Interaction__c == false)
 		{
+
+
 			bProceeded = true;
 			Map<String, Object> params = new Map<String, Object>();
 
 			params.put('visphone', visr.CVCH__Id__c);
 			params.put('ChatNumber', visr.CVCH__Chat_Number__c);
 			params.put('channel', visr.CVCH__chanel__c);
+
+			if(Test.isRunningTest() && visr.id == null)
+			{
+				insert visr;
+				params.put('visitorId',visr.id);
+			}
+
+
 			if (SM010_Utils.getChat2aiValue('Welcome Flow') != null && SM010_Utils.getChat2aiValue('Welcome Flow') != '')
 				Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Welcome Flow'), params).Start();
             triggeredFlow = 'Welcome Flow';
@@ -124,7 +134,7 @@ global class SM031_Nexmo
             }
             EventBus.publish(new User_Input__e(Input__c = mess.Text__c, Exit_Flow__c = false, VisitorId__c = visr.id, Filtered_Email__c = visEmail, Filtered_Name__c = visName));
             triggeredFlow = visr.Current_Flow__c;
-		}
+        }
 		else if (visr.CVCH__Next_Flow__c != null && visr.CVCH__Next_Flow__c != '')
 		{
 			bProceeded = true;
@@ -279,6 +289,7 @@ global class SM031_Nexmo
 
 		mess.CVCH__conversationId__c = (string)mConv.get('id');
 		mess.CVCH__conversationName__c = (string)mConv.get('name');
+		SM042_NexmoOut2.setInboundMessage(mess);
 		return mess;
 	}
 
@@ -345,7 +356,7 @@ global class SM031_Nexmo
 		if (!lVisitors.isEmpty())
 			ret = lVisitors[0];
 		else
-				ret = new CVCH__Visitor__c(CVCH__Id__c = sid, CVCH__Context__c = null, CVCH__Chat_Number__c = sChatNumber, CVCH__Chanel__c = channel);
+			ret = new CVCH__Visitor__c(CVCH__Id__c = sid, CVCH__Context__c = null, CVCH__Chat_Number__c = sChatNumber, CVCH__Chanel__c = channel,id = null);
 		return ret;
 	}
 

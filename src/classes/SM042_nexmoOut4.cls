@@ -6,14 +6,6 @@ Description:
 
 public with sharing class SM042_nexmoOut4
 {
-//	public static void sendTemplate(string sTo, string sFrom, string snamespace, string sTemplate)
-//	{
-//		if (Test.isRunningTest())
-//			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-//		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getMDMbody(sTo, sFrom,snamespace,sTemplate), 'NexmoOut2MDM', null);
-//
-//	}
-
 	public static map<string,string> getAuthHeader()
 	{
 		map<string,string> headers = new map <string,string>();
@@ -26,54 +18,17 @@ public with sharing class SM042_nexmoOut4
 	}
 
 
-
-
-//	public static string getMDMbody(string sTo,string sFrom, string sNamespace, string sTemplateName)
-//	{
-//		map<string, object> mRet = new map<string,object>();
-//		map<string,object> mMess = new map<string,object>();
-//		map<string,object> mContent = new map<string,object>();
-//		map<string,object> mTemplate = new map<string,object>();
-//		map<string, object> mFrom = new map<string,object>();
-//		map<string, object> mTo = new map<string,object>();
-//		mRet.put('message',mMess);
-//		mMess.put('content',mContent);
-//		mContent.put('template',mTemplate);
-//		mContent.put('type','template');
-//		mRet.put('from',mFrom);
-//		mRet.put('to',mTo);
-//
-//
-//		mTo.put('type','whatsapp');
-//		mTo.put('number',sTo);
-//
-//		mFrom.put('type','whatsapp');
-//		mFrom.put('number',sFrom);
-//
-//		mTemplate.put('parameters',new list<object>());
-//		mTemplate.put('name',sNamespace+':'+sTemplateName);
-//
-//		string sRet = JSON.serialize(mRet);
-//		return sRet;
-//
-//	}
-
-//    public static void send(string sTo, string sFrom, string message, string payload, string url, string type)
-//    {
-//
-//
-//    }
-
 	@future(CallOut=true)
 	public static void sendTextAsync(string sTo, string messageText,string sFrom,string sAuth)
 	{
 		try
 		{
-//            sendText(sTo,messageText,sFrom,sAuth);
 			SM042_nexmoOut4.sendText(sTo,sFrom,messageText);
 		}
 		catch( Exception ex)
 		{
+			if(test.isRunningTest())
+				throw ex;
 		}
 		finally
 		{
@@ -88,42 +43,6 @@ public with sharing class SM042_nexmoOut4
 		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyText(sTo, messageText,sFrom), 'NexmoOut3', null);
 
 	}
-
-//	public static void sendButton(string sTo, string sFrom ,string payload, string text)
-//	{
-//		if (Test.isRunningTest())
-//			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-//		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyButton(sTo,sFrom,  payload,text), 'NexmoOut2', null);
-//
-//	}
-
-
-//	public static string getBodyButton(string sTo,string sFrom,string payload,string text)
-//	{
-//		map<string,object> mret = new map<string,object>();
-//		map<string,string> mFrom = new map<string,string>();
-//		mFrom.put('type','whatsapp');
-//		mFrom.put('number',sFrom);
-//		mret.put('from', mFrom);
-//
-//
-//		map<string,string> mTo = new map<string,string>();
-//		mTo.put('type','whatsapp');
-//		mTo.put('number',sTo);
-//		mret.put('to', mTo);
-//
-//		map<string,object> mMess = new map<string,object>();
-//		map<string,object> mCont = new map<string,object>();
-//		map<string,string> mButton = new map<string,string>();
-//		mCont.put('type', 'button');
-//
-//		mCont.put('button', mButton);
-//		mMess.put('content',mCont);
-//		mret.put('message', mMess);
-//		mButton.put('payload',payload);
-//		mButton.put('text',text);
-//		return JSON.serialize(mret);
-//	}
 
 
 	public static string getBodyText(string sTo,string messageText,string sFrom)
@@ -144,7 +63,10 @@ public with sharing class SM042_nexmoOut4
 		map<string,string> mCont = new map<string,string>();
 		mCont.put('type', 'text');
         system.debug('messageText: '+messageText);
-		mCont.put('text', messageText.replaceAll('/n/r', '\n'));
+		if(messageText != null)
+			mCont.put('text', messageText.replaceAll('/n/r', '\n'));
+		else
+				mCont.put('text', messageText);
 		mMess.put('content',mCont);
 		mret.put('message', mMess);
         //system.debug('serialized text: '+messageText.replaceAll('/n/r', '\n'));
@@ -260,5 +182,84 @@ public with sharing class SM042_nexmoOut4
 		mret.put('message', mMess);
 		return JSON.serialize(mret);
 	}
+//	public static void sendTemplate(string sTo, string sFrom, string snamespace, string sTemplate)
+//	{
+//		if (Test.isRunningTest())
+//			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
+//		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getMDMbody(sTo, sFrom,snamespace,sTemplate), 'NexmoOut2MDM', null);
+//
+//	}
+
+	//	public static string getMDMbody(string sTo,string sFrom, string sNamespace, string sTemplateName)
+//	{
+//		map<string, object> mRet = new map<string,object>();
+//		map<string,object> mMess = new map<string,object>();
+//		map<string,object> mContent = new map<string,object>();
+//		map<string,object> mTemplate = new map<string,object>();
+//		map<string, object> mFrom = new map<string,object>();
+//		map<string, object> mTo = new map<string,object>();
+//		mRet.put('message',mMess);
+//		mMess.put('content',mContent);
+//		mContent.put('template',mTemplate);
+//		mContent.put('type','template');
+//		mRet.put('from',mFrom);
+//		mRet.put('to',mTo);
+//
+//
+//		mTo.put('type','whatsapp');
+//		mTo.put('number',sTo);
+//
+//		mFrom.put('type','whatsapp');
+//		mFrom.put('number',sFrom);
+//
+//		mTemplate.put('parameters',new list<object>());
+//		mTemplate.put('name',sNamespace+':'+sTemplateName);
+//
+//		string sRet = JSON.serialize(mRet);
+//		return sRet;
+//
+//	}
+
+//    public static void send(string sTo, string sFrom, string message, string payload, string url, string type)
+//    {
+//
+//
+//    }
+
+//	public static void sendButton(string sTo, string sFrom ,string payload, string text)
+//	{
+//		if (Test.isRunningTest())
+//			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
+//		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyButton(sTo,sFrom,  payload,text), 'NexmoOut2', null);
+//
+//	}
+
+
+//	public static string getBodyButton(string sTo,string sFrom,string payload,string text)
+//	{
+//		map<string,object> mret = new map<string,object>();
+//		map<string,string> mFrom = new map<string,string>();
+//		mFrom.put('type','whatsapp');
+//		mFrom.put('number',sFrom);
+//		mret.put('from', mFrom);
+//
+//
+//		map<string,string> mTo = new map<string,string>();
+//		mTo.put('type','whatsapp');
+//		mTo.put('number',sTo);
+//		mret.put('to', mTo);
+//
+//		map<string,object> mMess = new map<string,object>();
+//		map<string,object> mCont = new map<string,object>();
+//		map<string,string> mButton = new map<string,string>();
+//		mCont.put('type', 'button');
+//
+//		mCont.put('button', mButton);
+//		mMess.put('content',mCont);
+//		mret.put('message', mMess);
+//		mButton.put('payload',payload);
+//		mButton.put('text',text);
+//		return JSON.serialize(mret);
+//	}
 
 }

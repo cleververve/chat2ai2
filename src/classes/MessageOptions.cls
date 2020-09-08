@@ -13,8 +13,8 @@ global class MessageOptions implements iMessage
 	@AuraEnabled @InvocableVariable global boolean async;
 	public string sFieldName;
 	public string sFlow;
-    public string sConfirmMessage;
-    public string sInputType;
+	public string sConfirmMessage;
+	public string sInputType;
 	public list<CarouselItem> lItems = new list<CarouselItem>();
 	public map<string, Option> mOptions = new map<string, Option>();
 	public list<Option> lOptions = new list<Option>();
@@ -33,9 +33,7 @@ global class MessageOptions implements iMessage
 	public void addNonEmpty(set<string>sVal, string val)
 	{
 		if (val != null && val != '')
-		{
 			sVal.add(val);
-		}
 	}
 	public string translate(map<string, string>mTr, string val)
 	{
@@ -107,17 +105,16 @@ global class MessageOptions implements iMessage
 			}
 		}
 	}
-
-	public static map<string,Option> addOptions(map<string,Option>mOptions, list<Option>lOptions)
+	public static map<string, Option> addOptions(map<string, Option>mOptions, list<Option>lOptions)
 	{
-		integer i=1;
+		integer i = 1;
 		for (Option opt : lOptions)
 		{
 			system.debug('sendWF.option = ' + opt);
 			if (opt != null && opt.sLabel != null && opt.sLabel != '')
 			{
 				opt.iNumber = i;
-				mOptions.put(''+i, opt);
+				mOptions.put('' + i, opt);
 				i += 1;
 			}
 		}
@@ -128,12 +125,12 @@ global class MessageOptions implements iMessage
 	{
 		string sFrom = v.CVCH__Chat_Number__c;
 		string sTo = v.CVCH__Id__c;
-		if(mOptions.isEmpty() && !lOptions.isEmpty())
-			mOptions = MessageOptions.addOptions(mOptions,lOptions);
+		if (mOptions.isEmpty() && !lOptions.isEmpty())
+			mOptions = MessageOptions.addOptions(mOptions, lOptions);
 		translate(v.CVCH__language__c);
 		if (sType == 'Carousel')
 		{
-			integer i=1;
+			integer i = 1;
 			if (mOptions.isEmpty())
 			{
 				for (CarouselItem it : lItems)
@@ -158,23 +155,17 @@ global class MessageOptions implements iMessage
 					}
 				}
 			}
-
-			SM042_NexmoOut2.sendCarousel(this, sTo, sFrom);
-
-//			SM042_NexmoOut2.sendText(v.Id__c, sMessage, sFrom);
-//			for (string sKey : mOptions.keySet())
-//			{
-//				pause(800);
-//				Option opt = mOptions.get(sKey);
-//				SM042_NexmoOut2.sendImage(sTo, sFrom,  opt.getBody(),opt.sURL);
-////				SM042_NexmoOut2.sendCarousel(sTo, sFrom, opt.sURL, opt.getBody());
-//			}
+			SM042_NexmoOut2.sendComplexType(this, sTo, sFrom);
+		}
+		else if (SM042_NexmoOut2.getInboundChannel() == 'Azure')
+		{
+			if (sType == 'Options')
+				SM042_NexmoOut2.sendComplexType(this, sTo, sFrom);
+			else
+					SM042_NexmoOut2.sendText(sTo, getBody(), sFrom, this.async);
 		}
 		else
-		{
-			system.debug('start MessageOptions.send ' + getBody());
-			SM042_NexmoOut2.sendText(sTo, getBody(), sFrom,this.async);
-		}
+				SM042_NexmoOut2.sendText(sTo, getBody(), sFrom, this.async);
 
 		if (!mOptions.isEmpty() || this.sFieldName != null)
 		{
@@ -261,7 +252,7 @@ global class MessageOptions implements iMessage
 					MessageOptions.OptionsJSON msg = (MessageOptions.OptionsJSON) JSON.deserialize(req.content, MessageOptions.OptionsJSON.class);
 					if (msg.sType != '' && msg.sType != null)
 						req.sType = msg.sType;
-					req.mOptions = MessageOptions.addOptions(req.mOptions,msg.a);
+					req.mOptions = MessageOptions.addOptions(req.mOptions, msg.a);
 					system.debug('mOptions = ' + req.mOptions);
 				}
 			}

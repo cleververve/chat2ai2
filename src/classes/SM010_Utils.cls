@@ -82,6 +82,42 @@ public class SM010_Utils
         return ret;
     }
 
+    public static void insertConversation(decimal scoreLUIS, decimal scoreQnA, string intentLUIS, string triggeredFlow, string language, string phone, string input, string output, id visitorId, string errMsg)
+    {
+        Conversation__c conv = new Conversation__c();
+        try
+        {
+            if (scoreLUIS > scoreQnA)
+            {
+                conv.NLP__c = 'LUIS';
+                conv.score__c = scoreLUIS;
+                conv.intent__c = intentLUIS;
+            }
+            else
+            {
+                conv.NLP__c = 'QnA';
+                conv.score__c = scoreQnA;
+            }
+            conv.language__c = language;
+            conv.phone__c = phone;
+            conv.Error__c = errMsg;
+            conv.output__c = output;
+            if (input != null && input.length() > 32000)
+                input = input.substring(0, 32000);
+            conv.input__c = input;
+            if (input != null && input.length() > 255)
+                input = input.substring(0,255);
+            conv.Input2__c = input;
+            conv.visitor__c = visitorId;
+            conv.triggered_flow__c= triggeredflow;
+            insert conv;
+        }
+        catch(Exception e){
+            return;
+        }
+        
+    }
+    
 //
 //    public static string getParam(string sparamName)
 //    {

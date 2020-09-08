@@ -24,7 +24,7 @@ public class FlowGetDirectionTest
 		FlowGetDirection.send(new list<FlowGetDirection.FlowInput> {inp});
 		Test.stopTest();
 	}
-
+	
 	@IsTest
 	public static void testIt2()
 	{

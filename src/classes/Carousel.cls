@@ -39,7 +39,7 @@ global class Carousel
 			addItem(mess.item8,mo.lItems);
 			addItem(mess.item9,mo.lItems);
 			addItem(mess.item10,mo.lItems);
-			mo.sType = 'carousel';
+			mo.sType = 'Carousel';
 			mo.visitorId = mess.visitorId;
 			mo.sMessage = mess.sMessage;
 			mo.async = mess.async;

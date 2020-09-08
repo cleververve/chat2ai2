@@ -16,5 +16,5 @@ global class SM081_AzureTokenMock implements HttpCalloutMock
 		res.setBody(reqBody);
 		return res;
 	}
-
+	
 }

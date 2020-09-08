@@ -233,7 +233,7 @@ global class OutletSearch
 	{
 		SM010_Utils.pageReturn page = SM010_Utils.getPage(lAcc, pageNum, 10, false, true);
 		MessageOptions ret = new MessageOptions(vis.Id);
-		ret.sType = 'msg_options';
+		ret.sType = 'Options';
 
 
 		for (object obj : page.lObj)
@@ -307,7 +307,7 @@ global class OutletSearch
 	public static MessageOptions getOutletInfo(CVCH__Visitor__c vis, id outletId)
 	{
 		MessageOptions mo = new MessageOptions(vis.Id);
-		mo.sType = 'carousel';
+		mo.sType = 'Carousel';
 		account acc = getAccountRecord(outletId);
 		mo.lItems.add(getTemplate(acc, vis.CVCH__language__c, true, null));
 		return mo;
