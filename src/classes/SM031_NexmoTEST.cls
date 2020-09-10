@@ -28,12 +28,18 @@ public class SM031_NexmoTEST {
         cust6.name = 'Welcome Flow';
         cust6.CVCH__value__c = 'test';
         
+        CVCH__chat2ai__c cust7 = new CVCH__chat2ai__c();
+        cust7.name = 'Default Flow 2';
+        cust7.CVCH__value__c = 'test';
+
+        
         lcust.add(cust1);
         lcust.add(cust2);
         lcust.add(cust3);
         lcust.add(cust4);
         lcust.add(cust5);
         lcust.add(cust6);
+        lcust.add(cust7);
         insert lcust;
     }
 

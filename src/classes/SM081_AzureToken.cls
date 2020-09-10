@@ -11,8 +11,10 @@ public class SM081_AzureToken
 
 	public static string getToken0()
 	{
-		string sClientId = '1340ab55-ba59-46d9-a3c1-fe9d46b1954e';
-		string sClientSecret = 'KQn3-lR0Hd7TA4rEW~J3Bdly_86KDkI-v~';
+//		string sClientId = '1340ab55-ba59-46d9-a3c1-fe9d46b1954e';
+//		string sClientSecret = 'KQn3-lR0Hd7TA4rEW~J3Bdly_86KDkI-v~';
+		string sClientId  =  SM010_Utils.getChat2aiValue('Azure Bot ClientId');//'f0ecba54-e43d-45f0-b65c-96919a6bbdf5';
+		string sClientSecret  =  SM010_Utils.getChat2aiValue('Azure Bot ClientSecret');//'6aD.-x.~YkkdZM9KLb582CR.3bhRg5xsT0';
 		string sScope = 'https://api.botframework.com/.default';
 		string sBody = 'grant_type=client_credentials&client_id='+EncodingUtil.urlEncode(sClientId, 'UTF-8')
 				+'&client_secret='+EncodingUtil.urlEncode(sClientSecret, 'UTF-8')

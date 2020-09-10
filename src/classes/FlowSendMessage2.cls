@@ -33,10 +33,11 @@ global class FlowSendMessage2
 			if(vis.CVCH__language__c != 'en' && vis.CVCH__language__c != null && vis.CVCH__language__c != '')
 				inp.message = SM010_Utils.translate(inp.message,vis.CVCH__language__c);
 			system.debug('inp.message: '+inp.message);
-			if(inp.async){
-				SM042_NexmoOut4.sendTextAsync(vis.CVCH__Id__c,inp.message,vis.CVCH__Chat_Number__c,vis.CVCH__Chat_Number__c);
-			}else
-					SM042_NexmoOut4.sendText(vis.CVCH__Id__c,vis.CVCH__Chat_Number__c,inp.message);
+			SM042_NexmoOut2.sendText(vis.CVCH__Id__c,inp.message,vis.CVCH__Chat_Number__c,inp.async);
+//			if(inp.async){
+//				SM042_NexmoOut4.sendTextAsync(vis.CVCH__Id__c,inp.message,vis.CVCH__Chat_Number__c,vis.CVCH__Chat_Number__c);
+//			}else
+//					SM042_NexmoOut4.sendText(vis.CVCH__Id__c,vis.CVCH__Chat_Number__c,inp.message);
 			//SM042_NexmoOut2.sendText(vis.Id__c,inp.message,vis.Chat_Number__c);
 			if (inp.async == true)
             {

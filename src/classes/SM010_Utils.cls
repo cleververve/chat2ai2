@@ -167,6 +167,14 @@ public class SM010_Utils
         }
         return val.CVCH__Value__c;
     }
+
+    public static string getChat2aiValue2(string sName)
+    {
+        CVCH__Chat2ai__c val = CVCH__Chat2ai__c.getInstance(sName);
+        if(val == null)
+                return '';
+        return val.CVCH__Value__c;
+    }
     
 /*    public static string getFlowId(string flowName,string programId, string language)
     {
@@ -204,7 +212,7 @@ public class SM010_Utils
     {
         return translate(str,sLang,false);
     }
-    public static string translateAPI(string str)
+/*    public static string translateAPI(string str)
     {
 
         string sRet = null;
@@ -232,6 +240,39 @@ public class SM010_Utils
         tr.CVCH__default_value__c = en;
         tr.CVCH__key__c = str;
         tr.CVCH__API_Translation__c = true;
+        lTrans.add(tr);
+    }
+*/
+    public static MTranslation translateAPI0(string str)
+    {
+        MTranslation tran = new MTranslation();
+        
+        string sKey = getKey(str);
+        if(sKey.length()>254)
+            return null;
+        list<Translation__c> sObj = [select Id, key__c, en__c, DetectedLang__c from Translation__c where key__c = :sKey and API_Translation__c = true];
+
+        if(!sObj.isEmpty())
+        {
+            Translation__c tr = (Translation__c)sObj[0];
+            tran.text = str;
+            tran.detectedlang = tr.DetectedLang__c;
+            tran.translation = tr.en__c;
+        }
+        
+        return tran;
+    }
+    public static void addTranslationAPI0(MTranslation tran)
+    {
+        string sKey = getKey(tran.text);
+        if(sKey.length()>254)
+            return;
+        Translation__c tr  = new Translation__c();
+        tr.en__c = tran.translation;
+        tr.default_value__c = tran.translation;
+        tr.key__c = tran.text;
+        tr.API_Translation__c = true;
+        tr.DetectedLang__c = tran.detectedlang;
         lTrans.add(tr);
     }
     public static string translate(string str, string sLang,boolean bFlow)

@@ -28,6 +28,7 @@ global class Carousel
 		list<MessageOptions>lMess =new list<MessageOptions>();
 		for(Carousel mess : message)
 		{
+			system.debug('carousel mess='+mess);
 			MessageOptions mo = new MessageOptions();
 			addItem(mess.item1,mo.lItems);
 			addItem(mess.item2,mo.lItems);

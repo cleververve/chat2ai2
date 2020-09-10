@@ -6,24 +6,29 @@ Description:
 
 public class SM080_Translate
 {
-
-	public static string translate(string sText)
-	{
-		string sRet = SM010_Utils.translateAPI(sText); // ищем в кеше
-		if(sRet == null) // если в кеше не нашли
-		{ // то вызываем API
-			string sURL = SM010_Utils.getChat2aiValue('Microsoft Translator URL');
+    public static MTranslation translate0(string sText)
+    {
+        MTranslation tran;
+        
+        tran = SM010_Utils.translateAPI0(sText);
+        if (tran == null || tran.translation == null)
+        {
+            tran = new MTranslation();
+            string sURL = SM010_Utils.getChat2aiValue('Microsoft Translator URL');
 			sURL = sURL+'&to=en';
 			HttpResponse resp = SM003_Http.request(sURL,'POST', getHeaders(),getBody(sText), 'MS translate', NULL, 'SM080_TranslateMock');
 			string sResp = resp.getBody();
 			object oResp = JSON.deserializeUntyped(sResp);
-			sRet = (string)JPath.get0(oResp,'[1]/translations/[1]/text');
-			if(sRet != null)  // если API перевел - то сохраняем в кеш для последующей записи в базу
-				SM010_Utils.addTralslationAPI(sText,sRet);
-		}
-		return sRet;
-	}
-
+            tran.translation = (string)JPath.get0(oResp,'[1]/translations/[1]/text');
+            tran.detectedlang = (string)JPath.get0(oResp,'[1]/detectedLanguage/language');
+            tran.text = sText;
+            if (tran.translation != null)
+                SM010_Utils.addTranslationAPI0(tran);
+        }
+        
+        return tran;
+    }
+    
 	public static map<string, string> getHeaders()
 	{
 		map<string, string> ret = new map<string, string>();

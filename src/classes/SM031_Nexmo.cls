@@ -23,12 +23,22 @@ global class SM031_Nexmo
 
 	public static list<MessageOptions> getResponse(CVCH__NexmoMessage__c mess, CVCH__Visitor__c visr)
 	{
-
 		list<MessageOptions> lret = new list<MessageOptions>();
 		boolean bProceeded = false;
 		boolean TriggerDefaultFlow = false;
 		string translatedText = '';
-		translatedText = SM080_Translate.translate(mess.CVCH__Text__c);
+        MTranslation tran;
+        boolean TriggerDefaultFlowChangeLang = false;
+        if (visr.language__c != 'en')
+        {
+            tran = SM080_Translate.translate0(mess.Text__c);
+            translatedText = tran.translation;
+            if (tran.detectedlang != visr.language__c)
+                TriggerDefaultFlowChangeLang = true; // We will trigger Default Flow 2, if user typed in different language
+            system.debug('Detected language: '+tran.detectedlang);
+        }	
+        else
+            translatedText = mess.Text__c;
 		system.debug('Translated input: ' + translatedText);
 		SM080_LUIS.LuisResponse respLuis = SM080_LUIS.queryPhrase(translatedText, visr.CVCH__language__c);
 		SM080_QnA.QnAResponse respQnA = SM080_QnA.queryPhrase(translatedText, visr.CVCH__language__c);
@@ -51,11 +61,13 @@ global class SM031_Nexmo
 			params.put('ChatNumber', visr.CVCH__Chat_Number__c);
 			params.put('channel', visr.CVCH__chanel__c);
 
-			if(Test.isRunningTest() && visr.id == null)
+			if( visr.id == null && (Test.isRunningTest() || SM010_Utils.getChat2aiValue2('CREATE VISITOR BEFORE FLOWS') == 'TRUE'))
 			{
 				insert visr;
-				params.put('visitorId',visr.id);
+
 			}
+			params.put('visitorId',visr.id);
+			system.debug('visitor='+visr);
 
 
 			if (SM010_Utils.getChat2aiValue('Welcome Flow') != null && SM010_Utils.getChat2aiValue('Welcome Flow') != '')
@@ -241,17 +253,51 @@ global class SM031_Nexmo
 			}
 
 		}
+        if (!bProceeded && TriggerDefaultFlowChangeLang)
+        {
+            bProceeded = true;
+            Map<String, Object> params = new Map<String, Object>();
+            params.put('visitorId', visr.id);
+            params.put('originalmessage', mess.Text__c);
+            params.put('language',tran.detectedlang);
+            params.put('visitorlanguage',visr.language__c);
+            Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow 2'), params);
+            flow.start();// trigger default flow
+            triggeredFlow = 'Default Flow 2';
+        }
 		if (!bProceeded && TriggerDefaultFlow)
-		{
-			bProceeded = true;
-			Map<String, Object> params = new Map<String, Object>();
-			params.put('visitorId', visr.id);
-			params.put('originalmessage', mess.CVCH__Text__c);
-
-			Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow'), params);
-			flow.start();// trigger default flow
-            triggeredFlow = 'Default Flow';
-		}
+        {
+            bProceeded = true;
+            Map<String, Object> params = new Map<String, Object>();
+            params.put('visitorId', visr.id);
+            params.put('originalmessage', mess.Text__c);
+            //VF-438
+            if (visr.language__c == 'en')
+            {
+                tran = SM080_Translate.translate0(mess.Text__c);
+                if (visr.language__c != tran.detectedlang)
+                {
+                    params.put('language',tran.detectedlang);
+                    params.put('visitorlanguage',visr.language__c);
+                    Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow 2'), params);
+                    flow.start();// trigger default flow 2
+                    triggeredFlow = 'Default Flow 2';
+                }
+                else
+                {
+                    Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow'), params);
+            		flow.start();// trigger default flow
+                    triggeredFlow = 'Default Flow';
+                }
+            } 
+            else
+            {
+                Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow'), params);
+            	flow.start();// trigger default flow
+                triggeredFlow = 'Default Flow';
+            }
+            
+        }
 		if (!bProceeded)
 		{
 			system.debug('LUIS score=' + respLuis.dScore + ',QnA score=' + respQnA.dScore);
@@ -360,6 +406,16 @@ global class SM031_Nexmo
 		return ret;
 	}
 
+	public static void sendError(CVCH__NexmoMessage__c mess0, string sErrorMessage)
+	{
+		if(SM010_Utils.getChat2aiValue2('SEND DEV ERRORS') != 'TRUE')
+			sErrorMessage = 'Oops, something went wrong. Please try again.';
+
+		if (mess0 != null && mess0.CVCH__From__c != null)
+		{
+			SM042_NexmoOut2.sendText(mess0.CVCH__From__c, sErrorMessage, mess0.CVCH__To__c);
+		}
+	}
 
 	global static list<CVCH__NexmoMessage__c> getMessage0(string jsonbody)
 	{
@@ -405,19 +461,14 @@ global class SM031_Nexmo
 		}
 		catch (MyException e)
 		{
-			errMsg = e.getMessage();
-			if (mess0 != null && mess0.CVCH__From__c != null)
-			{
-				SM042_NexmoOut2.sendText(mess0.CVCH__From__c, 'Oops, something went wrong. Please try again.', mess0.CVCH__To__c);
-			}
+			sendError(mess0,e.getMessage());
 			if (Test.isRunningTest())
 				throw e;
 		}
 		catch (Exception e)
 		{
-			errMsg = '' + e.getLineNumber() + ' ' + e.getMessage() + ' ' + e.getStackTraceString();
-			if (mess0 != null && mess0.CVCH__From__c != null)
-				SM042_NexmoOut2.sendText(mess0.CVCH__From__c, 'Oops, something went wrong. Please try again.', mess0.CVCH__To__c);
+			sendError(mess0,'' + e.getLineNumber() + ' ' + e.getMessage() + ' ' + e.getStackTraceString());
+
 			if (Test.isRunningTest())
 				throw e;
 		}

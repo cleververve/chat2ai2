@@ -10,7 +10,7 @@ public class SM080_TranslateTest
 	public static void testIt()
 	{
 		Test.startTest();
-		system.debug(SM080_Translate.translate('Привет! Я - Сергей!'));
+		system.debug(SM080_Translate.translate0('Привет! Я - Сергей!'));
 		
 		SM010_Utils.saveTran();
 		Test.stopTest();

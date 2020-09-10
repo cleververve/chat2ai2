@@ -26,7 +26,10 @@ public class SM042_NexmoOut2 implements Queueable
 		{
 			MessageOptions mo = (MessageOptions) JSON.deserializeStrict(mess.CVCH__JSON__c, MessageOptions.class);
 			if (mess.CVCH__Channel__c == 'Azure')
-				SM081_Azure.sendCard(mess, mo.lItems);
+			{
+				SM081_Azure.sendCarousel(mess, mo.lItems);
+			}
+
 			else
 			{
 				if (mo.sMessage != null && mo.sMessage != '')
@@ -52,7 +55,16 @@ public class SM042_NexmoOut2 implements Queueable
 			}
 		}
 		else if (mess.CVCH__Channel__c == 'Azure')
-			SM081_Azure.sendText(mess);
+		{
+			if(mess.CVCH__Type__c == 'Options')
+			{
+				MessageOptions mo = (MessageOptions) JSON.deserializeStrict(mess.CVCH__JSON__c, MessageOptions.class);
+				SM081_Azure.sendOptions(mess,mo);
+			}
+			else
+				SM081_Azure.sendText(mess);
+		}
+
 		else
 				SM042_nexmoOut4.sendText(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c);
 
@@ -78,13 +90,11 @@ public class SM042_NexmoOut2 implements Queueable
 			{
 				send(mess);
 			}
-
 		}
 		catch (Exception e)
 		{
 			if (Test.isRunningTest())
 				throw e;
-
 		}
 		finally
 		{
@@ -158,7 +168,6 @@ public class SM042_NexmoOut2 implements Queueable
 	}
 	public static void sendText(string sTo, string sText, string sFrom, boolean async)
 	{
-
 		CVCH__NexmoMessage__c mess = initMessage(sto, sFrom);
 
 		mess.CVCH__Text__c = sText;
@@ -177,6 +186,10 @@ public class SM042_NexmoOut2 implements Queueable
 			mess.CVCH__Type__c = 'Carousel';
 		else
 				mess.CVCH__Type__c = opt.sType;
+		string sText = opt.sMessage;
+		if (mess.CVCH__Text__c != null && mess.CVCH__Text__c.length() > 254)
+			mess.CVCH__Text__c = mess.CVCH__Text__c.substring(0, 254);
+		mess.CVCH__FullText__c = sText;
 		mess.CVCH__JSON__c = JSON.serializePretty(opt);
 		mess.CVCH__Status__c = 'Queued';
 
