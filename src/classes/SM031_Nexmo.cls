@@ -62,13 +62,10 @@ global class SM031_Nexmo
 			params.put('channel', visr.CVCH__chanel__c);
 
 			if( visr.id == null && (Test.isRunningTest() || SM010_Utils.getChat2aiValue2('CREATE VISITOR BEFORE FLOWS') == 'TRUE'))
-			{
 				insert visr;
-
-			}
-			params.put('visitorId',visr.id);
+			if(SM010_Utils.getChat2aiValue2('CREATE VISITOR BEFORE FLOWS') == 'TRUE')
+				params.put('visitorId',visr.id);
 			system.debug('visitor='+visr);
-
 
 			if (SM010_Utils.getChat2aiValue('Welcome Flow') != null && SM010_Utils.getChat2aiValue('Welcome Flow') != '')
 				Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Welcome Flow'), params).Start();
