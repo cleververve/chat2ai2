@@ -21,7 +21,7 @@ global class Option
 	{
 		return ''+'*'+iNumber+')* '+sLabel;
 	}
-	public Option()
+	global Option()
 	{
 
 	}

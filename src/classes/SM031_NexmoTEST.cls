@@ -32,6 +32,9 @@ public class SM031_NexmoTEST {
         cust7.name = 'Default Flow 2';
         cust7.CVCH__value__c = 'test';
 
+        CVCH__chat2ai__c cust8 = new CVCH__chat2ai__c();
+        cust8.name = 'CREATE VISITOR BEFORE FLOWS';
+        cust8.CVCH__value__c = 'TRUE';
         
         lcust.add(cust1);
         lcust.add(cust2);
@@ -40,6 +43,7 @@ public class SM031_NexmoTEST {
         lcust.add(cust5);
         lcust.add(cust6);
         lcust.add(cust7);
+        lcust.add(cust8);
         insert lcust;
     }
 

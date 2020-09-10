@@ -23,18 +23,32 @@ global class FlowSendWelcomeCarousel2
 			sids.add((id)inp.visitorId);
 		}
 		map<id,Visitor__c> mVis = new map<id,Visitor__c>(DM080_Visitor.getRecords(sids));*/
+		list<MessageOptions>lMess =new list<MessageOptions>();
 		for(FlowSendWelcomeCarousel2 inp: lParam)
 		{
+			MessageOptions mo = new MessageOptions();
+			CarouselItem item = new CarouselItem();
+			item.title = inp.caption;
+			item.imageURL = inp.imageurl;
+			mo.lItems.add(item);
+			mo.sType = 'Carousel';
+//			mo.visitorId = mess.visitorId;
+			mo.sMessage = inp.caption;
+			mo.async = inp.async;
+			SM042_NexmoOut2.sendComplexType(mo, inp.visphone, inp.ChatNumber);
+			lMess.add(mo);
+
 			//Visitor__c vis = mVis.get((id)inp.visitorId);
-			if(inp.async == null || inp.async == false)
-			{
-				sm042_nexmoout2.sendcarousel(inp.visphone,inp.ChatNumber, inp.imageurl, inp.caption);
-				SM042_NexmoOut2.pause(800);
-			}
-			else
-			{
-				sm042_nexmoout2.sendCarouselAsync(inp.visphone,inp.ChatNumber, inp.imageurl, inp.caption);
-			}
+//			if(inp.async == null || inp.async == false)
+//			{
+//				sm042_nexmoout2.sendcarousel(inp.visphone,inp.ChatNumber, inp.imageurl, inp.caption);
+//				SM042_NexmoOut2.pause(800);
+//			}
+//			else
+//			{
+//				sm042_nexmoout2.sendCarouselAsync(inp.visphone,inp.ChatNumber, inp.imageurl, inp.caption);
+//			}
 		}
+//		MessageOptions.sendWF(lMess);
 	}
 }
