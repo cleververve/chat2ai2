@@ -48,6 +48,7 @@
             <name>output</name>
         </outputParameters>
     </actionCalls>
+    <apiVersion>49.0</apiVersion>
     <interviewLabel>CarouselItem to JSON {!$Flow.CurrentDateTime}</interviewLabel>
     <label>CarouselItem to JSON</label>
     <processMetadataValues>

@@ -66,6 +66,7 @@
             <name>output</name>
         </outputParameters>
     </actionCalls>
+    <apiVersion>49.0</apiVersion>
     <interviewLabel>Option to JSON {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Option to JSON</label>
     <processMetadataValues>

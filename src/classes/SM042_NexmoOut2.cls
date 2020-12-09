@@ -282,7 +282,7 @@ public class SM042_NexmoOut2 implements Queueable
 		mCont.put('image', mImage);
 		mMess.put('content', mCont);
 		mret.put('message', mMess);
-		return JSON.serialize(mret);
+		return JSON.serialize(mret).replaceAll('\\n','\n');
 	}
 	//	public static void sendImage(string sTo, string sFrom, string sText, string sImageURL)
 //	{

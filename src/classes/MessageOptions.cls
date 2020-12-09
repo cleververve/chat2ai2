@@ -6,7 +6,7 @@ Description:
 
 global class MessageOptions implements iMessage
 {
-	@AuraEnabled @InvocableVariable global string sMessage;
+	@AuraEnabled @InvocableVariable global string sMessage='';
 	@AuraEnabled @InvocableVariable global id visitorId;
 	@AuraEnabled @InvocableVariable global string content;
 	@AuraEnabled @InvocableVariable global string sType;

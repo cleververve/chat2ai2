@@ -32,6 +32,7 @@
             </value>
         </inputParameters>
     </actionCalls>
+    <apiVersion>49.0</apiVersion>
     <decisions>
         <name>item1_is_present</name>
         <label>item1 is present</label>

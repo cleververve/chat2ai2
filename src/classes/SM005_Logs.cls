@@ -76,7 +76,7 @@ global class SM005_Logs
     {
         if(!lLog.isEmpty())
         {
-            insert lLog;
+            Database.insert(lLog,false);
             lLog =  new list<CVCH__CallOut__c> ();
         }
     }
