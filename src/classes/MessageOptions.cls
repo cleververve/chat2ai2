@@ -121,13 +121,13 @@ global class MessageOptions implements iMessage
 		return mOptions;
 	}
 
-	public void send(CVCH__Visitor__c v)
+	public void send(CVCH__Visitor__c visr)
 	{
-		string sFrom = v.CVCH__Chat_Number__c;
-		string sTo = v.CVCH__Id__c;
+		string sFrom = visr.CVCH__Chat_Number__c;
+		string sTo = visr.CVCH__Id__c;
 		if (mOptions.isEmpty() && !lOptions.isEmpty())
 			mOptions = MessageOptions.addOptions(mOptions, lOptions);
-		translate(v.CVCH__language__c);
+		translate(visr.CVCH__language__c);
 		if (sType == 'Carousel')
 		{
 			integer i = 1;
@@ -170,8 +170,8 @@ global class MessageOptions implements iMessage
 		if (!mOptions.isEmpty() || this.sFieldName != null)
 		{
 			system.debug('mOptions=' + mOptions);
-			v.CVCH__Context__c = JSON.serialize(this);
-			system.debug('Context__c= ' + v.CVCH__Context__c);
+			visr.CVCH__Context__c = JSON.serialize(this);
+			system.debug('Context__c= ' + visr.CVCH__Context__c);
 		}
 		SM010_Utils.saveTran();
 	}

@@ -73,7 +73,7 @@ public class SM042_NexmoOut2 implements Queueable
 	@future(Callout =true)
 	public static void executeF(id messId)
 	{
-		list<CVCH__NexmoMessage__c> lMess =
+		CVCH__NexmoMessage__c mess =
 		[
 				select id,CVCH__Text__c,CVCH__Status__c,CVCH__FullText__c,
 						CVCH__JSON__c,CVCH__Type__c,
@@ -86,10 +86,7 @@ public class SM042_NexmoOut2 implements Queueable
 		];
 		try
 		{
-			for (CVCH__NexmoMessage__c mess : lMess)
-			{
 				send(mess);
-			}
 		}
 		catch (Exception e)
 		{
@@ -99,9 +96,41 @@ public class SM042_NexmoOut2 implements Queueable
 		finally
 		{
 			SM005_Logs.save();
-			update lmess;
+			update mess;
 		}
 	}
+
+
+	@future(Callout =true)
+	public static void sendOrEnqueueF(id messId)
+	{
+		CVCH__NexmoMessage__c mess =
+		[
+				select id,CVCH__Text__c,CVCH__Status__c,CVCH__FullText__c,
+						CVCH__JSON__c,CVCH__Type__c,
+						CVCH__From__c,CVCH__From_Name__c,
+						CVCH__To__c,CVCH__To_Name__c,
+						CVCH__activityId__c,CVCH__conversationId__c,CVCH__conversationName__c,CVCH__Channel__c
+
+				from CVCH__NexmoMessage__c
+				where id = :messId
+		];
+		try
+		{
+			send(mess);
+		}
+		catch (Exception e)
+		{
+			SM042_NexmoOut2 job = new SM042_NexmoOut2(mess.id);
+			System.enqueueJob(job);
+		}
+		finally
+		{
+			SM005_Logs.save();
+			update mess;
+		}
+	}
+
 
 	public static void sendOrEnqueue(CVCH__NexmoMessage__c mess, Boolean async)
 	{
@@ -122,8 +151,7 @@ public class SM042_NexmoOut2 implements Queueable
 			catch (Exception e)
 			{
 				insert mess;
-				SM042_NexmoOut2 job = new SM042_NexmoOut2(mess.id);
-				System.enqueueJob(job);
+				sendOrEnqueueF(mess.id);
 			}
 		}
 	}

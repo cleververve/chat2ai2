@@ -6,6 +6,8 @@ global class SM031_Nexmo
     global static decimal scoreQnA = 0;
     global static string intentLUIS = '';
     global static string triggeredFlow = '';
+    global static SM080_LUIS.LuisResponse respLuis = null;
+    global static boolean triggeredLUIS = false;
     
 	@HttpPost
 	global static list<CVCH__NexmoMessage__c> getMessage()
@@ -27,20 +29,33 @@ global class SM031_Nexmo
 		boolean bProceeded = false;
 		boolean TriggerDefaultFlow = false;
 		string translatedText = '';
-        MTranslation tran;
+        MTranslation tran = new MTranslation();
+        tran.detectedlang = 'en';
         boolean TriggerDefaultFlowChangeLang = false;
-        if (visr.language__c != 'en')
+        boolean flowinput = false;
+        
+        if (visr.CVCH__Context__c != null && visr.CVCH__Context__c != '') { //if we received input, dont have to translate it
+			MessageOptions mo = (MessageOptions) JSON.deserialize(visr.Context__c, MessageOptions.class);
+			if (mo.sType == 'Input') { 
+                if (mo.sInputType == 'Name' || mo.sInputType == 'Email') {
+                    flowinput = true;
+                }
+            }
+        }
+        
+        if (visr.language__c != 'en' && !flowinput)
         {
             tran = SM080_Translate.translate0(mess.Text__c);
             translatedText = tran.translation;
-            if (tran.detectedlang != visr.language__c)
-                TriggerDefaultFlowChangeLang = true; // We will trigger Default Flow 2, if user typed in different language
-            system.debug('Detected language: '+tran.detectedlang);
         }	
-        else
+        else {
             translatedText = mess.Text__c;
-		system.debug('Translated input: ' + translatedText);
-		SM080_LUIS.LuisResponse respLuis = SM080_LUIS.queryPhrase(translatedText, visr.CVCH__language__c);
+        }
+            
+        
+        
+		//system.debug('Translated input: ' + translatedText);
+		respLuis = SM080_LUIS.queryPhrase(translatedText, visr.CVCH__language__c);
 		SM080_QnA.QnAResponse respQnA = SM080_QnA.queryPhrase(translatedText, visr.CVCH__language__c);
         scoreLUIS = respLuis.dScore;
         scoreQnA = respQnA.dScore;
@@ -48,7 +63,22 @@ global class SM031_Nexmo
         
 		if (respLuis.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) && respQnA.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')))
 		{
-			TriggerDefaultFlow = true; // We will trigger Default Flow, if both scores are below set treshold
+            if (tran.detectedlang != visr.language__c) {
+                TriggerDefaultFlowChangeLang = true; // We will trigger Default Flow 2, if both scores are below set treshold and if user typed in different language
+            }
+            else if (visr.language__c == 'en') {
+                tran = SM080_Translate.translate0(mess.Text__c);
+                if (tran.detectedlang != 'en') {
+                    TriggerDefaultFlowChangeLang = true; // We will trigger Default Flow 2, if both scores are below set treshold and if user typed in different language
+                }
+                else {
+                    TriggerDefaultFlow = true; // We will trigger Default Flow, if both scores are below set treshold and if user typed in same language
+                }
+            }
+            else {
+                TriggerDefaultFlow = true; // We will trigger Default Flow, if both scores are below set treshold and if user typed in same language
+            }
+				
 		}
 		if (visr.CVCH__Had_First_Interaction__c == false)
 		{
@@ -91,6 +121,9 @@ global class SM031_Nexmo
 			MessageOptions mo = (MessageOptions) JSON.deserialize(visr.CVCH__Context__c, MessageOptions.class);
 			system.debug('GDPR MessageOptions=' + mo);
 			Option opt = mo.mOptions.get(mess.CVCH__Text__c);
+            if (opt == null) {
+            	opt = SM010_Utils.getOption(mo.mOptions, mess.CVCH__Text__c); // if input wasnt valid number of option - try to get it with label
+            }
 			if (opt != null && opt.sFlow != null)
 			{
 				if (opt.sName != null)
@@ -109,7 +142,7 @@ global class SM031_Nexmo
 			}
             triggeredFlow = 'GDPR Flow';
 		}
-		else if (!TriggerDefaultFlow && respLuis.dScore > respQnA.dScore && respLuis.sIntent == 'exit')
+		else if (!TriggerDefaultFlow && !TriggerDefaultFlowChangeLang && respLuis.dScore > respQnA.dScore && respLuis.sIntent == 'exit')
 		{
 			bProceeded = true;
 			Map<String, Object> params = new Map<String, Object>();
@@ -216,6 +249,9 @@ global class SM031_Nexmo
 			{
 				system.debug('getting option ' + mess.CVCH__Text__c + ' from ' + mo.mOptions);
 				Option opt = mo.mOptions.get(mess.CVCH__Text__c);
+                if (opt == null) {
+                    opt = SM010_Utils.getOption(mo.mOptions, mess.CVCH__Text__c); // if input wasnt valid number of option - try to get it with label
+                }
 				if (opt != null)
 				{
 					system.debug('found option ' + opt);
@@ -252,15 +288,18 @@ global class SM031_Nexmo
 		}
         if (!bProceeded && TriggerDefaultFlowChangeLang)
         {
-            bProceeded = true;
-            Map<String, Object> params = new Map<String, Object>();
-            params.put('visitorId', visr.id);
-            params.put('originalmessage', mess.Text__c);
-            params.put('language',tran.detectedlang);
-            params.put('visitorlanguage',visr.language__c);
-            Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow 2'), params);
-            flow.start();// trigger default flow
-            triggeredFlow = 'Default Flow 2';
+            //if (respLuis.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) || (respLuis.dScore >= Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) && !(respLuis.sIntent == 'directions' || respLuis.sIntent == 'category search' || respLuis.sIntent == 'outlet search' || respLuis.sIntent == 'special opening hours' || respLuis.sIntent == 'opt out' || respLuis.sIntent == 'ikea'))) {
+                bProceeded = true;
+                Map<String, Object> params = new Map<String, Object>();
+                params.put('visitorId', visr.id);
+                params.put('originalmessage', mess.Text__c);
+                params.put('language',tran.detectedlang);
+                params.put('visitorlanguage',visr.language__c);
+                Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow 2'), params);
+                flow.start();// trigger default flow 2
+                triggeredFlow = 'Default Flow 2';
+            //}
+            
         }
 		if (!bProceeded && TriggerDefaultFlow)
         {
@@ -268,8 +307,11 @@ global class SM031_Nexmo
             Map<String, Object> params = new Map<String, Object>();
             params.put('visitorId', visr.id);
             params.put('originalmessage', mess.Text__c);
+            Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow'), params);
+            flow.start();// trigger default flow
+            triggeredFlow = 'Default Flow';
             //VF-438
-            if (visr.language__c == 'en')
+            /*if (visr.language__c == 'en')
             {
                 tran = SM080_Translate.translate0(mess.Text__c);
                 if (visr.language__c != tran.detectedlang)
@@ -293,7 +335,7 @@ global class SM031_Nexmo
             	flow.start();// trigger default flow
                 triggeredFlow = 'Default Flow';
             }
-            
+            */
         }
 		if (!bProceeded)
 		{
@@ -308,6 +350,7 @@ global class SM031_Nexmo
 				Flow.Interview chat2aiflow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Chat2ai Flow'), params);
 				chat2aiflow.Start();
                 triggeredFlow = intentLUIS;
+                triggeredLUIS = true;
 			}
 			else
 					lret.add(new MessageOptions(respQnA));
@@ -319,6 +362,8 @@ global class SM031_Nexmo
 		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
 		mess.name = (string) m.get('id');
 		mess.CVCH__Text__c = (string) m.get('text');
+		if(mess.CVCH__Text__c == null || mess.CVCH__Text__c == '')
+			return null;
 		map<string, object> mFrom = (map<string, object>) m.get('from');
 		mess.CVCH__From__c = (string) mFrom.get('id');
 		mess.CVCH__From_Name__c = (string) mFrom.get('name');
@@ -486,6 +531,9 @@ global class SM031_Nexmo
 				if (lMess != null)
 					insert lMess;
                 SM010_Utils.insertConversation(scoreLUIS, scoreQnA, intentLUIS, triggeredFlow, visr.language__c, visr.id__c, mess0.Text__c, sOutput, visr.id, errMsg);
+                if (triggeredLUIS) { // if we got LUIS response for query - log Search Request for keyword, if present
+                    SM010_Utils.logSearchRequest(respLuis);
+                }
 			}
 			catch (Exception e)
 			{

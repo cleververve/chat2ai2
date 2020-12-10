@@ -7,6 +7,7 @@
           <option name="connectionName" value="chat2ai2" />
           <option name="connectionType" value="MDAPI" />
           <option name="defaultModuleName" value="chat2ai2" />
+          <option name="offlineSymbolTablePath" value="$PROJECT_DIR$/IlluminatedCloud/chat2ai2/OfflineSymbolTable.zip" />
         </IlluminatedCloudConnection>
       </list>
     </option>

@@ -82,6 +82,67 @@ public class SM010_Utils
         return ret;
     }
 
+    public static string getEmojiforNum(integer input) {
+        string emoji = null;
+            switch on input {
+                when 1 {
+					emoji = '1️⃣';
+                }
+                when 2 {
+					emoji = '2️⃣';
+                }
+                when 3 {
+					emoji = '3️⃣';
+                }
+                when 4 {
+					emoji = '4️⃣';
+                }
+                when 5 {
+					emoji = '5️⃣';
+                }
+                when 6 {
+					emoji = '6️⃣';
+                }
+                when 7 {
+					emoji = '7️⃣';
+                }
+                when 8 {
+					emoji = '8️⃣';
+                }
+                when 9 {
+					emoji = '9️⃣';
+                }
+                when 10 {
+					emoji = '🔟';
+                }
+                when else {
+                    emoji = String.valueOf(input);
+                }
+            }
+        return emoji;
+    }
+    
+    public static Option getOption(map<string,option> mOption, string input) {
+        Option ret = null;
+        if (input == null || input == '') {
+            return ret;
+        }
+        for (string index :mOption.keySet()) { 
+            Option opt = mOption.get(index);
+            if (opt.slabel == null) {
+                continue;
+            }
+            if (opt.slabel.containsIgnoreCase(input) && input.length() > 1) { // found match
+                ret = opt;
+            }
+            if (opt.slabel.equalsignorecase(input)) { // found exact match - returning this value immediately
+                ret = opt;
+                break;
+            }
+        }
+        return ret;
+    }
+    
     public static void insertConversation(decimal scoreLUIS, decimal scoreQnA, string intentLUIS, string triggeredFlow, string language, string phone, string input, string output, id visitorId, string errMsg)
     {
         Conversation__c conv = new Conversation__c();
@@ -116,6 +177,99 @@ public class SM010_Utils
             return;
         }
         
+    }
+    
+    public static void logSearchRequest(SM080_LUIS.LuisResponse respLuis) {
+        //if (respLuis.sIntent != 'category search' && respLuis.sIntent != 'outlet search' && respLuis.sIntent != 'ikea') {
+        //    return;
+        //}
+        string keyword1 = '';//found shop
+        string keyword2 = '';//found item
+        string keyword3 = '';//found item from fashion
+        Map<string, object> mEntities = new map<string, object>();
+        string entities = respLuis.getEntities();
+        if (entities != null && entities != '') {
+            mEntities = (Map<string, object>) JSON.deserializeUntyped(respLuis.getEntities());
+        } else {
+            return;
+        }
+        
+        if (mEntities.get('shops') != null)
+			keyword1 = String.valueOf(((list<object>) mEntities.get('shops'))[0]);
+		if (mEntities.get('item') != null)
+			keyword2 = String.valueOf(((list<object>) mEntities.get('item'))[0]);
+        if (mEntities.get('fashion men') != null)
+            keyword3 = String.valueOf(((list<object>) mEntities.get('fashion men'))[0]);
+        else if (mEntities.get('fashion women') != null)
+            keyword3 = String.valueOf(((list<object>) mEntities.get('fashion women'))[0]);
+        else if (mEntities.get('fashion kids') != null)
+            keyword3 = string.valueOf(((list<object>) mEntities.get('fashion kids'))[0]);
+        
+        if (keyword1 == keyword2) {
+            keyword2 = '';
+        }
+        if (keyword1 == keyword3) {
+            keyword3 = '';
+        }
+        if (keyword2 == keyword3) {
+            keyword3 = '';
+        }
+
+        list<Search_Request__c> lIns = new list<Search_Request__c>();
+        list<Search_Request__c> lUpd = new list<Search_Request__c>();
+        // then, if we have keywords, log search requests        
+        
+        if (keyword1 != '' && keyword1 != null) { // shop request
+            Search_Request__c SR = new Search_Request__c();
+            list<Search_Request__c> lSearch = new list<Search_Request__c>();
+            lSearch = [select id, count__c, name from Search_Request__c where name =:keyword1];
+            if (lSearch.isEmpty()) {
+                SR.name = keyword1;
+                SR.count__c = 1;
+                lIns.add(SR);
+            } else {
+                SR = lSearch[0];
+                SR.count__c++;
+                lUpd.add(SR);
+            }
+        }
+        
+        if (keyword2 != '' && keyword2 != null) { // item request
+            Search_Request__c SR = new Search_Request__c();
+            list<Search_Request__c> lSearch = new list<Search_Request__c>();
+            lSearch = [select id, count__c, name from Search_Request__c where name =:keyword2];
+            if (lSearch.isEmpty()) {
+                SR.name = keyword2;
+                SR.count__c = 1;
+                lIns.add(SR);
+            } else {
+                SR = lSearch[0];
+                SR.count__c++;
+                lUpd.add(SR);
+            }
+        }
+        
+        if (keyword3 != '' && keyword3 != null) { // fashion item request
+            Search_Request__c SR = new Search_Request__c();
+            list<Search_Request__c> lSearch = new list<Search_Request__c>();
+            lSearch = [select id, count__c, name from Search_Request__c where name =:keyword3];
+            if (lSearch.isEmpty()) {
+                SR.name = keyword3;
+                SR.count__c = 1;
+                lIns.add(SR);
+            } else {
+                SR = lSearch[0];
+                SR.count__c++;
+                lUpd.add(SR);
+            }
+        }
+        
+        if (!lIns.isEmpty()) {
+            insert lIns;
+        }
+        if (!lUpd.isEmpty()) {
+            update lUpd;
+        }
     }
     
 //
@@ -246,20 +400,21 @@ public class SM010_Utils
     public static MTranslation translateAPI0(string str)
     {
         MTranslation tran = new MTranslation();
-        
-        string sKey = getKey(str);
-        if(sKey.length()>254)
-            return null;
-        list<Translation__c> sObj = [select Id, key__c, en__c, DetectedLang__c from Translation__c where key__c = :sKey and API_Translation__c = true];
-
-        if(!sObj.isEmpty())
+        if(str != null)
         {
-            Translation__c tr = (Translation__c)sObj[0];
-            tran.text = str;
-            tran.detectedlang = tr.DetectedLang__c;
-            tran.translation = tr.en__c;
+            string sKey = getKey(str);
+            if(sKey.length()>254)
+                return null;
+            list<Translation__c> sObj = [select Id, key__c, en__c, DetectedLang__c from Translation__c where key__c = :sKey and API_Translation__c = true];
+
+            if(!sObj.isEmpty())
+            {
+                Translation__c tr = (Translation__c)sObj[0];
+                tran.text = str;
+                tran.detectedlang = tr.DetectedLang__c;
+                tran.translation = tr.en__c;
+            }
         }
-        
         return tran;
     }
     public static void addTranslationAPI0(MTranslation tran)

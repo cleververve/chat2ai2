@@ -19,7 +19,10 @@ global class Option
 	public integer iNumber;
 	public string getBody()
 	{
-		return ''+'*'+iNumber+')* '+sLabel;
+        //string body = '';
+        //body = SM010_Utils.getEmojiforNum(iNumber);
+        //return body+' '+sLabel;
+		return ''+'*'+iNumber+'* - '+sLabel;
 	}
 	global Option()
 	{
