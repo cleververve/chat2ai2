@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>get_outlet_info</name>
+        <label>get outlet info</label>
+        <locationX>212</locationX>
+        <locationY>260</locationY>
+        <actionName>OutletInfo</actionName>
+        <actionType>apex</actionType>
+        <inputParameters>
+            <name>outletId</name>
+            <value>
+                <elementReference>outletId</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>visitorId</name>
+            <value>
+                <elementReference>visitorId</elementReference>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <apiVersion>49.0</apiVersion>
+    <interviewLabel>get outlet info {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>get outlet info</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>50</locationY>
+        <connector>
+            <targetReference>get_outlet_info</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>outletId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>visitorId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+</Flow>
