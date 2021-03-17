@@ -24,4 +24,13 @@ public with sharing class FlowUtilsTest
 		FlowUtils2.getEntityString(new list<FlowUtils2>{par});
 	}
 
+
+	@IsTest
+	public static void testIt3()
+	{
+		FlowUtils2 par = new FlowUtils2();
+		par.sEntities = '{"aaa":{"value":"Egypt"}}';
+		par.sEntityName = 'aaa';
+		FlowUtils2.getEntityString(new list<FlowUtils2>{par});
+	}
 }

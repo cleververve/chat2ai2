@@ -23,7 +23,7 @@ global class FlowSendWelcomeCarousel2
 			sids.add((id)inp.visitorId);
 		}
 		map<id,Visitor__c> mVis = new map<id,Visitor__c>(DM080_Visitor.getRecords(sids));*/
-		list<MessageOptions>lMess =new list<MessageOptions>();
+//		list<MessageOptions>lMess =new list<MessageOptions>();
 		for(FlowSendWelcomeCarousel2 inp: lParam)
 		{
 			MessageOptions mo = new MessageOptions();
@@ -36,7 +36,7 @@ global class FlowSendWelcomeCarousel2
 			mo.sMessage = inp.caption;
 			mo.async = inp.async;
 			SM042_NexmoOut2.sendComplexType(mo, inp.visphone, inp.ChatNumber);
-			lMess.add(mo);
+//			lMess.add(mo);
 
 			//Visitor__c vis = mVis.get((id)inp.visitorId);
 //			if(inp.async == null || inp.async == false)

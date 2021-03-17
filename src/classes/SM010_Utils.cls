@@ -1,4 +1,4 @@
-public class SM010_Utils 
+global class SM010_Utils
 {
 
     public class pageReturn
@@ -286,16 +286,16 @@ public class SM010_Utils
 //        return sRet;
 //    }
 //
-//    public static string getRestParam(string sParamName)
-//    {
-//        string sRet = (string)RestContext.request.params.get(sParamName);
-//        if(sRet == null)
-//            sRet = '';
-//        sRet = sRet.trim();
-//        if(sRet == 'null' || sRet == 'empty')
-//            sRet = '';
-//        return sRet;
-//    }
+    public static string getRestParam(string sParamName)
+    {
+        string sRet = (string)RestContext.request.params.get(sParamName);
+        if(sRet == null)
+            sRet = '';
+        sRet = sRet.trim();
+        if(sRet == 'null' || sRet == 'empty')
+            sRet = '';
+        return sRet;
+    }
 
 
     public static string getValue(string sName)
@@ -310,7 +310,7 @@ public class SM010_Utils
         return val.CVCH__Value__c;
     }
     
-    public static string getChat2aiValue(string sName)
+    global static string getChat2aiValue(string sName)
     {
         CVCH__Chat2ai__c val = CVCH__Chat2ai__c.getInstance(sName);
         if(val == null)
@@ -906,4 +906,54 @@ public class SM010_Utils
 
     }
 */
+
+    public static string encodeId(string sName)
+    {
+        long int1 = long.valueof('1'+sName.substring(4));
+        return toAlpha(int1);
+    }
+
+    public static string decodeId(string sEncoded,string prefix)
+    {
+        string str = ''+toInt(sEncoded);
+        return prefix +str.substring(1);
+    }
+
+    static string sStr = 'QWERTYUIPASDFGHJKLZXCVBNM123456789';
+    public static string toAlpha(long d)
+    {
+        string sRet = '';
+        long left = d;
+        integer len = sStr.length();
+        system.debug('len='+len);
+        while (left>0)
+        {
+            integer curDigit =integer.valueOf(math.mod(left,len));
+            //		system.debug('curDigit='+curDigit);
+            string sadd = sStr.substring(curDigit,curDigit+1);
+            //		system.debug('sadd='+sadd);
+            sRet = sRet+sadd;
+            left = Integer.valueOf( math.floor(left/len));
+        }
+        return sRet;
+    }
+
+    public static long toInt(string str)
+    {
+        integer len = sStr.length();
+
+        long ret=0;
+        integer strLen = str.length();
+        for(integer i=0; i<strLen; i++)
+        {
+            string sChar = str.substring(str.length()-i-1,str.length()-i);
+            //		system.debug(sChar);
+            integer idx = sStr.indexOf(sChar);
+            //		system.debug(idx);
+            ret*=len;
+            ret += idx;
+        }
+        return ret;
+    }
+
 }

@@ -1,0 +1,11 @@
+<!--
+-Author:         serhiivolynets
+-Date:           31.01.2021
+-Description:   
+-->
+<apex:page id="VFP_RuffleDraw" standardController="Ruffle_Draw__c" extensions="SM082_RuffleDraw"
+           action="{!onRun}">
+    <apex:form >
+        <apex:pageMessages />
+    </apex:form>
+</apex:page>

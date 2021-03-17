@@ -22,9 +22,13 @@ global class SM080_QnA
 	}
 	public static map<string, string> getHeaders()
 	{
+		CVCH__Chat2ai__c oAuth = CVCH__Chat2ai__c.getInstance('QnA Authorization');
+		string sAuth = 'EndpointKey 62b515e5-9377-4b3b-8d94-c236a49eeda9';
+		if(oAuth != null)
+			sAuth = oAuth.Value__c;
 		map<string, string> ret = new map<string, string>();
 		ret.put('Content-Type', 'application/json');
-		ret.put('Authorization', 'EndpointKey 62b515e5-9377-4b3b-8d94-c236a49eeda9');
+		ret.put('Authorization', sAuth);
 		return ret;
 	}
 	public static string getBody(string sPhrase, integer qnaid)

@@ -138,8 +138,7 @@ public class SM042_NexmoOut2 implements Queueable
 		if (async == true)
 		{
 			insert mess;
-			SM042_NexmoOut2 job = new SM042_NexmoOut2(mess.id);
-			System.enqueueJob(job);
+			sendOrEnqueueF(mess.id);
 		}
 		else
 		{

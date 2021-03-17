@@ -239,15 +239,14 @@ public class SM031_NexmoTEST {
 
         req.requestURI = '/services/apexrest/nexmo/';
         req.httpMethod = 'POST';
-        req.requestBody = getRequestBody('male');
+        req.requestBody = getRequestBody('20/01/2022');
         RestContext.request = req;
         RestContext.response = res;
 
         CVCH__Visitor__c v = createExistingVisitor('Full Access');
-        v.CVCH__Context__c = getVisitorContext('Input','gender__c');
+        v.CVCH__Context__c = getVisitorContext('Input','CVCH__Date__c');
 
         update v;
-        CVCH__Visitor__c vv;
         Test.startTest();
         SM031_Nexmo.getMessage();
         Test.stopTest();

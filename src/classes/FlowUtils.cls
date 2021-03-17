@@ -17,10 +17,22 @@ global class FlowUtils
 		list<string>lret = new list<string>();
 		for(getEntityParam param: lParam)
 		{
-			lret.add((string)getEntity(param));
+			string sRet = '';
+			object obj = getEntity(param);
+			try
+			{
+				map<string,object> mObj = (map<string,object>) obj;
+				sRet = ''+mObj.get('value');
+			}catch(Exception e)
+			{
+				sRet = ''+obj;
+			}
+			lret.add(sRet);
+
 		}
 		return lret;
 	}
+
 	
 	public static object getEntity(getEntityParam param)
 	{

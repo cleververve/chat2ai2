@@ -4,7 +4,7 @@ Date:           30.03.2020
 Description:
 **/
 
-public with sharing class SM003_Http
+global class SM003_Http
 {
 
     Public Static Integer TIMEOUT = 100000; // IMO-3716 // Default HTTP Timeout
@@ -34,7 +34,7 @@ public with sharing class SM003_Http
 		return request(url, method, headers, body, callType, recId,null);
 	}
 
-	Public static HttpResponse request(String url, String method, Map<String, String> headers, String body, string callType, string recId,string sMockName)
+	global static HttpResponse request(String url, String method, Map<String, String> headers, String body, string callType, string recId,string sMockName)
     {
 		Http h = new Http();
 		system.debug('request body is: '+body);
