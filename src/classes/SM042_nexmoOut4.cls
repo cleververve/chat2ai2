@@ -41,7 +41,36 @@ public with sharing class SM042_nexmoOut4
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
 		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyText(sTo, messageText,sFrom), 'NexmoOut3', null);
+	}
 
+
+	public static void sendCustom(string sTo,string sFrom, string messageText)
+	{
+		if (Test.isRunningTest())
+			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
+		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyCustom(sTo, messageText,sFrom), 'NexmoOutCustom', null);
+	}
+
+
+	public static string getBodyCustom(string sTo,string messageText,string sFrom)
+	{
+		map<string,object> mret = new map<string,object>();
+		map<string,string> mFrom = new map<string,string>();
+		mFrom.put('type','whatsapp');
+		mFrom.put('number',sFrom);
+		mret.put('from', mFrom);
+
+
+		map<string,string> mTo = new map<string,string>();
+		mTo.put('type','whatsapp');
+		mTo.put('number',sTo);
+		mret.put('to', mTo);
+		map<string,object> mMess = new map<string,object>();
+
+		mret.put('message',mMess);
+		mMess.put('content',JSON.deserializeUntyped(messageText));
+
+		return JSON.serialize(mret);//.replaceAll('%A9%','\r');//
 	}
 
 

@@ -38,6 +38,19 @@ public class RuffleDrawTests
 		Test.stopTest();
 	}
 
+	@IsTest
+	public static void testBatch2()
+	{
+		Ruffle_Draw__c r = [
+				select id
+				from Ruffle_Draw__c
+				limit 1
+		];
+		Test.startTest();
+		Database.executeBatch(new SM082_RaffleDrawBatch(r.Id));
+		Test.stopTest();
+	}
+
 
 	@IsTest
 	public static void testIt2()

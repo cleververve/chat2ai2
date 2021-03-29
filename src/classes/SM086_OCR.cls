@@ -35,6 +35,7 @@ global class SM086_OCR
 		@AuraEnabled @InvocableVariable global string check_number;
 		@AuraEnabled @InvocableVariable global string store_number;
 		@AuraEnabled @InvocableVariable global string notes;
+		@AuraEnabled @InvocableVariable global string barcode;
 	}
 
 
@@ -124,6 +125,15 @@ global class SM086_OCR
 		resp.is_duplicate = (integer) mResp.get('is_duplicate');
 		resp.ocr_text = (string) mResp.get('ocr_text');
 		resp.notes = (string) mResp.get('notes');
+		list<object> lbarcodes = (list<object>) mResp.get('barcodes');
+		if(lbarcodes != null)
+		{
+			for(object obj : lbarcodes)
+			{
+				map<string,object> mBar = (map<string,object>)obj;
+				resp.barcode = (string)mBar.get('data');
+			}
+		}
 
 //		resp.store_number=checknumber(resp.ocr_text,'DHFC');
 //		if(resp.store_number == null || resp.store_number =='')

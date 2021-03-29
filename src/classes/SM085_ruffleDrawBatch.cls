@@ -1,9 +1,8 @@
 /**
 Author:         serhiivolynets
 Date:           31.01.2021
-Description:   
+Description:
 **/
-
 global class SM085_ruffleDrawBatch implements
 				Schedulable
 {

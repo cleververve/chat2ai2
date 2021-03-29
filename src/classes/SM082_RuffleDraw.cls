@@ -6,36 +6,31 @@
 @RestResource(urlMapping='/rafleDraw/*')
 global class SM082_RuffleDraw
 {
-	global static void start(id drawId)
+	global static void start(Id drawId)
 	{
 		start2(drawId);
 	}
-	global static string start2(id drawId)
+	global static String start2(Id drawId)
 	{
-
 		Savepoint sp;
-		string sRet = '';
+		String sRet = '';
 		try
 		{
-
-
 			Ruffle_Draw__c rec =
 			[
-					SELECT id,CVCH__Winners__c,CVCH__Number_of_Winers_Created__c,CVCH__Type__c
+					SELECT Id,CVCH__Winners__c,CVCH__Number_of_Winers_Created__c,CVCH__Type__c
 					from Ruffle_Draw__c
-					where id = :drawId
+					where Id = :drawId
 			];
-			list<AggregateResult> lres = null;
+			List<AggregateResult> lres = null;
 
 			if (rec.CVCH__Type__c == 'Global')
 			{
 				lres =
 				[
-
-						SELECT count(id)
+						SELECT count(Id)
 						from Ruffle_Draw_Ticket__c
 						where
-//							Ruffle_Draw__c = :drawId and
 						CVCH__Won_Flag__c <> true and
 						CVCH__Status__c = 'Valid'
 				];
@@ -44,75 +39,72 @@ global class SM082_RuffleDraw
 			{
 				lres =
 				[
-						SELECT count(id)
+						SELECT count(Id)
 						from Ruffle_Draw_Ticket__c
 						where Ruffle_Draw__c = :drawId and CVCH__Won_Flag__c <> true and CVCH__Status__c = 'Valid'
 						group by Ruffle_Draw__c
 				];
 			}
-
-			sp = Database.setSavepoint();
-
-			if (lres.size() > 0)
+			Integer itickets = (Integer) lres[0].get('expr0');
+			if (itickets > 45000)
 			{
-				integer itickets = (integer) lres[0].get('expr0');
-				integer cnt = integer.valueOf(rec.CVCH__Winners__c) - integer.valueOf(rec.CVCH__Number_of_Winers_Created__c);
-				if (cnt > 90) cnt = 90;
+				Database.executeBatch(new SM082_RaffleDrawBatch(drawId));
+			}
+			else
+			{
+				List<Ruffle_Draw_Ticket__c> lTick ;
 
-				for (integer i = 0; i < cnt; i++)
+				if (rec.CVCH__Type__c == 'Global')
+				{
+					lTick =
+					[
+							SELECT Id
+							from Ruffle_Draw_Ticket__c
+							where
+							CVCH__Won_Flag__c <> true and
+							CVCH__Status__c = 'Valid'
+					];
+				}
+				else
+				{
+					lTick =
+					[
+							SELECT Id
+							from Ruffle_Draw_Ticket__c
+							where Ruffle_Draw__c = :drawId and CVCH__Won_Flag__c <> true and CVCH__Status__c = 'Valid'
+					];
+				}
+				sp = Database.setSavepoint();
+
+				Integer itickets = lTick.size();
+
+				Integer cnt = Integer.valueOf(rec.CVCH__Winners__c) - Integer.valueOf(rec.CVCH__Number_of_Winers_Created__c);
+				if (cnt > 90)
+					cnt = 90;
+				for (Integer i = 0; i < cnt; i++)
 				{
 					if (itickets <= 0) throw new MyException('Not enough candidates');
-					integer ind = Integer.valueof((Math.random() * itickets));
+					Integer ind = Integer.valueOf((Math.random() * itickets));
+
 					Ruffle_Draw_Ticket__c ticket = null;
-					if (rec.CVCH__Type__c == 'Global')
-					{
-						ticket =
-						[
-								select id
-								from Ruffle_Draw_Ticket__c
-								where
-//							Ruffle_Draw__c = :drawId and
-								Won_Flag__c <> true and
-								CVCH__Status__c = 'Valid'
-								limit 1
-								offset :ind
-						];
-					}
-					else
-					{
-						ticket =
-						[
-								select id
-								from Ruffle_Draw_Ticket__c
-								where
-								Ruffle_Draw__c = :drawId and
-								Won_Flag__c <> true and
-								CVCH__Status__c = 'Valid'
-								limit 1
-								offset :ind
-						];
-					}
+					ticket = lTick[ind];
 					ticket.CVCH__Ruffle_Draw_Won__c = drawId;
 					ticket.Won_Flag__c = true;
-					ticket.Winner_Number__c = i + 1 + integer.valueOf(rec.CVCH__Number_of_Winers_Created__c);
+					ticket.Winner_Number__c = i + 1 + Integer.valueOf(rec.CVCH__Number_of_Winers_Created__c);
 					update ticket;
 					itickets -= 1;
-//					if(true)
-//						throw new MyException('ha-ha-ha!');
 				}
 				rec.CVCH__Number_of_Winers_Created__c += cnt;
 				update rec;
 			}
-		}catch(MyException me)
+		}
+		catch (MyException me)
 		{
-			sRet = me.getMessage();
-			if(sp != null)
-				Database.rollback(sp);
-		}catch(Exception e)
+			sRet = me.getMessage();if (sp != null)Database.rollback(sp);
+		}
+		catch (Exception e)
 		{
-			sRet = e.getMessage()+ ' '+e.getStackTraceString();
-			if(sp != null)
-				Database.rollback(sp);
+			sRet = e.getMessage() + ' ' + e.getStackTraceString();if (sp != null)Database.rollback(sp);
 		}
 		return sRet;
 	}
@@ -128,18 +120,16 @@ global class SM082_RuffleDraw
 	{
 		try
 		{
-			string sError = SM082_RuffleDraw.start2(drawId);
-			if(sError != '')
+			String sError = SM082_RuffleDraw.start2(drawId);
+			if (sError != '')
 			{
-				ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR, sError));
-				return null;
+				ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, sError));return null;
 			}
 
 		}
 		catch (Exception e)
 		{
-			ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR, e.getMessage() + ' ' + e.getStackTraceString()));
-			return null;
+			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, e.getMessage() + ' ' + e.getStackTraceString()));return null;
 		}
 		return new PageReference('/' + drawId);
 	}
