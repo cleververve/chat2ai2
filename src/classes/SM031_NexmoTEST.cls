@@ -272,5 +272,14 @@ public class SM031_NexmoTEST {
         SM031_Nexmo.getMessage();
         Test.stopTest();
     }
+
+
+    @isTest
+    static void TestButton()
+    {
+        Test.startTest();
+        SM031_Nexmo.getMessage0('{"message_uuid":"5a6dbb4e-cde7-4664-a40f-81d5854a03c4","to":{"type":"whatsapp","number":"1234567890"},"from":{"type":"whatsapp","number":"380668657070"},"timestamp":"2021-05-19T09:12:44.151Z","message":{"content":{"type":"button","button":{"text":"Consent 1","payload":"Yes-Button-Payload"}}},"direction":"inbound"}');
+        Test.stopTest();
+    }
     
 }

@@ -142,6 +142,12 @@ global class SM010_Utils
         }
         return ret;
     }
+    public static set<string> lResponses = new set<string>();
+    public static void addResponse(object o)
+    {
+        string sResp = JSON.serialize(o);
+        lResponses.add(sResp);
+    }
     
     public static void insertConversation(decimal scoreLUIS, decimal scoreQnA, string intentLUIS, string triggeredFlow, string language, string phone, string input, string output, id visitorId, string errMsg)
     {
@@ -171,6 +177,9 @@ global class SM010_Utils
             conv.Input2__c = input;
             conv.visitor__c = visitorId;
             conv.triggered_flow__c= triggeredflow;
+            list<string>lResp = new list<string>();
+            lResp.addAll(lResponses);
+            conv.Responses__c = string.join(lResp,'; ');
             insert conv;
         }
         catch(Exception e){

@@ -9,6 +9,11 @@ global class SM089_Herc
 	@InvocableMethod(label='Herc' description='Herc')
 	global static void callHerc(list<HercInput> lInput)
 	{
+		CVCH__Chat2ai__c val = CVCH__Chat2ai__c.getInstance('Skip blockchain');
+		if(val != null && val.CVCH__Value__c == 'TRUE')
+			return;
+
+
 		set<string>lNumber = new set<string>();
 		for (HercInput inp : lInput)
 		{

@@ -130,6 +130,7 @@ public class SM042_NexmoOut2 implements Queueable
 
     public static void sendOrEnqueue(CVCH__NexmoMessage__c mess, Boolean async)
     {
+        SM010_Utils.addResponse(mess.FullText__c);
         system.debug(mess);
         if (async == true)
         {

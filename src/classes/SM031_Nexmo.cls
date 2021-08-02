@@ -15,7 +15,7 @@ global class SM031_Nexmo
 //		if(SM010_Utils.getChat2aiValue2('PROCEED ASYNC')=='TRUE' || Test.isRunningTest())
 //			proceedAsync (RestContext.request.requestBody.toString());
 //		else
-				getMessage0 (RestContext.request.requestBody.toString());
+		getMessage0 (RestContext.request.requestBody.toString());
 		return new list<CVCH__NexmoMessage__c>();
 	}
 
@@ -51,9 +51,18 @@ global class SM031_Nexmo
 			}
 		}
 
-
-		SM080_QnA.QnAResponse respQnA ;
-		if (mess.Text__c != null)
+		SM080_QnA.QnAResponse respQnA  = new SM080_QnA.QnAResponse();
+		respQnA.dScore = 0;
+		if (mess.CVCH__InputType__c == 'button')
+		{
+			respLuis = new SM080_LUIS.LuisResponse();
+			respLuis.sIntent = mess.Text__c;
+			respLuis.dScore = 100;
+			respQnA = new SM080_QnA.QnAResponse();
+			respQnA.dScore = 0;
+			mess.CVCH__Text__c = mess.CVCH__ImageURL__c;
+		}
+		else if (mess.Text__c != null)
 		{
 			if (visr.language__c != 'en' && !flowinput)
 			{
@@ -67,9 +76,13 @@ global class SM031_Nexmo
 
 			//system.debug('Translated input: ' + translatedText);
 			respLuis = SM080_LUIS.queryPhrase(translatedText, visr.CVCH__language__c);
-			respQnA = SM080_QnA.queryPhrase(translatedText, visr.CVCH__language__c);
+			if (visr.CVCH__GDPR_Consent__c != 'No Access')
+			{
+				respQnA = SM080_QnA.queryPhrase(translatedText, visr.CVCH__language__c);
+				scoreQnA = respQnA.dScore;
+			}
 			scoreLUIS = respLuis.dScore;
-			scoreQnA = respQnA.dScore;
+
 			intentLUIS = respLuis.sIntent;
 
 			if (respLuis.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) && respQnA.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')))
@@ -119,7 +132,7 @@ global class SM031_Nexmo
 				Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Welcome Flow'), params).Start();
 			triggeredFlow = 'Welcome Flow';
 		}
-		else if (visr.CVCH__GDPR_Consent__c == 'No Access' && (visr.CVCH__Context__c == '' || visr.CVCH__Context__c == null)) //Restrict Non-GDPR users
+		else if (apexGDPR() && visr.CVCH__GDPR_Consent__c == 'No Access' && (visr.CVCH__Context__c == '' || visr.CVCH__Context__c == null)) //Restrict Non-GDPR users
 		{
 			system.debug('No Access');
 			bProceeded = true;
@@ -130,7 +143,7 @@ global class SM031_Nexmo
 			Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('GDPR Flow'), params);
 			flow.start();
 		}
-		else if (visr.CVCH__GDPR_Consent__c == 'No Access' && visr.CVCH__Context__c != '' && visr.CVCH__Context__c != null)
+		else if (apexGDPR() && visr.CVCH__GDPR_Consent__c == 'No Access' && visr.CVCH__Context__c != '' && visr.CVCH__Context__c != null)
 		{
 			system.debug('start flow: GDPR Flow');
 			bProceeded = true;
@@ -270,10 +283,10 @@ global class SM031_Nexmo
 					if (fieldMap.get(mo.sFieldName).getDescribe().getType() == Schema.DisplayType.DATE)
 					{
 						Pattern pat = Pattern.compile('^\\d{1,2}\\/\\d{1,2}\\/\\d{4}$');
-						if(!pat.matcher(mess.Text__c).matches())
+						if (!pat.matcher(mess.Text__c).matches())
 						{
 							string dateEx = SM010_Utils.getChat2aiValue2('INVALID_DATE');
-							if(dateEx == '')
+							if (dateEx == '')
 								dateEx = 'Invalid date format. Please provide dd/MM/yyyy';
 							throw new MyException(dateEx);
 						}
@@ -419,6 +432,19 @@ else
 		}
 		return lret;
 	}
+
+	public static boolean apexGDPR()
+	{
+		boolean bRet = false;
+		Chat2ai__c val = Chat2ai__c.getInstance('ApexGDPR');
+		if (val != null)
+		{
+			bRet = (val.Value__c == 'TRUE');
+		}
+		if (Test.isRunningTest())
+			bRet = true;
+		return bRet;
+	}
 	global static CVCH__NexmoMessage__c getAzureMessage(Map<String, Object> m)
 	{
 		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
@@ -471,6 +497,11 @@ else
 		string messageText = (string) mcon.get('text');
 		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
 		mess.CVCH__InputType__c = (string) mcon.get('type');
+		System.debug(mcon);
+		if (mess.CVCH__InputType__c == 'button')
+		{
+			messageText = (string) ((map<string, object>) mCon.get('button')).get('payload');
+		}
 		if (mess.CVCH__InputType__c == 'image')
 		{
 			map<string, object> mImage = (map<string, object>) mcon.get('image');
@@ -484,8 +515,8 @@ else
 
 
 		mess.CVCH__Text__c = messageText;
-		if(mess.CVCH__Text__c != null)
-		mess.CVCH__Text__c = mess.CVCH__Text__c.replace('١','1').replace('٢','2').replace('٣','3').replace('٤','4').replace('٥','5').replace('٦','6').replace('٧','7').replace('٨','8').replace('٩','9').replace('٠','0');
+		if (mess.CVCH__Text__c != null)
+			mess.CVCH__Text__c = mess.CVCH__Text__c.replace('١', '1').replace('٢', '2').replace('٣', '3').replace('٤', '4').replace('٥', '5').replace('٦', '6').replace('٧', '7').replace('٨', '8').replace('٩', '9').replace('٠', '0');
 		mess.CVCH__Channel__c = sChannel;
 
 		mess.CVCH__From_Name__c = '';
@@ -501,7 +532,7 @@ else
 				where Name = :mess.name
 		];
 		if (!lold.isEmpty())
-			mess=null;
+			mess = null;
 		System.debug('parse.return ' + mess);
 		SM042_NexmoOut2.setInboundMessage(mess);
 		return mess;
@@ -515,19 +546,20 @@ else
 		if (!lVisitors.isEmpty())
 			ret = lVisitors[0];
 		else
-				ret = new CVCH__Visitor__c(CVCH__Id__c = sid, CVCH__Context__c = null, CVCH__Chat_Number__c = sChatNumber, CVCH__Chanel__c = channel, id = null, CVCH__language__c=null);
+				ret = new CVCH__Visitor__c(CVCH__Id__c = sid, CVCH__Context__c = null, CVCH__Chat_Number__c = sChatNumber, CVCH__Chanel__c = channel, id = null, CVCH__language__c = null);
 		return ret;
 	}
 
 
-	public static void sendError0(CVCH__NexmoMessage__c mess0, string sErrorMessage,CVCH__Visitor__c vis)
+	public static void sendError0(CVCH__NexmoMessage__c mess0, string sErrorMessage, CVCH__Visitor__c vis)
 	{
-		if(vis != null && vis.CVCH__language__c != '' && vis.CVCH__language__c != null && vis.CVCH__language__c != 'en')
+		if (vis != null && vis.CVCH__language__c != '' && vis.CVCH__language__c != null && vis.CVCH__language__c != 'en')
 		{
 			try
 			{
-				sErrorMessage = SM010_Utils.translate(sErrorMessage,vis.CVCH__language__c);
-			}catch(Exception e)
+				sErrorMessage = SM010_Utils.translate(sErrorMessage, vis.CVCH__language__c);
+			}
+			catch (Exception e)
 			{
 
 			}
@@ -538,33 +570,34 @@ else
 			SM042_NexmoOut2.sendText(mess0.CVCH__From__c, sErrorMessage, mess0.CVCH__To__c);
 		}
 	}
-	public static void sendError(CVCH__NexmoMessage__c mess0, string sErrorMessage,CVCH__Visitor__c vis)
+	public static void sendError(CVCH__NexmoMessage__c mess0, string sErrorMessage, CVCH__Visitor__c vis)
 	{
-		if(sErrorMessage.contains('FIELD_CUSTOM_VALIDATION_EXCEPTION'))
+		if (sErrorMessage.contains('FIELD_CUSTOM_VALIDATION_EXCEPTION'))
 		{
-			sErrorMessage =sErrorMessage.substring(sErrorMessage.indexOf('FIELD_CUSTOM_VALIDATION_EXCEPTION')+'FIELD_CUSTOM_VALIDATION_EXCEPTION'.length()+2);
-			if(sErrorMessage.contains('Class.'))
+			sErrorMessage = sErrorMessage.substring(sErrorMessage.indexOf('FIELD_CUSTOM_VALIDATION_EXCEPTION') + 'FIELD_CUSTOM_VALIDATION_EXCEPTION'.length() + 2);
+			if (sErrorMessage.contains('Class.'))
 			{
-				sErrorMessage =sErrorMessage.substring(0,sErrorMessage.indexOf('Class.'));
+				sErrorMessage = sErrorMessage.substring(0, sErrorMessage.indexOf('Class.'));
 			}
 
-			if(sErrorMessage.contains(': []'))
+			if (sErrorMessage.contains(': []'))
 			{
-				sErrorMessage =sErrorMessage.substring(0,sErrorMessage.indexOf(': []'));
+				sErrorMessage = sErrorMessage.substring(0, sErrorMessage.indexOf(': []'));
 			}
-			if(sErrorMessage.contains('[]'))
+			if (sErrorMessage.contains('[]'))
 			{
-				sErrorMessage =sErrorMessage.substring(0,sErrorMessage.indexOf('[]'));
+				sErrorMessage = sErrorMessage.substring(0, sErrorMessage.indexOf('[]'));
 			}
 		}
 		else if (SM010_Utils.getChat2aiValue2('SEND DEV ERRORS') != 'TRUE')
 			sErrorMessage = 'Oops, something went wrong. Please try again.';
-		if(vis != null && vis.CVCH__language__c != '' && vis.CVCH__language__c != null && vis.CVCH__language__c != 'en')
+		if (vis != null && vis.CVCH__language__c != '' && vis.CVCH__language__c != null && vis.CVCH__language__c != 'en')
 		{
 			try
 			{
-				sErrorMessage = SM010_Utils.translate(sErrorMessage,vis.CVCH__language__c);
-			}catch(Exception e)
+				sErrorMessage = SM010_Utils.translate(sErrorMessage, vis.CVCH__language__c);
+			}
+			catch (Exception e)
 			{
 			}
 		}
@@ -576,7 +609,7 @@ else
 	@Future(Callout = true)
 	global static void proceedAsync(string jsonbody)
 	{
-		getMessage0( jsonbody);
+		getMessage0(jsonbody);
 
 	}
 
@@ -623,15 +656,15 @@ else
 		}
 		catch (MyException e)
 		{
-			system.debug('error: '+e);
-			sendError0(mess0, e.getMessage(),visr);
+			system.debug('error: ' + e);
+			sendError0(mess0, e.getMessage(), visr);
 			if (Test.isRunningTest())
 				throw e;
 		}
 		catch (Exception e)
 		{
-			system.debug('error: '+e);
-			sendError(mess0, '' + e.getLineNumber() + ' ' + e.getMessage() + ' ' + e.getStackTraceString(),visr);
+			system.debug('error: ' + e);
+			sendError(mess0, '' + e.getLineNumber() + ' ' + e.getMessage() + ' ' + e.getStackTraceString(), visr);
 			if (Test.isRunningTest())
 				throw e;
 		}

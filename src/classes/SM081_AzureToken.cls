@@ -8,7 +8,6 @@ public class SM081_AzureToken
 {
 	public static string token;
 	public static string url = 'callout:Azure_bot_token';
-
 	public static string getToken0()
 	{
 //		string sClientId = '1340ab55-ba59-46d9-a3c1-fe9d46b1954e';
@@ -32,6 +31,4 @@ public class SM081_AzureToken
 			token = getToken0();
 		return token;
 	}
-	
-
 }

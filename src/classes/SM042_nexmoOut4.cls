@@ -174,6 +174,7 @@ public with sharing class SM042_nexmoOut4
 		mCont.put('file', mFile);
 		mMess.put('content',mCont);
 		mret.put('message', mMess);
+		SM010_Utils.addResponse(mCont);
 		return JSON.serialize(mret);
 	}
     

@@ -636,6 +636,10 @@
                       <option name="entries">
                         <list>
                           <MetadataEntry>
+                            <option name="name" value="Cancel" />
+                            <option name="selected" value="true" />
+                          </MetadataEntry>
+                          <MetadataEntry>
                             <option name="name" value="CarouselItem_to_JSON" />
                             <option name="selected" value="true" />
                           </MetadataEntry>
@@ -645,6 +649,14 @@
                           </MetadataEntry>
                           <MetadataEntry>
                             <option name="name" value="get_outlet_info" />
+                            <option name="selected" value="true" />
+                          </MetadataEntry>
+                          <MetadataEntry>
+                            <option name="name" value="LUIS" />
+                            <option name="selected" value="true" />
+                          </MetadataEntry>
+                          <MetadataEntry>
+                            <option name="name" value="mt" />
                             <option name="selected" value="true" />
                           </MetadataEntry>
                           <MetadataEntry>
@@ -661,6 +673,10 @@
                           </MetadataEntry>
                           <MetadataEntry>
                             <option name="name" value="send_carousel" />
+                            <option name="selected" value="true" />
+                          </MetadataEntry>
+                          <MetadataEntry>
+                            <option name="name" value="send_message" />
                             <option name="selected" value="true" />
                           </MetadataEntry>
                           <MetadataEntry>

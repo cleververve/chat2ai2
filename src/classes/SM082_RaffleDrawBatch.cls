@@ -12,7 +12,7 @@ global class SM082_RaffleDrawBatch
 	string stype;
 	integer actualTicket;
 	set<integer>sWinners = new set<integer>();
-	Ruffle_Draw__c rec;
+	CVCH__Ruffle_Draw__c rec;
 	integer winnersCreated =0;
 	global SM082_RaffleDrawBatch(id drawId)
 	{
@@ -21,7 +21,7 @@ global class SM082_RaffleDrawBatch
 		rec =
 		[
 				SELECT Id,CVCH__Winners__c,CVCH__Number_of_Winers_Created__c,CVCH__Type__c
-				from Ruffle_Draw__c
+				from CVCH__Ruffle_Draw__c
 				where Id = :drawId
 		];
 		List<AggregateResult> lres = null;
@@ -31,7 +31,7 @@ global class SM082_RaffleDrawBatch
 			lres =
 			[
 					SELECT count(Id)
-					from Ruffle_Draw_Ticket__c
+					from CVCH__Ruffle_Draw_Ticket__c
 					where
 					CVCH__Won_Flag__c <> true and
 					CVCH__Status__c = 'Valid'
@@ -42,9 +42,9 @@ global class SM082_RaffleDrawBatch
 			lres =
 			[
 					SELECT count(Id)
-					from Ruffle_Draw_Ticket__c
-					where Ruffle_Draw__c = :drawId and CVCH__Won_Flag__c <> true and CVCH__Status__c = 'Valid'
-					group by Ruffle_Draw__c
+					from CVCH__Ruffle_Draw_Ticket__c
+					where CVCH__Ruffle_Draw__c = :drawId and CVCH__Won_Flag__c <> true and CVCH__Status__c = 'Valid'
+					group by CVCH__Ruffle_Draw__c
 			];
 		}
 		itickets = (Integer) lres[0].get('expr0');
@@ -71,26 +71,26 @@ global class SM082_RaffleDrawBatch
 
 	global Database.QueryLocator start(Database.BatchableContext BC)
 	{
-		string sQuery = 'SELECT Id from Ruffle_Draw_Ticket__c where CVCH__Won_Flag__c <> true and CVCH__Status__c = \'Valid\'';
+		string sQuery = 'SELECT Id from CVCH__Ruffle_Draw_Ticket__c where CVCH__Won_Flag__c <> true and CVCH__Status__c = \'Valid\'';
 
 		if (sType != 'Global')
-			sQuery = sQuery + ' AND  Ruffle_Draw__c = :drawId';
+			sQuery = sQuery + ' AND  CVCH__Ruffle_Draw__c = :drawId';
 		return Database.getQueryLocator(sQuery);
 
 	}
 
 	global void execute(Database.BatchableContext BC, List<sobject> lRec)
 	{
-		map<id,Ruffle_Draw_Ticket__c>mUpd = new map<id,Ruffle_Draw_Ticket__c>();
+		map<id,CVCH__Ruffle_Draw_Ticket__c>mUpd = new map<id,CVCH__Ruffle_Draw_Ticket__c>();
 
 		for (sobject obj : lRec)
 		{
-			Ruffle_Draw_Ticket__c ticket = (Ruffle_Draw_Ticket__c) obj;
+			CVCH__Ruffle_Draw_Ticket__c ticket = (CVCH__Ruffle_Draw_Ticket__c) obj;
 			if (sWinners.contains(actualTicket))
 			{
-				ticket.Won_Flag__c = true;
-				ticket.Winner_Number__c = (++winnersCreated) + Integer.valueOf(rec.CVCH__Number_of_Winers_Created__c);
-				ticket.Ruffle_Draw_Won__c  = rec.Id;
+				ticket.CVCH__Won_Flag__c = true;
+				ticket.CVCH__Winner_Number__c = (++winnersCreated) + Integer.valueOf(rec.CVCH__Number_of_Winers_Created__c);
+				ticket.CVCH__Ruffle_Draw_Won__c  = rec.Id;
 				mUpd.put(ticket.Id,ticket);
 
 			}
