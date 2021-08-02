@@ -13,7 +13,7 @@ global class SM089_Herc
 		if(val != null && val.CVCH__Value__c == 'TRUE')
 			return;
 
-
+		
 		set<string>lNumber = new set<string>();
 		for (HercInput inp : lInput)
 		{

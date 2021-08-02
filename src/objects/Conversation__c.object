@@ -269,6 +269,16 @@
         <type>Phone</type>
     </fields>
     <fields>
+        <fullName>Responses__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Responses</label>
+        <length>130768</length>
+        <trackTrending>false</trackTrending>
+        <type>LongTextArea</type>
+        <visibleLines>3</visibleLines>
+    </fields>
+    <fields>
         <fullName>Score__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>
