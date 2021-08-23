@@ -232,7 +232,6 @@ global class SM031_Nexmo
 			if (mo.sType == 'Input')
 			{
 				bProceeded = true;
-				string input;
 				Map<string, object> mEntities = new map<string, object>();
 				if (respLuis.getentities() != null && respLuis.getentities() != '')
 				{
