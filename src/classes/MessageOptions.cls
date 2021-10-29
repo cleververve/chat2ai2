@@ -179,6 +179,7 @@ global class MessageOptions implements iMessage
 		SM010_Utils.saveTran();
 	}
 
+
 	public MessageOptions(SM080_QnA.QnAResponse respQnA)
 	{
 		this.sMessage = respQnA.sAnswer;
