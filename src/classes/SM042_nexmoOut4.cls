@@ -4,9 +4,9 @@ Date:           22.06.2020
 Description:   
 **/
 
-public with sharing class SM042_nexmoOut4
+global class SM042_nexmoOut4
 {
-	public static map<string,string> getAuthHeader()
+	global static map<string,string> getAuthHeader()
 	{
 		map<string,string> headers = new map <string,string>();
 		string token = JWT.getAccessToken();
@@ -19,7 +19,7 @@ public with sharing class SM042_nexmoOut4
 
 
 	@future(CallOut=true)
-	public static void sendTextAsync(string sTo, string messageText,string sFrom,string sAuth)
+	global static void sendTextAsync(string sTo, string messageText,string sFrom,string sAuth)
 	{
 		try
 		{
@@ -36,23 +36,29 @@ public with sharing class SM042_nexmoOut4
 		}
 	}
 
-	public static void sendText(string sTo,string sFrom, string messageText)
+	global static void sendText(string sTo,string sFrom, string messageText)
 	{
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyText(sTo, messageText,sFrom), 'NexmoOut3', null);
+
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyText(sTo, messageText,sFrom), 'NexmoOut3', null);
 	}
 
-
-	public static void sendCustom(string sTo,string sFrom, string messageText)
+	global static void sendCustom(string sTo,string sFrom, string messageText)
 	{
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyCustom(sTo, messageText,sFrom), 'NexmoOutCustom', null);
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyCustom(sTo, messageText,sFrom), 'NexmoOutCustom', null);
 	}
 
+	global static void sendCustom2(string sTo,string sFrom, string messageText)
+	{
+		if (Test.isRunningTest())
+			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURLV1(), 'POST', getAuthHeader(), getBodyCustom2(sTo, messageText,sFrom), 'NexmoOutCustom2', null);
+	}
 
-	public static string getBodyCustom(string sTo,string messageText,string sFrom)
+	global static string getBodyCustom(string sTo,string messageText,string sFrom)
 	{
 		map<string,object> mret = new map<string,object>();
 		map<string,string> mFrom = new map<string,string>();
@@ -73,8 +79,18 @@ public with sharing class SM042_nexmoOut4
 		return JSON.serialize(mret);//.replaceAll('%A9%','\r');//
 	}
 
+	global static string getBodyCustom2(string sTo,string messageText,string sFrom)
+	{
+		map<string,object> mret = new map<string,object>();
+		mRet.put('custom',JSON.deserializeUntyped(messageText));
+		mRet.put('message_type','custom');
+		mret.put('channel','whatsapp');
+		mret.put('to',sTo);
+		mret.put('from', sFrom);
+		return JSON.serialize(mret);//.replaceAll('%A9%','\r');//
+	}
 
-	public static string getBodyText(string sTo,string messageText,string sFrom)
+	global static string getBodyText(string sTo,string messageText,string sFrom)
 	{
 		map<string,object> mret = new map<string,object>();
 		map<string,string> mFrom = new map<string,string>();
@@ -103,20 +119,20 @@ public with sharing class SM042_nexmoOut4
 	}
 
 	@future(callout=true)
-    public static void sendImageAsync(string sTo,string sFrom, string sImageURL)
+	global static void sendImageAsync(string sTo,string sFrom, string sImageURL)
     {
         sendImage(sTo,sFrom,sImageURL);
     }
-    
-	public static void sendImage(string sTo,string sFrom, string sImageURL)
+
+	global static void sendImage(string sTo,string sFrom, string sImageURL)
 	{
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyImage(sTo, sImageURL,sFrom), 'NexmoOut2', null);
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyImage(sTo, sImageURL,sFrom), 'NexmoOut2', null);
 
 	}
 
-	public static string getBodyImage(string sTo,string imageURL,string sFrom)
+	global static string getBodyImage(string sTo,string imageURL,string sFrom)
 	{
 		map<string,object> mret = new map<string,object>();
 		map<string,string> mFrom = new map<string,string>();
@@ -142,16 +158,16 @@ public with sharing class SM042_nexmoOut4
 	}
 
     @future(Callout=true)
-	public static void sendFile(string sTo,string sFrom, string sFile,string sCaption)
+	global static void sendFile(string sTo,string sFrom, string sFile,string sCaption)
 	{
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyFile(sTo, sFile,sCaption,sFrom), 'NexmoOut2', null);
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyFile(sTo, sFile,sCaption,sFrom), 'NexmoOut2', null);
 
 	}
 
 
-	public static string getBodyFile(string sTo,string fileURL,string sCaption,string sFrom)
+	global static string getBodyFile(string sTo,string fileURL,string sCaption,string sFrom)
 	{
 		map<string,object> mret = new map<string,object>();
 		map<string,string> mFrom = new map<string,string>();
@@ -179,15 +195,15 @@ public with sharing class SM042_nexmoOut4
 	}
     
     @future(Callout=true)
-    public static void sendVideo(string sTo,string sFrom, string sVideoURL, string sCaption)
+	global static void sendVideo(string sTo,string sFrom, string sVideoURL, string sCaption)
 	{
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyVideo(sTo, sVideoURL, sCaption, sFrom), 'NexmoOut2', null);
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyVideo(sTo, sVideoURL, sCaption, sFrom), 'NexmoOut2', null);
 
 	}
-    
-    public static string getBodyVideo(string sTo,string VideoURL,string caption, string sFrom)
+
+	global static string getBodyVideo(string sTo,string VideoURL,string caption, string sFrom)
 	{
 		map<string,object> mret = new map<string,object>();
 		map<string,string> mFrom = new map<string,string>();
@@ -216,7 +232,7 @@ public with sharing class SM042_nexmoOut4
 //	{
 //		if (Test.isRunningTest())
 //			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-//		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getMDMbody(sTo, sFrom,snamespace,sTemplate), 'NexmoOut2MDM', null);
+//		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getMDMbody(sTo, sFrom,snamespace,sTemplate), 'NexmoOut2MDM', null);
 //
 //	}
 
@@ -260,7 +276,7 @@ public with sharing class SM042_nexmoOut4
 //	{
 //		if (Test.isRunningTest())
 //			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-//		Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyButton(sTo,sFrom,  payload,text), 'NexmoOut2', null);
+//		Object o = SM003_Http.request(SM042_NexmoOut2.geetNexmoURL(), 'POST', getAuthHeader(), getBodyButton(sTo,sFrom,  payload,text), 'NexmoOut2', null);
 //
 //	}
 

@@ -36,6 +36,7 @@ global class SM086_OCR
 		@AuraEnabled @InvocableVariable global string store_number;
 		@AuraEnabled @InvocableVariable global string notes;
 		@AuraEnabled @InvocableVariable global string barcode;
+		@AuraEnabled @InvocableVariable global string id;
 	}
 
 
@@ -125,6 +126,7 @@ global class SM086_OCR
 		resp.is_duplicate = (integer) mResp.get('is_duplicate');
 		resp.ocr_text = (string) mResp.get('ocr_text');
 		resp.notes = (string) mResp.get('notes');
+		resp.id =  ''+(integer) mResp.get('id');
 		list<object> lbarcodes = (list<object>) mResp.get('barcodes');
 		if(lbarcodes != null)
 		{

@@ -8,7 +8,9 @@ global class FlowInputMessage
 {
 	@AuraEnabled @InvocableVariable global string sMessage;
 	@AuraEnabled @InvocableVariable global string sFieldName;
+	@AuraEnabled @InvocableVariable global string sParamName;
 	@AuraEnabled @InvocableVariable global string sFlow;
+	@AuraEnabled @InvocableVariable global string flowParamsJSON;
     @AuraEnabled @InvocableVariable global string sConfirmMessage;
     @AuraEnabled @InvocableVariable global string type;
 	@AuraEnabled @InvocableVariable global id visitorId;

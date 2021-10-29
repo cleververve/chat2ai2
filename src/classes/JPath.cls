@@ -3,7 +3,7 @@
 * Created Date: 4/12/2016
 * Purpose : Use xpath type of expressions in order to select json nodes.
 */
-public class JPath
+global class JPath
 {
 	string rawJson;
 
@@ -306,7 +306,7 @@ context.toSearch = context.processingPath;*/
 	/*
 * PUBLIC STATIC METHODS
 */
-	public static object get0(object untypedJson, string path)
+	global static object get0(object untypedJson, string path)
 	{
 		JPathContext context = new JPathContext(path);
 

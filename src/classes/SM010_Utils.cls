@@ -82,45 +82,45 @@ global class SM010_Utils
         return ret;
     }
 
-    public static string getEmojiforNum(integer input) {
-        string emoji = null;
-            switch on input {
-                when 1 {
-					emoji = '1️⃣';
-                }
-                when 2 {
-					emoji = '2️⃣';
-                }
-                when 3 {
-					emoji = '3️⃣';
-                }
-                when 4 {
-					emoji = '4️⃣';
-                }
-                when 5 {
-					emoji = '5️⃣';
-                }
-                when 6 {
-					emoji = '6️⃣';
-                }
-                when 7 {
-					emoji = '7️⃣';
-                }
-                when 8 {
-					emoji = '8️⃣';
-                }
-                when 9 {
-					emoji = '9️⃣';
-                }
-                when 10 {
-					emoji = '🔟';
-                }
-                when else {
-                    emoji = String.valueOf(input);
-                }
-            }
-        return emoji;
-    }
+//    public static string getEmojiforNum(integer input) {
+//        string emoji = null;
+//            switch on input {
+//                when 1 {
+//					emoji = '1️⃣';
+//                }
+//                when 2 {
+//					emoji = '2️⃣';
+//                }
+//                when 3 {
+//					emoji = '3️⃣';
+//                }
+//                when 4 {
+//					emoji = '4️⃣';
+//                }
+//                when 5 {
+//					emoji = '5️⃣';
+//                }
+//                when 6 {
+//					emoji = '6️⃣';
+//                }
+//                when 7 {
+//					emoji = '7️⃣';
+//                }
+//                when 8 {
+//					emoji = '8️⃣';
+//                }
+//                when 9 {
+//					emoji = '9️⃣';
+//                }
+//                when 10 {
+//					emoji = '🔟';
+//                }
+//                when else {
+//                    emoji = String.valueOf(input);
+//                }
+//            }
+//        return emoji;
+//    }
     
     public static Option getOption(map<string,option> mOption, string input) {
         Option ret = null;

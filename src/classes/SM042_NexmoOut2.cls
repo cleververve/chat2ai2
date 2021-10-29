@@ -1,11 +1,30 @@
-public class SM042_NexmoOut2 implements Queueable
+global class SM042_NexmoOut2 implements Queueable
 {
-    public id messId;
-    public SM042_NexmoOut2(id messId0)
+
+    global id messId;
+
+    global static string getNexmoURL()
+    {
+        string sRet = SM010_Utils.getChat2aiValue2('Nexmo URL');
+        if(sRet == '' || sRet == null)
+            sRet = 'https://api.nexmo.com/v0.1/messages';
+        return sRet;
+    }
+
+    global static string getNexmoURLV1()
+    {
+        string sRet = SM010_Utils.getChat2aiValue2('Nexmo URLV1');
+        if(sRet == '' || sRet == null)
+            sRet = 'https://api.nexmo.com/v1/messages';
+        return sRet;
+    }
+
+
+    global SM042_NexmoOut2(id messId0)
     {
         messId = messId0;
     }
-    public static void pause(integer delayInMilliseconds)
+    global static void pause(integer delayInMilliseconds)
     {
         Long startingTime = System.now().getTime(); // Num milliseconds since Jan 1 1970
         while (System.now().getTime() - startingTime < delayInMilliseconds)
@@ -14,12 +33,12 @@ public class SM042_NexmoOut2 implements Queueable
         }
     }
 
-    public void execute(QueueableContext context)
+    global void execute(QueueableContext context)
     {
         SM042_NexmoOut2.executeF(messId);
     }
 
-    public static void send(CVCH__NexmoMessage__c mess)
+    global static void send(CVCH__NexmoMessage__c mess)
     {
         system.debug(mess);
         if (mess.CVCH__Type__c == 'Carousel')
@@ -29,7 +48,6 @@ public class SM042_NexmoOut2 implements Queueable
             {
                 SM081_Azure.sendCarousel(mess, mo.lItems);
             }
-
             else
             {
                 if (mo.sMessage != null && mo.sMessage != '')
@@ -55,7 +73,12 @@ public class SM042_NexmoOut2 implements Queueable
         } else if (mess.CVCH__Type__c == 'Custom')
         {
             SM042_nexmoOut4.sendCustom(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c);
-        } else if (mess.CVCH__Channel__c == 'Azure')
+        }
+        else if (mess.CVCH__Type__c == 'Custom2')
+        {
+            SM042_nexmoOut4.sendCustom2(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c);
+        }
+        else if (mess.CVCH__Channel__c == 'Azure')
         {
             if (mess.CVCH__Type__c == 'Options')
             {
@@ -71,7 +94,7 @@ public class SM042_NexmoOut2 implements Queueable
     }
 
     @future(Callout =true)
-    public static void executeF(id messId)
+    global static void executeF(id messId)
     {
         CVCH__NexmoMessage__c mess =
         [
@@ -87,10 +110,13 @@ public class SM042_NexmoOut2 implements Queueable
         try
         {
             send(mess);
+            mess.Status__c = 'Complete';
         } catch (Exception e)
         {
             if (Test.isRunningTest())
                 throw e;
+            mess.Error_Message__c = e.getMessage() + ' '+e.getStackTraceString();
+            mess.Status__c = 'Error';
         } finally
         {
             SM005_Logs.save();
@@ -100,7 +126,7 @@ public class SM042_NexmoOut2 implements Queueable
 
 
     @future(Callout =true)
-    public static void sendOrEnqueueF(id messId)
+    global static void sendOrEnqueueF(id messId)
     {
         CVCH__NexmoMessage__c mess =
         [
@@ -128,7 +154,7 @@ public class SM042_NexmoOut2 implements Queueable
     }
 
 
-    public static void sendOrEnqueue(CVCH__NexmoMessage__c mess, Boolean async)
+    global static void sendOrEnqueue(CVCH__NexmoMessage__c mess, Boolean async)
     {
         SM010_Utils.addResponse(mess.FullText__c);
         system.debug(mess);
@@ -150,17 +176,17 @@ public class SM042_NexmoOut2 implements Queueable
             }
         }
     }
-    public static void sendText(string sTo, string sText, string sFrom)
+    global static void sendText(string sTo, string sText, string sFrom)
     {
         sendText(sTo, sText, sFrom, false);
     }
-    public static CVCH__NexmoMessage__c inboundMess;
+    global static CVCH__NexmoMessage__c inboundMess;
 
-    public static void setInboundMessage(CVCH__NexmoMessage__c mess)
+    global static void setInboundMessage(CVCH__NexmoMessage__c mess)
     {
         inboundMess = mess;
     }
-    public static CVCH__NexmoMessage__c initMessage(string sTo, string sFrom)
+    global static CVCH__NexmoMessage__c initMessage(string sTo, string sFrom)
     {
         CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
         if (inboundMess != null)
@@ -182,13 +208,13 @@ public class SM042_NexmoOut2 implements Queueable
         }
         return mess;
     }
-    public static string getInboundChannel()
+    global static string getInboundChannel()
     {
         if (inboundMess != null)
             return inboundMess.CVCH__Channel__c;
         return '';
     }
-    public static void sendText(string sTo, string sText, string sFrom, boolean async)
+    global static void sendText(string sTo, string sText, string sFrom, boolean async)
     {
         CVCH__NexmoMessage__c mess = initMessage(sto, sFrom);
 
@@ -200,7 +226,18 @@ public class SM042_NexmoOut2 implements Queueable
         sendOrEnqueue(mess, async);
     }
 
-    public static void sendCustomText(string sTo, string sText, string sFrom, boolean async)
+
+    global static void sendCustomText2(string sTo, string sText, string sFrom, boolean async)
+    {
+        sendCustomText(sTo,sText,sFrom,async,'Custom2');
+    }
+    global static void sendCustomText(string sTo, string sText, string sFrom, boolean async)
+    {
+        sendCustomText(sTo,sText,sFrom,async,'Custom');
+    }
+
+
+    global static void sendCustomText(string sTo, string sText, string sFrom, boolean async, string sType)
     {
         CVCH__NexmoMessage__c mess = initMessage(sto, sFrom);
 
@@ -209,12 +246,12 @@ public class SM042_NexmoOut2 implements Queueable
             mess.CVCH__Text__c = mess.CVCH__Text__c.substring(0, 254);
         mess.CVCH__FullText__c = sText;
         mess.CVCH__Status__c = 'Queued';
-        mess.CVCH__Type__c = 'Custom';
+        mess.CVCH__Type__c = sType;
         sendOrEnqueue(mess, async);
     }
 
 
-    public static void sendComplexType(MessageOptions opt, string sto, string sFrom)
+    global static void sendComplexType(MessageOptions opt, string sto, string sFrom)
     {
         CVCH__NexmoMessage__c mess = initMessage(sto, sFrom);
 
@@ -231,7 +268,7 @@ public class SM042_NexmoOut2 implements Queueable
         sendOrEnqueue(mess, opt.async);
     }
 
-    public static map<string, string> getAuthHeader()
+    global static map<string, string> getAuthHeader()
     {
         map<string, string> headers = new map <string, string>();
         string token = JWT.getAccessToken();
@@ -242,7 +279,7 @@ public class SM042_NexmoOut2 implements Queueable
         return headers;
     }
 
-    public static string getBody(string sTo, string messageText, string sFrom)
+    global static string getBody(string sTo, string messageText, string sFrom)
     {
         map<string, object> mret = new map<string, object>();
         map<string, string> mFrom = new map<string, string>();
@@ -267,33 +304,34 @@ public class SM042_NexmoOut2 implements Queueable
     }
 
 
-    public static void sendText(string sTo, string messageText)
+    global static void sendText(string sTo, string messageText)
     {
         sendText2(sTo, '97144099000', messageText);
     }
 
-    public static void sendText2(string sTo, string sFrom, string messageText)
+    global static void sendText2(string sTo, string sFrom, string messageText)
     {
         if (Test.isRunningTest())
             Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-        Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBody(sTo, messageText, sFrom), 'NexmoOut2', null);
+        Object o = SM003_Http.request(getNexmoURL(), 'POST', getAuthHeader(), getBody(sTo, messageText, sFrom), 'NexmoOut2', null);
     }
 
 
     @future(callout=true)
-    public static void sendCarouselAsync(string sTo, string sFrom, string imageurl, string caption)
+    global static void sendCarouselAsync(string sTo, string sFrom, string imageurl, string caption)
     {
         sendCarousel(Sto, sFrom, imageurl, caption);
     }
 
-    public static void sendCarousel(string sTo, string sFrom, string imageurl, string caption)
+
+    global static void sendCarousel(string sTo, string sFrom, string imageurl, string caption)
     {
         if (Test.isRunningTest())
             Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-        Object o = SM003_Http.request('https://api.nexmo.com/v0.1/messages', 'POST', getAuthHeader(), getBodyCarousel(sTo, sFrom, imageurl, caption), 'NexmoOut2', null);
+        Object o = SM003_Http.request(getNexmoURL(), 'POST', getAuthHeader(), getBodyCarousel(sTo, sFrom, imageurl, caption), 'NexmoOut2', null);
     }
 
-    public static string getBodyCarousel(string sTo, string sFrom, string imageURL, string sCaption)
+    global static string getBodyCarousel(string sTo, string sFrom, string imageURL, string sCaption)
     {
         map<string, object> mret = new map<string, object>();
         map<string, string> mFrom = new map<string, string>();
@@ -312,7 +350,8 @@ public class SM042_NexmoOut2 implements Queueable
         mCont.put('type', 'image');
         map <string, object> mImage = new map<string, object>();
         mImage.put('url', imageURL);
-        mImage.put('caption', sCaption);
+        if(sCaption != null)
+        mImage.put('caption', sCaption.replaceAll('/n/r', '\n'));
         mCont.put('image', mImage);
         mMess.put('content', mCont);
         mret.put('message', mMess);

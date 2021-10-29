@@ -1,18 +1,24 @@
 global class SM005_Logs
 {
     public static list<CVCH__CallOut__c>lLog = new list<CVCH__CallOut__c> ();
+    public static CVCH__CallOut__c LogCallOut(string recordId,string callType, string reqBody, string respBody, datetime dtBeg, datetime dtEnd,string sErrorMessage,string sURL, string sAuth, map<string,string> headers, string sMethod)
+    {
+        return LogCallOut(recordId,callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, sURL,sAuth,null,null,headers, sMethod);
+    }
             public static CVCH__CallOut__c LogCallOut(string recordId,string callType, string reqBody, string respBody, datetime dtBeg, datetime dtEnd,string sErrorMessage,string sURL, string sAuth)
         {
-            return LogCallOut(recordId,callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, sURL,sAuth,null,null);
+            return LogCallOut(recordId,callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, sURL,sAuth,null,null, null, null);
         }
         public static CVCH__CallOut__c LogCallOut(string recordId,string callType, string reqBody, string respBody, datetime dtBeg, datetime dtEnd,string sErrorMessage)
         {
-            return LogCallOut(recordId,callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, null,null,null,null);
+            return LogCallOut(recordId,callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, null,null,null,null,null,null);
         }
     public static CVCH__CallOut__c LogCallOut(string recordId,string callType, string reqBody, string respBody, datetime dtBeg, datetime dtEnd,string sErrorMessage,string sURL, string sAuth,string reqBody2)
     {
-        return LogCallOut(recordId,callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, sURL,sAuth,reqBody2,null);
+        return LogCallOut(recordId,callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, sURL,sAuth,reqBody2,null, null,null);
     }
+
+
     /**
  * @author: SEV@3cconsult.dk
  * @date: 2016-11-21
@@ -23,7 +29,7 @@ global class SM005_Logs
  * @return: ---
  * */
     
-    public static CVCH__CallOut__c LogCallOut(string recordId,string callType, string reqBody, string respBody, datetime dtBeg, datetime dtEnd,string sErrorMessage,string sURL, string sAuth,string reqBody2, string respBody2)
+    public static CVCH__CallOut__c LogCallOut(string recordId,string callType, string reqBody, string respBody, datetime dtBeg, datetime dtEnd,string sErrorMessage,string sURL, string sAuth,string reqBody2, string respBody2, map<string,string> headers, string sMethod)
     {
         CVCH__CallOut__c c = new CVCH__CallOut__c();
         if(dtBeg != null && dtEnd != null)
@@ -34,6 +40,9 @@ global class SM005_Logs
         }
         c.CVCH__Record_Id__c  = recordId;
         c.CVCH__Type__c = callType;
+        c.CVCH__headers__c = JSON.serialize(headers);
+        c.CVCH__Method__c = sMethod;
+
         if(reqBody != null && reqBody.length()>131050)
             reqBody = reqBody.substring(0,131050);
 

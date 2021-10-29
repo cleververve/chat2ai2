@@ -12,7 +12,10 @@ global class MessageOptions implements iMessage
 	@AuraEnabled @InvocableVariable global string sType;
 	@AuraEnabled @InvocableVariable global boolean async;
 	public string sFieldName;
+	public string sParamName;
 	public string sFlow;
+	public string flowParamsJSON;
+
 	public string sConfirmMessage;
 	public string sInputType;
 	public list<CarouselItem> lItems = new list<CarouselItem>();
@@ -167,7 +170,7 @@ global class MessageOptions implements iMessage
 		else
 				SM042_NexmoOut2.sendText(sTo, getBody(), sFrom, this.async);
 
-		if (!mOptions.isEmpty() || this.sFieldName != null)
+		if (!mOptions.isEmpty() || this.sFieldName != null || this.sParamName != null)
 		{
 			system.debug('mOptions=' + mOptions);
 			visr.CVCH__Context__c = JSON.serialize(this);

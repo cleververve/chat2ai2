@@ -294,6 +294,16 @@
         <unique>false</unique>
     </fields>
     <fields>
+        <fullName>Livechat_Session_Key__c</fullName>
+        <externalId>false</externalId>
+        <label>Livechat Session Key</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>Location__c</fullName>
         <deprecated>false</deprecated>
         <externalId>false</externalId>

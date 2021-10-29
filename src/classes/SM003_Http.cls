@@ -66,8 +66,11 @@ global class SM003_Http
 			sStatusCode = '' + response.getStatusCode();
 			if (response.getStatusCode() > 299)
 			{
-				system.debug('SM001_Rest_Client: Failed to receive a success code from remote. Code was: ' + response.getStatusCode() + ' request was ' + request + ' Response Body is: ' + response.getBody());
-                throw new MyException(response.getBody());
+				string sErr = response.getBody();
+				if(sErr == null || sErr == '')
+					sErr = 'SM001_Rest_Client: Failed to receive a success code from remote. ' + response.getStatus()+' '+response.getStatusCode();
+//				system.debug('SM001_Rest_Client: Failed to receive a success code from remote. Code was: ' + response.getStatusCode() + ' request was ' + request + ' Response Body is: ' + response.getBody());
+                throw new MyException(sErr);
             }
             sStatus = 'Success';
 		}
@@ -94,7 +97,7 @@ global class SM003_Http
 			if (request != null)
                 reqBody = request.getBody();
 
-			SM005_Logs.LogCallOut(recId, callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, url, request.getHeader('Authorization'));
+			SM005_Logs.LogCallOut(recId, callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, url, request.getHeader('Authorization'), headers,method);
         }
         return response;    
     }

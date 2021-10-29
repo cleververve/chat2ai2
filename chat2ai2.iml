@@ -697,6 +697,9 @@
                       <option name="wildcard" value="false" />
                     </MetadataType>
                     <MetadataType>
+                      <option name="name" value="LightningComponentBundle" />
+                    </MetadataType>
+                    <MetadataType>
                       <option name="entries">
                         <list>
                           <MetadataEntry>

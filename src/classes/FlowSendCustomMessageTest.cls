@@ -18,4 +18,18 @@ public class FlowSendCustomMessageTest
         FlowSendCustomMessage.sendMessage(new list<FlowSendCustomMessage>{inp});
         Test.stopTest();
     }
+
+    @IsTest
+    public static void send1()
+    {
+        TestDataFactory data = new TestDataFactory();
+        FlowSendCustomMessage2 inp = new FlowSendCustomMessage2();
+        inp.visitorId = data.vis.id;
+        inp.async = false;
+        inp.content = '{}';
+        Test.startTest();
+        FlowSendCustomMessage2.sendMessage(new list<FlowSendCustomMessage2>{inp});
+        Test.stopTest();
+    }
+
 }

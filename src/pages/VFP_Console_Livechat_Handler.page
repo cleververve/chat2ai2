@@ -1,0 +1,15 @@
+<!--
+-Author:         serhiivolynets
+-Date:           24.08.2021
+-Description:   
+-->
+<apex:page id="VFP_Console_Livechat_Handler">
+    <apex:includeScript value="/support/console/38.0/integration.js"/>
+    <apex:includeScript value="/soap/ajax/38.0/connection.js"/>
+    <script>
+        try {
+            // Session Init
+            sforce.connection.sessionId = '{!$Api.Session_ID}';
+        }catch(e){}
+    </script>
+</apex:page>

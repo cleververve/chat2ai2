@@ -51,7 +51,7 @@ global class SM031_Nexmo
 			}
 		}
 
-		SM080_QnA.QnAResponse respQnA  = new SM080_QnA.QnAResponse();
+		SM080_QnA.QnAResponse respQnA = new SM080_QnA.QnAResponse();
 		respQnA.dScore = 0;
 		if (mess.CVCH__InputType__c == 'button')
 		{
@@ -112,277 +112,334 @@ global class SM031_Nexmo
 		}
 		system.debug('mess=');
 		system.debug(mess);
-		if (visr.CVCH__Had_First_Interaction__c == false)
+		if (visr.CVCH__Livechat_Session_Key__c != null && visr.CVCH__Livechat_Session_Key__c != '')
 		{
-			system.debug('CVCH__Had_First_Interaction__c=false');
-			bProceeded = true;
-			Map<String, Object> params = new Map<String, Object>();
-
-			params.put('visphone', visr.CVCH__Id__c);
-			params.put('ChatNumber', visr.CVCH__Chat_Number__c);
-			params.put('channel', visr.CVCH__chanel__c);
-
-			if (visr.id == null && (Test.isRunningTest() || SM010_Utils.getChat2aiValue2('CREATE VISITOR BEFORE FLOWS') == 'TRUE'))
-				insert visr;
-			if (SM010_Utils.getChat2aiValue2('CREATE VISITOR BEFORE FLOWS') == 'TRUE')
-				params.put('visitorId', visr.id);
-			system.debug('visitor=' + visr);
-
-			if (SM010_Utils.getChat2aiValue('Welcome Flow') != null && SM010_Utils.getChat2aiValue('Welcome Flow') != '')
-				Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Welcome Flow'), params).Start();
-			triggeredFlow = 'Welcome Flow';
-		}
-		else if (apexGDPR() && visr.CVCH__GDPR_Consent__c == 'No Access' && (visr.CVCH__Context__c == '' || visr.CVCH__Context__c == null)) //Restrict Non-GDPR users
-		{
-			system.debug('No Access');
-			bProceeded = true;
-			Map<String, Object> params = new Map<String, Object>();
-			params.put('visitorId', visr.id);
-			params.put('originalmessage', mess.CVCH__Text__c);
-
-			Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('GDPR Flow'), params);
-			flow.start();
-		}
-		else if (apexGDPR() && visr.CVCH__GDPR_Consent__c == 'No Access' && visr.CVCH__Context__c != '' && visr.CVCH__Context__c != null)
-		{
-			system.debug('start flow: GDPR Flow');
-			bProceeded = true;
-			Map<String, Object> params = new Map<String, Object>();
-			params.put('visitorId', visr.id);
-			params.put('originalmessage', mess.CVCH__Text__c);
-
-			MessageOptions mo = (MessageOptions) JSON.deserialize(visr.CVCH__Context__c, MessageOptions.class);
-			system.debug('GDPR MessageOptions=' + mo);
-			Option opt = mo.mOptions.get(mess.CVCH__Text__c);
-			if (opt == null)
+			if(/*mess.Text__c == 'end chat' || */(respLuis != null && respLuis.sIntent == 'EndChat'))
 			{
-				opt = SM010_Utils.getOption(mo.mOptions, mess.CVCH__Text__c); // if input wasnt valid number of option - try to get it with label
-			}
-			if (opt != null && opt.sFlow != null)
-			{
-				if (opt.sName != null)
-					params.put(opt.sName, opt.sValue);
-				if (opt.sName2 != null)
-					params.put(opt.sName2, opt.sValue2);
-				if (opt.sName3 != null)
-					params.put(opt.sName3, opt.sValue3);
-				Flow.Interview flow = Flow.Interview.createInterview(opt.sFlow, params);
-				flow.start();
+				Visitor__c vis = new Visitor__c();
+				vis.Id = visr.Id;
+				vis.Livechat_Session_Key__c =  null;
+				vis.Livechat_Session_Id__c = null;
+				vis.Livechat_affinityToken__c = null;
+				update vis;
+				SM042_NexmoOut2.sendText(vis.CVCH__Id__c,SM010_Utils.translate('The chat is disconnected',vis.CVCH__language__c),vis.CVCH__Chat_Number__c,false);
 			}
 			else
 			{
+				if(respLuis.sIntent == 'Image')
+				{
+					if(SM010_Utils.getChat2aiValue2('Skip LiveChat File S3 Upload') != 'TRUE')
+					{
+						SM090_UploadS3.S3Output ret = SM090_UploadS3.getS3URL(mess.CVCH__Text__c);
+						if(ret.S3URL != null )
+							mess.CVCH__Text__c = ret.S3URL;
+						else
+								throw new MyException('Error: '+ ret.Error);
+					}
+				}
+				SM093_LiveAgent.ChatMessage(mess.CVCH__Text__c, visr.Livechat_affinityToken__c, visr.CVCH__Livechat_Session_Key__c);
+			}
+		}
+		else
+		{
+			if (visr.CVCH__Had_First_Interaction__c == false)
+			{
+				system.debug('CVCH__Had_First_Interaction__c=false');
+				bProceeded = true;
+				Map<String, Object> params = new Map<String, Object>();
+
+				params.put('visphone', visr.CVCH__Id__c);
+				params.put('ChatNumber', visr.CVCH__Chat_Number__c);
+				params.put('channel', visr.CVCH__chanel__c);
+
+				if (visr.id == null && (Test.isRunningTest() || SM010_Utils.getChat2aiValue2('CREATE VISITOR BEFORE FLOWS') == 'TRUE'))
+					insert visr;
+				if (SM010_Utils.getChat2aiValue2('CREATE VISITOR BEFORE FLOWS') == 'TRUE')
+					params.put('visitorId', visr.id);
+				system.debug('visitor=' + visr);
+
+				if (SM010_Utils.getChat2aiValue('Welcome Flow') != null && SM010_Utils.getChat2aiValue('Welcome Flow') != '')
+					Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Welcome Flow'), params).Start();
+				triggeredFlow = 'Welcome Flow';
+			}
+			else if (apexGDPR() && visr.CVCH__GDPR_Consent__c == 'No Access' && (visr.CVCH__Context__c == '' || visr.CVCH__Context__c == null)) //Restrict Non-GDPR users
+			{
+				system.debug('No Access');
+				bProceeded = true;
+				Map<String, Object> params = new Map<String, Object>();
+				params.put('visitorId', visr.id);
+				params.put('originalmessage', mess.CVCH__Text__c);
+
 				Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('GDPR Flow'), params);
 				flow.start();
 			}
-			triggeredFlow = 'GDPR Flow';
-		}
-		else if (!TriggerDefaultFlow && !TriggerDefaultFlowChangeLang && respLuis.dScore > respQnA.dScore && respLuis.sIntent == 'exit')
-		{
-			system.debug('start flow: Main Menu Flow');
-			bProceeded = true;
-			Map<String, Object> params = new Map<String, Object>();
-			params.put('visitorId', visr.id);
-			params.put('originalmessage', mess.CVCH__Text__c);
-			Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Main Menu Flow'), params);
-			flow.start();
-			CVCH__Visitor__c v = new CVCH__Visitor__c(Id = visr.id, CVCH__Next_flow__c = null);
-			if (visr.Current_Flow__c != null && visr.Current_Flow__c != '')
+			else if (apexGDPR() && visr.CVCH__GDPR_Consent__c == 'No Access' && visr.CVCH__Context__c != '' && visr.CVCH__Context__c != null)
 			{
-				EventBus.publish(new User_Input__e(Input__c = mess.Text__c, Exit_Flow__c = true, VisitorId__c = visr.id));
-				v.Current_Flow__c = null;
-			}
-			update v;
-			triggeredFlow = 'Main Menu Flow';
-		}
-		else if (visr.Current_Flow__c != null && visr.Current_Flow__c != '')
-		{
-			system.debug('FIRE USER INPUT EVENT');
-			bProceeded = true;
-			Map<string, object> mEntities = new map<string, object>();
-			string visEmail = '';
-			string visName = '';
-			if (respLuis.getentities() != null && respLuis.getentities() != '')
-			{
-				mEntities = (Map<string, object>) JSON.deserializeUntyped(respLuis.getentities());
-				if (mEntities.get('email') != null)
-					visEmail = String.valueOf(mEntities.get('email'));
-				if (mEntities.get('personName') != null)
-					visName = String.valueOf(mEntities.get('personName'));
-			}
-			EventBus.publish(new User_Input__e(Input__c = mess.Text__c, Exit_Flow__c = false, VisitorId__c = visr.id, Filtered_Email__c = visEmail, Filtered_Name__c = visName));
-			triggeredFlow = visr.Current_Flow__c;
-		}
-		else if (visr.CVCH__Next_Flow__c != null && visr.CVCH__Next_Flow__c != '')
-		{
-			system.debug('start flow: CVCH__Next_Flow__c');
-			bProceeded = true;
-			Map<String, Object> params = new Map<String, Object>();
-			params.put('visitorId', visr.id);
-			params.put('input', mess.CVCH__Text__c);
-
-			Flow.Interview flow = Flow.Interview.createInterview(visr.CVCH__Next_Flow__c, params);
-			flow.start();
-			triggeredFlow = visr.Next_Flow__c;
-		}
-		else if (visr.CVCH__Context__c != null && visr.CVCH__Context__c != '')
-		{
-			system.debug('start flow: CVCH__Context__c');
-			MessageOptions mo = (MessageOptions) JSON.deserialize(visr.Context__c, MessageOptions.class);
-			system.debug('MessageOptions=' + mo);
-			if (mo.sType == 'Input')
-			{
+				system.debug('start flow: GDPR Flow');
 				bProceeded = true;
-				Map<string, object> mEntities = new map<string, object>();
-				if (respLuis.getentities() != null && respLuis.getentities() != '')
-				{
-					mEntities = (Map<string, object>) JSON.deserializeUntyped(respLuis.getentities());
-				}
-				//input type check
-				if (mo.sInputType == 'Email')
-				{
-					if (mEntities.get('email') != null)
-						mess.Text__c = String.valueOf(mEntities.get('email'));
-					else
-					{
-						Map<String, Object> params = new Map<String, Object>();
-						params.put('visitorId', visr.id);
-						params.put('type', 'Email');
-						Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Input Validation Error Flow'), params);
-						flow.start();
-						return lret;
-					}
-				}
-				if (mo.sInputType == 'Name')
-				{
-					if (mEntities.get('personName') != null)
-					{
-						mess.Text__c = String.valueOf(mEntities.get('personName'));
-					}
-					else
-					{
-						Map<String, Object> params = new Map<String, Object>();
-						params.put('visitorId', visr.id);
-						params.put('type', 'Name');
-						Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Input Validation Error Flow'), params);
-						flow.start();
-						return lret;
-					}
-				}
+				Map<String, Object> params = new Map<String, Object>();
+				params.put('visitorId', visr.id);
+				params.put('originalmessage', mess.CVCH__Text__c);
 
-				Visitor__c v = new Visitor__c(Id = visr.id);
-
-				Map<String, Schema.SObjectType> schemaMap = Schema.getGlobalDescribe();
-				//System.debug('schemaMap = ' + schemaMap);
-				Schema.SObjectType leadSchema = schemaMap.get('CVCH__Visitor__c');
-				//System.debug('leadSchema = ' + leadSchema);
-				Map<String, Schema.SObjectField> fieldMap = leadSchema.getDescribe().fields.getMap();
-
-				try
-				{
-					if (fieldMap.get(mo.sFieldName).getDescribe().getType() == Schema.DisplayType.DATE)
-					{
-						Pattern pat = Pattern.compile('^\\d{1,2}\\/\\d{1,2}\\/\\d{4}$');
-						if (!pat.matcher(mess.Text__c).matches())
-						{
-							string dateEx = SM010_Utils.getChat2aiValue2('INVALID_DATE');
-							if (dateEx == '')
-								dateEx = 'Invalid date format. Please provide dd/MM/yyyy';
-							throw new MyException(dateEx);
-						}
-						v.put(mo.sFieldName, Date.parse(mess.Text__c));
-					}
-					else
-							v.put(mo.sFieldName, mess.Text__c);
-				}
-				catch (MyException ex)
-				{
-					throw ex;
-				}
-				catch (Exception e)
-				{
-					v.put(mo.sFieldName, mess.Text__c);
-				}
-
-				v.Context__c = '';
-				update v;
-				if (mo.sFlow != null && mo.sFlow != '')
-				{
-					Map<String, Object> params = new Map<String, Object>();
-					params.put('visitorId', visr.id);
-
-					Flow.Interview flow = Flow.Interview.createInterview(mo.sFlow, params);
-					flow.start();
-					triggeredFlow = mo.sFlow;
-				}
-			}
-			else
-			{
-				system.debug('getting option ' + mess.CVCH__Text__c + ' from ' + mo.mOptions);
+				MessageOptions mo = (MessageOptions) JSON.deserialize(visr.CVCH__Context__c, MessageOptions.class);
+				system.debug('GDPR MessageOptions=' + mo);
 				Option opt = mo.mOptions.get(mess.CVCH__Text__c);
 				if (opt == null)
 				{
 					opt = SM010_Utils.getOption(mo.mOptions, mess.CVCH__Text__c); // if input wasnt valid number of option - try to get it with label
 				}
-				if (opt != null)
+				if (opt != null && opt.sFlow != null)
 				{
-					system.debug('found option ' + opt);
-					if (opt.sType == 'QnA')
-					{
-						integer qnaid = integer.valueOf(opt.sValue);
+					if (opt.sName != null)
+						params.put(opt.sName, opt.sValue);
+					if (opt.sName2 != null)
+						params.put(opt.sName2, opt.sValue2);
+					if (opt.sName3 != null)
+						params.put(opt.sName3, opt.sValue3);
+					Flow.Interview flow = Flow.Interview.createInterview(opt.sFlow, params);
+					flow.start();
+				}
+				else
+				{
+					Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('GDPR Flow'), params);
+					flow.start();
+				}
+				triggeredFlow = 'GDPR Flow';
+			}
+			else if (!TriggerDefaultFlow && !TriggerDefaultFlowChangeLang && respLuis.dScore > respQnA.dScore && respLuis.sIntent == 'exit')
+			{
+				system.debug('start flow: Main Menu Flow');
+				bProceeded = true;
+				Map<String, Object> params = new Map<String, Object>();
+				params.put('visitorId', visr.id);
+				params.put('originalmessage', mess.CVCH__Text__c);
+				Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Main Menu Flow'), params);
+				flow.start();
+				CVCH__Visitor__c v = new CVCH__Visitor__c(Id = visr.id, CVCH__Next_flow__c = null);
+				if (visr.Current_Flow__c != null && visr.Current_Flow__c != '')
+				{
+					EventBus.publish(new User_Input__e(Input__c = mess.Text__c, Exit_Flow__c = true, VisitorId__c = visr.id));
+					v.Current_Flow__c = null;
+				}
+				update v;
+				triggeredFlow = 'Main Menu Flow';
+			}
+			else if (visr.Current_Flow__c != null && visr.Current_Flow__c != '')
+			{
+				system.debug('FIRE USER INPUT EVENT');
+				bProceeded = true;
+				Map<string, object> mEntities = new map<string, object>();
+				string visEmail = '';
+				string visName = '';
+				if (respLuis.getentities() != null && respLuis.getentities() != '')
+				{
+					mEntities = (Map<string, object>) JSON.deserializeUntyped(respLuis.getentities());
+					if (mEntities.get('email') != null)
+						visEmail = String.valueOf(mEntities.get('email'));
+					if (mEntities.get('personName') != null)
+						visName = String.valueOf(mEntities.get('personName'));
+				}
+				EventBus.publish(new User_Input__e(Input__c = mess.Text__c, Exit_Flow__c = false, VisitorId__c = visr.id, Filtered_Email__c = visEmail, Filtered_Name__c = visName));
+				triggeredFlow = visr.Current_Flow__c;
+			}
+			else if (visr.CVCH__Next_Flow__c != null && visr.CVCH__Next_Flow__c != '')
+			{
+				system.debug('start flow: CVCH__Next_Flow__c');
+				bProceeded = true;
+				Map<String, Object> params = new Map<String, Object>();
+				params.put('visitorId', visr.id);
+				params.put('input', mess.CVCH__Text__c);
 
-						SM080_QnA.QnAResponse respQnA2 = SM080_QnA.getQNA(qnaid, visr.CVCH__language__c);
-						lret.add(new MessageOptions(respQnA2));
-						bProceeded = true;
-					}
-					else
+				Flow.Interview flow = Flow.Interview.createInterview(visr.CVCH__Next_Flow__c, params);
+				flow.start();
+				triggeredFlow = visr.Next_Flow__c;
+			}
+			else if (visr.CVCH__Context__c != null && visr.CVCH__Context__c != '')
+			{
+				system.debug('start flow: CVCH__Context__c');
+				MessageOptions mo = (MessageOptions) JSON.deserialize(visr.Context__c, MessageOptions.class);
+				system.debug('MessageOptions=' + mo);
+				if (mo.sType == 'Input')
+				{
+					bProceeded = true;
+					Map<string, object> mEntities = new map<string, object>();
+					if (respLuis.getentities() != null && respLuis.getentities() != '')
 					{
-						bProceeded = true;
-						if (opt.sFlow != null)
+						mEntities = (Map<string, object>) JSON.deserializeUntyped(respLuis.getentities());
+					}
+					//input type check
+					if (mo.sInputType == 'Email')
+					{
+						if (mEntities.get('email') != null)
+							mess.Text__c = String.valueOf(mEntities.get('email'));
+						else
 						{
 							Map<String, Object> params = new Map<String, Object>();
 							params.put('visitorId', visr.id);
-							params.put('originalmessage', mess.CVCH__Text__c);
-							if (opt.sName != null)
-								params.put(opt.sName, opt.sValue);
-							if (opt.sName2 != null)
-								params.put(opt.sName2, opt.sValue2);
-							if (opt.sName3 != null)
-								params.put(opt.sName3, opt.sValue3);
-							Flow.Interview flow = Flow.Interview.createInterview(opt.sFlow, params);
+							params.put('type', 'Email');
+							Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Input Validation Error Flow'), params);
 							flow.start();
-							triggeredFlow = opt.sFlow;
+							return lret;
+						}
+					}
+					if (mo.sInputType == 'Name')
+					{
+						if (mEntities.get('personName') != null)
+						{
+							mess.Text__c = String.valueOf(mEntities.get('personName'));
+						}
+						else
+						{
+							Map<String, Object> params = new Map<String, Object>();
+							params.put('visitorId', visr.id);
+							params.put('type', 'Name');
+							Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Input Validation Error Flow'), params);
+							flow.start();
+							return lret;
+						}
+					}
+
+					Visitor__c v = new Visitor__c(Id = visr.id);
+
+					Map<String, Schema.SObjectType> schemaMap = Schema.getGlobalDescribe();
+					//System.debug('schemaMap = ' + schemaMap);
+					Schema.SObjectType leadSchema = schemaMap.get('CVCH__Visitor__c');
+					//System.debug('leadSchema = ' + leadSchema);
+					Map<String, Schema.SObjectField> fieldMap = leadSchema.getDescribe().fields.getMap();
+					if(mo.sFieldName != '' && mo.sFieldName != null)
+					{
+						try
+						{
+							if (fieldMap.get(mo.sFieldName).getDescribe().getType() == Schema.DisplayType.DATE)
+							{
+								Pattern pat = Pattern.compile('^\\d{1,2}\\/\\d{1,2}\\/\\d{4}$');
+								if (!pat.matcher(mess.Text__c).matches())
+								{
+									string dateEx = SM010_Utils.getChat2aiValue2('INVALID_DATE');
+									if (dateEx == '')
+										dateEx = 'Invalid date format. Please provide dd/MM/yyyy';
+									throw new MyException(dateEx);
+								}
+								v.put(mo.sFieldName, Date.parse(mess.Text__c));
+							}
+							else
+									v.put(mo.sFieldName, mess.Text__c);
+						}
+						catch (MyException ex)
+						{
+							throw ex;
+						}
+						catch (Exception e)
+						{
+							v.put(mo.sFieldName, mess.Text__c);
+						}
+
+						v.Context__c = '';
+						update v;
+					}
+					if (mo.sFlow != null && mo.sFlow != '')
+					{
+						Map<String, Object> params = new Map<String, Object>();
+
+						if(mo.flowParamsJSON != null && mo.flowParamsJSON != '')
+						{
+							try
+							{
+								map<string,object> mParams2 = (map<string,object>)JSON.deserializeUntyped(mo.flowParamsJSON);
+								params.putAll(mParams2);
+							}catch(Exception e)
+							{
+
+							}
+						}
+						params.put('visitorId', visr.id);
+						if(mo.sParamName != '' && mo.sParamName != null)
+						{
+							params.put(mo.sParamName,mess.Text__c);
+						}
+
+						Flow.Interview flow = Flow.Interview.createInterview(mo.sFlow, params);
+						flow.start();
+						triggeredFlow = mo.sFlow;
+					}
+					if(mo.sFieldName == '' || mo.sFieldName == null)
+					{
+						Visitor__c vis = [select id, Context__c from Visitor__c where id = :v.Id];
+						if(v.Context__c == vis.Context__c)
+						{
+							vis.Context__c = '';
+							update vis;
 						}
 					}
 				}
-			}
+				else
+				{
+					system.debug('getting option ' + mess.CVCH__Text__c + ' from ' + mo.mOptions);
+					Option opt = mo.mOptions.get(mess.CVCH__Text__c);
+					if (opt == null)
+					{
+						opt = SM010_Utils.getOption(mo.mOptions, mess.CVCH__Text__c); // if input wasnt valid number of option - try to get it with label
+					}
+					if (opt != null)
+					{
+						system.debug('found option ' + opt);
+						if (opt.sType == 'QnA')
+						{
+							integer qnaid = integer.valueOf(opt.sValue);
 
-		}
-		if (!bProceeded && TriggerDefaultFlowChangeLang)
-		{
-			system.debug('start flow: Default Flow 2');
-			//if (respLuis.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) || (respLuis.dScore >= Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) && !(respLuis.sIntent == 'directions' || respLuis.sIntent == 'category search' || respLuis.sIntent == 'outlet search' || respLuis.sIntent == 'special opening hours' || respLuis.sIntent == 'opt out' || respLuis.sIntent == 'ikea'))) {
-			bProceeded = true;
-			Map<String, Object> params = new Map<String, Object>();
-			params.put('visitorId', visr.id);
-			params.put('originalmessage', mess.Text__c);
-			params.put('language', tran.detectedlang);
-			params.put('visitorlanguage', visr.language__c);
-			Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow 2'), params);
-			flow.start();// trigger default flow 2
-			triggeredFlow = 'Default Flow 2';
+							SM080_QnA.QnAResponse respQnA2 = SM080_QnA.getQNA(qnaid, visr.CVCH__language__c);
+							lret.add(new MessageOptions(respQnA2));
+							bProceeded = true;
+						}
+						else
+						{
+							bProceeded = true;
+							if (opt.sFlow != null)
+							{
+								Map<String, Object> params = new Map<String, Object>();
+								params.put('visitorId', visr.id);
+								params.put('originalmessage', mess.CVCH__Text__c);
+								if (opt.sName != null)
+									params.put(opt.sName, opt.sValue);
+								if (opt.sName2 != null)
+									params.put(opt.sName2, opt.sValue2);
+								if (opt.sName3 != null)
+									params.put(opt.sName3, opt.sValue3);
+								Flow.Interview flow = Flow.Interview.createInterview(opt.sFlow, params);
+								flow.start();
+								triggeredFlow = opt.sFlow;
+							}
+						}
+					}
+				}
+
+			}
+			if (!bProceeded && TriggerDefaultFlowChangeLang)
+			{
+				system.debug('start flow: Default Flow 2');
+				//if (respLuis.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) || (respLuis.dScore >= Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) && !(respLuis.sIntent == 'directions' || respLuis.sIntent == 'category search' || respLuis.sIntent == 'outlet search' || respLuis.sIntent == 'special opening hours' || respLuis.sIntent == 'opt out' || respLuis.sIntent == 'ikea'))) {
+				bProceeded = true;
+				Map<String, Object> params = new Map<String, Object>();
+				params.put('visitorId', visr.id);
+				params.put('originalmessage', mess.Text__c);
+				params.put('language', tran.detectedlang);
+				params.put('visitorlanguage', visr.language__c);
+				Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow 2'), params);
+				flow.start();// trigger default flow 2
+				triggeredFlow = 'Default Flow 2';
 //}
 
-		}
-		if (!bProceeded && TriggerDefaultFlow)
-		{
-			system.debug('start flow: Default Flow');
-			bProceeded = true;
-			Map<String, Object> params = new Map<String, Object>();
-			params.put('visitorId', visr.id);
-			params.put('originalmessage', mess.Text__c);
-			Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow'), params);
-			flow.start();// trigger default flow
-			triggeredFlow = 'Default Flow';
+			}
+			if (!bProceeded && TriggerDefaultFlow)
+			{
+				system.debug('start flow: Default Flow');
+				bProceeded = true;
+				Map<String, Object> params = new Map<String, Object>();
+				params.put('visitorId', visr.id);
+				params.put('originalmessage', mess.Text__c);
+				Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow'), params);
+				flow.start();// trigger default flow
+				triggeredFlow = 'Default Flow';
 //VF-438
 /*if (visr.language__c == 'en')
 {
@@ -409,25 +466,26 @@ else
     triggeredFlow = 'Default Flow';
 }
 */
-		}
-		if (!bProceeded)
-		{
-			system.debug('start flow: Chat2ai Flow');
-			system.debug('LUIS score=' + respLuis.dScore + ',QnA score=' + respQnA.dScore);
-			if (respLuis.dScore > respQnA.dScore)
-			{
-				Map<String, Object> params = new Map<String, Object>();
-				params.put('visitorId', visr.id);
-				params.put('intent', respLuis.sIntent);
-				params.put('entities', respLuis.getEntities());
-				params.put('originalmessage', mess.CVCH__Text__c);
-				Flow.Interview chat2aiflow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Chat2ai Flow'), params);
-				chat2aiflow.Start();
-				triggeredFlow = intentLUIS;
-				triggeredLUIS = true;
 			}
-			else
-					lret.add(new MessageOptions(respQnA));
+			if (!bProceeded)
+			{
+				system.debug('start flow: Chat2ai Flow');
+				system.debug('LUIS score=' + respLuis.dScore + ',QnA score=' + respQnA.dScore);
+				if (respLuis.dScore > respQnA.dScore)
+				{
+					Map<String, Object> params = new Map<String, Object>();
+					params.put('visitorId', visr.id);
+					params.put('intent', respLuis.sIntent);
+					params.put('entities', respLuis.getEntities());
+					params.put('originalmessage', mess.CVCH__Text__c);
+					Flow.Interview chat2aiflow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Chat2ai Flow'), params);
+					chat2aiflow.Start();
+					triggeredFlow = intentLUIS;
+					triggeredLUIS = true;
+				}
+				else
+						lret.add(new MessageOptions(respQnA));
+			}
 		}
 		return lret;
 	}
@@ -506,6 +564,12 @@ else
 			map<string, object> mImage = (map<string, object>) mcon.get('image');
 			mess.ImageURL__c = (string) mImage.get('url');
 		}
+		else if(mess.CVCH__InputType__c == 'file')
+		{
+			map<string, object> mImage = (map<string, object>) mcon.get('file');
+			mess.ImageURL__c = (string) mImage.get('url');
+		}
+
 
 		mess.Name = message_uuid;
 		mess.CVCH__From__c = sFrom;
@@ -545,7 +609,7 @@ else
 		if (!lVisitors.isEmpty())
 			ret = lVisitors[0];
 		else
-				ret = new CVCH__Visitor__c(CVCH__Id__c = sid, CVCH__Context__c = null, CVCH__Chat_Number__c = sChatNumber, CVCH__Chanel__c = channel, id = null, CVCH__language__c = null);
+				ret = new CVCH__Visitor__c(CVCH__Id__c = sid, CVCH__Context__c = null, CVCH__Chat_Number__c = sChatNumber, CVCH__Chanel__c = channel, id = null, CVCH__language__c = null, CVCH__Livechat_Session_Key__c = null);
 		return ret;
 	}
 
