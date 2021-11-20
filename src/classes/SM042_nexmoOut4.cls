@@ -21,19 +21,19 @@ global class SM042_nexmoOut4
 	@future(CallOut=true)
 	global static void sendTextAsync(string sTo, string messageText,string sFrom,string sAuth)
 	{
-		try
-		{
-			SM042_nexmoOut4.sendText(sTo,sFrom,messageText);
-		}
-		catch( Exception ex)
-		{
-			if(test.isRunningTest())
-				throw ex;
-		}
-		finally
-		{
-			SM005_Logs.save();
-		}
+//		try
+//		{
+//			SM042_nexmoOut4.sendText(sTo,sFrom,messageText);
+//		}
+//		catch( Exception ex)
+//		{
+//			if(test.isRunningTest())
+//				throw ex;
+//		}
+//		finally
+//		{
+//			SM005_Logs.save();
+//		}
 	}
 
 	global static void sendText(string sTo,string sFrom, string messageText)
@@ -121,41 +121,40 @@ global class SM042_nexmoOut4
 	@future(callout=true)
 	global static void sendImageAsync(string sTo,string sFrom, string sImageURL)
     {
-        sendImage(sTo,sFrom,sImageURL);
+//        sendImage(sTo,sFrom,sImageURL);
     }
 
 	global static void sendImage(string sTo,string sFrom, string sImageURL)
 	{
-		if (Test.isRunningTest())
-			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyImage(sTo, sImageURL,sFrom), 'NexmoOut2', null);
-
+//		if (Test.isRunningTest())
+//			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
+//		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyImage(sTo, sImageURL,sFrom), 'NexmoOut2', null);
 	}
 
-	global static string getBodyImage(string sTo,string imageURL,string sFrom)
-	{
-		map<string,object> mret = new map<string,object>();
-		map<string,string> mFrom = new map<string,string>();
-		mFrom.put('type','whatsapp');
-		mFrom.put('number',sFrom);
-		mret.put('from', mFrom);
-
-
-		map<string,string> mTo = new map<string,string>();
-		mTo.put('type','whatsapp');
-		mTo.put('number',sTo);
-		mret.put('to', mTo);
-
-		map<string,object> mMess = new map<string,object>();
-		map<string,object> mCont = new map<string,object>();
-		mCont.put('type', 'image');
-		map <string,object> mImage = new map<string,object>();
-		mImage.put('url',imageURL);
-		mCont.put('image', mImage);
-		mMess.put('content',mCont);
-		mret.put('message', mMess);
-		return JSON.serialize(mret).replaceAll('\\n','\n');
-	}
+//	global static string getBodyImage(string sTo,string imageURL,string sFrom)
+//	{
+//		map<string,object> mret = new map<string,object>();
+//		map<string,string> mFrom = new map<string,string>();
+//		mFrom.put('type','whatsapp');
+//		mFrom.put('number',sFrom);
+//		mret.put('from', mFrom);
+//
+//
+//		map<string,string> mTo = new map<string,string>();
+//		mTo.put('type','whatsapp');
+//		mTo.put('number',sTo);
+//		mret.put('to', mTo);
+//
+//		map<string,object> mMess = new map<string,object>();
+//		map<string,object> mCont = new map<string,object>();
+//		mCont.put('type', 'image');
+//		map <string,object> mImage = new map<string,object>();
+//		mImage.put('url',imageURL);
+//		mCont.put('image', mImage);
+//		mMess.put('content',mCont);
+//		mret.put('message', mMess);
+//		return JSON.serialize(mret).replaceAll('\\n','\n');
+//	}
 
     @future(Callout=true)
 	global static void sendFile(string sTo,string sFrom, string sFile,string sCaption)
@@ -276,7 +275,7 @@ global class SM042_nexmoOut4
 //	{
 //		if (Test.isRunningTest())
 //			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-//		Object o = SM003_Http.request(SM042_NexmoOut2.geetNexmoURL(), 'POST', getAuthHeader(), getBodyButton(sTo,sFrom,  payload,text), 'NexmoOut2', null);
+//		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyButton(sTo,sFrom,  payload,text), 'NexmoOut2', null);
 //
 //	}
 

@@ -26,6 +26,8 @@ global class FlowInputMessage
 			mo.sType = 'Input';
 			mo.sFlow = mess.sFlow;
 			mo.sFieldName = mess.sFieldName;
+			mo.sParamName = mess.sParamName;
+			mo.flowParamsJSON = mess.flowParamsJSON;
 			mo.sMessage = mess.sMessage;
 			mo.visitorId = mess.visitorId;
             mo.sConfirmMessage = mess.sConfirmMessage;

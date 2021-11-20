@@ -28,19 +28,12 @@ global class FlowSendCustomMessage
         {
             if(inp.async == null)
                 inp.async = false;
-
             CVCH__Visitor__c vis = mVis.get((id)inp.visitorId);
-
-
             system.debug('inp.message: '+inp.content);
             SM042_NexmoOut2.sendCustomText(vis.CVCH__Id__c,inp.content,vis.CVCH__Chat_Number__c,inp.async);
-
             if (inp.async == true)
-            {
                 SM010_Utils.saveTran();
-            }
             SM042_NexmoOut2.pause(800);
-
         }
         SM005_Logs.save();
     }

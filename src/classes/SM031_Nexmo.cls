@@ -1,7 +1,7 @@
 @RestResource(urlMapping='/nexmo/*')
 global class SM031_Nexmo
 {
-
+	global static boolean bContextChanged = false;
 	global static decimal scoreLUIS = 0;
 	global static decimal scoreQnA = 0;
 	global static string intentLUIS = '';
@@ -114,27 +114,27 @@ global class SM031_Nexmo
 		system.debug(mess);
 		if (visr.CVCH__Livechat_Session_Key__c != null && visr.CVCH__Livechat_Session_Key__c != '')
 		{
-			if(/*mess.Text__c == 'end chat' || */(respLuis != null && respLuis.sIntent == 'EndChat'))
+			if (/*mess.Text__c == 'end chat' || */(respLuis != null && respLuis.sIntent == 'EndChat'))
 			{
 				Visitor__c vis = new Visitor__c();
 				vis.Id = visr.Id;
-				vis.Livechat_Session_Key__c =  null;
+				vis.Livechat_Session_Key__c = null;
 				vis.Livechat_Session_Id__c = null;
 				vis.Livechat_affinityToken__c = null;
 				update vis;
-				SM042_NexmoOut2.sendText(vis.CVCH__Id__c,SM010_Utils.translate('The chat is disconnected',vis.CVCH__language__c),vis.CVCH__Chat_Number__c,false);
+				SM042_NexmoOut2.sendText(vis.CVCH__Id__c, SM010_Utils.translate('The chat is disconnected', vis.CVCH__language__c), vis.CVCH__Chat_Number__c, false);
 			}
 			else
 			{
-				if(respLuis.sIntent == 'Image')
+				if (respLuis.sIntent == 'Image')
 				{
-					if(SM010_Utils.getChat2aiValue2('Skip LiveChat File S3 Upload') != 'TRUE')
+					if (SM010_Utils.getChat2aiValue2('Skip LiveChat File S3 Upload') != 'TRUE')
 					{
 						SM090_UploadS3.S3Output ret = SM090_UploadS3.getS3URL(mess.CVCH__Text__c);
-						if(ret.S3URL != null )
+						if (ret.S3URL != null)
 							mess.CVCH__Text__c = ret.S3URL;
 						else
-								throw new MyException('Error: '+ ret.Error);
+								throw new MyException('Error: ' + ret.Error);
 					}
 				}
 				SM093_LiveAgent.ChatMessage(mess.CVCH__Text__c, visr.Livechat_affinityToken__c, visr.CVCH__Livechat_Session_Key__c);
@@ -151,6 +151,7 @@ global class SM031_Nexmo
 				params.put('visphone', visr.CVCH__Id__c);
 				params.put('ChatNumber', visr.CVCH__Chat_Number__c);
 				params.put('channel', visr.CVCH__chanel__c);
+				params.put('originalmessage', mess.CVCH__Text__c);
 
 				if (visr.id == null && (Test.isRunningTest() || SM010_Utils.getChat2aiValue2('CREATE VISITOR BEFORE FLOWS') == 'TRUE'))
 					insert visr;
@@ -306,7 +307,7 @@ global class SM031_Nexmo
 					Schema.SObjectType leadSchema = schemaMap.get('CVCH__Visitor__c');
 					//System.debug('leadSchema = ' + leadSchema);
 					Map<String, Schema.SObjectField> fieldMap = leadSchema.getDescribe().fields.getMap();
-					if(mo.sFieldName != '' && mo.sFieldName != null)
+					if (mo.sFieldName != '' && mo.sFieldName != null)
 					{
 						try
 						{
@@ -341,33 +342,34 @@ global class SM031_Nexmo
 					{
 						Map<String, Object> params = new Map<String, Object>();
 
-						if(mo.flowParamsJSON != null && mo.flowParamsJSON != '')
+						if (mo.flowParamsJSON != null && mo.flowParamsJSON != '')
 						{
 							try
 							{
-								map<string,object> mParams2 = (map<string,object>)JSON.deserializeUntyped(mo.flowParamsJSON);
+								map<string, object> mParams2 = (map<string, object>) JSON.deserializeUntyped(mo.flowParamsJSON);
 								params.putAll(mParams2);
-							}catch(Exception e)
+							}
+							catch (Exception e)
 							{
 
 							}
 						}
 						params.put('visitorId', visr.id);
-						if(mo.sParamName != '' && mo.sParamName != null)
+						if (mo.sParamName != '' && mo.sParamName != null)
 						{
-							params.put(mo.sParamName,mess.Text__c);
+							params.put(mo.sParamName, mess.Text__c);
 						}
 
 						Flow.Interview flow = Flow.Interview.createInterview(mo.sFlow, params);
 						flow.start();
 						triggeredFlow = mo.sFlow;
 					}
-					if(mo.sFieldName == '' || mo.sFieldName == null)
+
+					if (mo.sFieldName == '' || mo.sFieldName == null)
 					{
-						Visitor__c vis = [select id, Context__c from Visitor__c where id = :v.Id];
-						if(v.Context__c == vis.Context__c)
+						if (bContextChanged != true)
 						{
-							vis.Context__c = '';
+							CVCH__Visitor__c vis = new CVCH__Visitor__c(id = v.Id, CVCH__Context__c = '');
 							update vis;
 						}
 					}
@@ -502,6 +504,7 @@ else
 			bRet = true;
 		return bRet;
 	}
+
 	global static CVCH__NexmoMessage__c getAzureMessage(Map<String, Object> m)
 	{
 		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
@@ -526,6 +529,26 @@ else
 		return mess;
 	}
 
+	private static NexmoMessage__c D360Message(Map<String, Object> mObj)
+	{
+		map<string, object> m = (map<string, object>) mObj.get('message');
+		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
+		mess.name = (string) m.get('id');
+		mess.CVCH__Channel__c = 'D360';
+		mess.CVCH__From__c = (string) m.get('from');
+		mess.From_Name__c = (string) JPath.get0(mObj, '/contacts/[1]/profile/name');
+		mess.CVCH__InputType__c = (string) m.get('type');
+		if (mess.CVCH__InputType__c == ' text')
+			mess.CVCH__Text__c = (string) ((map<string, object>) m.get('text')).get('body');
+		else if (mess.CVCH__InputType__c == 'image')
+			mess.ImageURL__c = (string) ((map<string, object>) m.get('image')).get('url');
+		else if (mess.CVCH__InputType__c == 'file')
+			mess.ImageURL__c = (string) ((map<string, object>) m.get('file')).get('url');
+		else if (mess.CVCH__InputType__c == 'button')
+			mess.CVCH__Text__c = (string) ((map<string, object>) m.get('button')).get('payload');
+		return mess;
+	}
+
 	global static CVCH__NexmoMessage__c parse(string jsonbody)
 	{
 		system.debug('parse.start ' + jsonbody);
@@ -534,7 +557,12 @@ else
 
 		string message_uuid = (string) m.get('message_uuid');
 		if (message_uuid == null && (string) m.get('type') != null)
+		{
+			if (m.containsKey('message'))
+				return D360Message(m);
 			return getAzureMessage(m);
+		}
+
 		map<string, object> mFrom = (map<string, object>) m.get('from');
 		string sFrom = SM010_Utils.phone((string) mFrom.get('number'));
 		string sChannel = (string) mFrom.get('type');
@@ -564,7 +592,7 @@ else
 			map<string, object> mImage = (map<string, object>) mcon.get('image');
 			mess.ImageURL__c = (string) mImage.get('url');
 		}
-		else if(mess.CVCH__InputType__c == 'file')
+		else if (mess.CVCH__InputType__c == 'file')
 		{
 			map<string, object> mImage = (map<string, object>) mcon.get('file');
 			mess.ImageURL__c = (string) mImage.get('url');
@@ -600,6 +628,7 @@ else
 		SM042_NexmoOut2.setInboundMessage(mess);
 		return mess;
 	}
+
 
 	public static CVCH__Visitor__c getVisitor(string sid, string sChatNumber, string channel)
 	{

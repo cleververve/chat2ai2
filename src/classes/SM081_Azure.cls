@@ -94,19 +94,6 @@ public with sharing class SM081_Azure
 			mContent.put('title', item.title);
 			latt.add(mAtt);
 		}
-//		map<string,object>mRecipient = new map<string,object>();
-//		mRecipient.put('name',mess.CVCH__To_Name__c);
-//		mRecipient.put('id',mess.CVCH__To__c);
-//		mRet.put('recipient',mRecipient);
-//		map<string,object>mConv = new map<string,object>();
-//		mConv.put('name',mess.CVCH__conversationId__c);
-//		mConv.put('id',mess.CVCH__conversationId__c);
-//		mRet.put('conversation',mConv);
-//		map<string,object>mFrom = new map<string,object>();
-//		mFrom.put('name',mess.CVCH__From_Name__c);
-//		mFrom.put('id',mess.CVCH__From__c);
-//		mRet.put('from',mFrom);
-//		mRet.put('type','message');
 		return JSON.serialize(mRet);
 	}
 
@@ -137,17 +124,11 @@ public with sharing class SM081_Azure
 		{
 			Option opt = lopt[i];
 			addButton(lButtons, opt);
-
 		}
-//		for (Option opt : mo.mOptions.values())
-//		{
-//			addButton(lButtons, opt);
-//		}
 
 		list<object>lIm = new list<object>();
 		mContent.put('images', lIm);
 		mContent.put('title', mo.sMessage);
-
 		return JSON.serialize(mRet);
 	}
 

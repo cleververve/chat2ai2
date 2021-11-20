@@ -1,0 +1,21 @@
+{
+    "contacts":[
+        {
+            "profile":{
+                "name":"Kerry Fisher"
+            },
+            "wa_id":"16315551234"
+        }
+    ],
+    "messages":[
+        {
+            "from":"16315551234",
+            "id":"ABGGFlA5FpafAgo6tHcNmNjXmuSf",
+            "timestamp":"1518694235",
+            "text":{
+                "body":"Hello this is an answer"
+            },
+            "type":"text"
+        }
+    ]
+}

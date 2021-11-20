@@ -14,7 +14,7 @@ public with sharing class LiveChatMonitor
 		string sKey = getChatKey(recordId);
 		list<CVCH__Visitor__c> lvisr =
 		[
-				SELECT id,CVCH__Id__c,CVCH__Chat_Number__c
+				SELECT id,CVCH__Id__c,CVCH__Chat_Number__c,CVCH__Livechat_Session_Id__c
 				from CVCH__Visitor__c
 				where CVCH__Livechat_Session_Id__c = :sKey
 		];

@@ -174,6 +174,7 @@ global class MessageOptions implements iMessage
 		{
 			system.debug('mOptions=' + mOptions);
 			visr.CVCH__Context__c = JSON.serialize(this);
+			SM031_Nexmo.bContextChanged = true;
 			system.debug('Context__c= ' + visr.CVCH__Context__c);
 		}
 		SM010_Utils.saveTran();
