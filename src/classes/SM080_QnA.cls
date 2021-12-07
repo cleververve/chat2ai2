@@ -53,11 +53,8 @@ global class SM080_QnA
 	global static QnAResponse queryPhrase(string sPhrase, integer qnaid, string language)
 	{
 		QnAResponse ret = new QnAResponse();
+		ret.dScore =0;
 		string sURL = 'callout:QnA';
-		//if(language != null && language != '' && language != 'en')
-		//{
-		//	sURL = sURL+'_'+language;
-		//}
 		system.debug('qna url='+sURL);
 		HttpResponse resp = SM003_Http.request(
 				sURL
@@ -88,5 +85,4 @@ global class SM080_QnA
 		}
 		return ret;
 	}
-
 }

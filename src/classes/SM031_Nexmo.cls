@@ -85,7 +85,7 @@ global class SM031_Nexmo
 
 			intentLUIS = respLuis.sIntent;
 
-			if (respLuis.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) && respQnA.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')))
+			if (respLuis.dScore < SM010_Utils.getMinResponseScore() && respQnA.dScore < SM010_Utils.getMinResponseScore())
 			{
 				if (tran.detectedlang != visr.language__c)
 					TriggerDefaultFlowChangeLang = true; // We will trigger Default Flow 2, if both scores are below set treshold and if user typed in different language
@@ -159,9 +159,12 @@ global class SM031_Nexmo
 					params.put('visitorId', visr.id);
 				system.debug('visitor=' + visr);
 
-				if (SM010_Utils.getChat2aiValue('Welcome Flow') != null && SM010_Utils.getChat2aiValue('Welcome Flow') != '')
-					Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Welcome Flow'), params).Start();
-				triggeredFlow = 'Welcome Flow';
+				string sFlow = SM010_Utils.getChat2aiValue2('Welcome Flow');
+				if (sFLow != '')
+				{
+					Flow.Interview.createInterview(sFLow, params).Start();
+					triggeredFlow = 'Welcome Flow';
+				}
 			}
 			else if (apexGDPR() && visr.CVCH__GDPR_Consent__c == 'No Access' && (visr.CVCH__Context__c == '' || visr.CVCH__Context__c == null)) //Restrict Non-GDPR users
 			{
@@ -199,22 +202,24 @@ global class SM031_Nexmo
 						params.put(opt.sName3, opt.sValue3);
 					Flow.Interview flow = Flow.Interview.createInterview(opt.sFlow, params);
 					flow.start();
+					triggeredFlow = 'GDPR Flow';
 				}
-				else
+				else if (SM010_Utils.getChat2aiValue2('GDPR Flow') !='')
 				{
 					Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('GDPR Flow'), params);
 					flow.start();
+					triggeredFlow = 'GDPR Flow';
 				}
-				triggeredFlow = 'GDPR Flow';
+
 			}
-			else if (!TriggerDefaultFlow && !TriggerDefaultFlowChangeLang && respLuis.dScore > respQnA.dScore && respLuis.sIntent == 'exit')
+			else if (!TriggerDefaultFlow && !TriggerDefaultFlowChangeLang && respLuis.dScore > respQnA.dScore && respLuis.sIntent == 'exit' && SM010_Utils.getChat2aiValue2('Main Menu Flow') != '')
 			{
 				system.debug('start flow: Main Menu Flow');
 				bProceeded = true;
 				Map<String, Object> params = new Map<String, Object>();
 				params.put('visitorId', visr.id);
 				params.put('originalmessage', mess.CVCH__Text__c);
-				Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Main Menu Flow'), params);
+				Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue2('Main Menu Flow'), params);
 				flow.start();
 				CVCH__Visitor__c v = new CVCH__Visitor__c(Id = visr.id, CVCH__Next_flow__c = null);
 				if (visr.Current_Flow__c != null && visr.Current_Flow__c != '')
@@ -416,7 +421,7 @@ global class SM031_Nexmo
 				}
 
 			}
-			if (!bProceeded && TriggerDefaultFlowChangeLang)
+			if (!bProceeded && TriggerDefaultFlowChangeLang && SM010_Utils.getChat2aiValue2('Default Flow 2') !='' )
 			{
 				system.debug('start flow: Default Flow 2');
 				//if (respLuis.dScore < Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) || (respLuis.dScore >= Decimal.valueOf(SM010_Utils.getChat2aiValue('Response minimum score')) && !(respLuis.sIntent == 'directions' || respLuis.sIntent == 'category search' || respLuis.sIntent == 'outlet search' || respLuis.sIntent == 'special opening hours' || respLuis.sIntent == 'opt out' || respLuis.sIntent == 'ikea'))) {
@@ -426,20 +431,20 @@ global class SM031_Nexmo
 				params.put('originalmessage', mess.Text__c);
 				params.put('language', tran.detectedlang);
 				params.put('visitorlanguage', visr.language__c);
-				Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow 2'), params);
+				Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue2('Default Flow 2'), params);
 				flow.start();// trigger default flow 2
 				triggeredFlow = 'Default Flow 2';
 //}
 
 			}
-			if (!bProceeded && TriggerDefaultFlow)
+			if (!bProceeded && TriggerDefaultFlow  && SM010_Utils.getChat2aiValue2('Default Flow') !='' )
 			{
 				system.debug('start flow: Default Flow');
 				bProceeded = true;
 				Map<String, Object> params = new Map<String, Object>();
 				params.put('visitorId', visr.id);
 				params.put('originalmessage', mess.Text__c);
-				Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue('Default Flow'), params);
+				Flow.Interview flow = Flow.Interview.createInterview(SM010_Utils.getChat2aiValue2('Default Flow'), params);
 				flow.start();// trigger default flow
 				triggeredFlow = 'Default Flow';
 //VF-438
@@ -531,7 +536,9 @@ else
 
 	private static NexmoMessage__c D360Message(Map<String, Object> mObj)
 	{
-		map<string, object> m = (map<string, object>) mObj.get('message');
+		system.debug('D360Message.start');
+		list<object> lMess = (list<object> ) mObj.get('messages');
+		map<string, object> m = (map<string, object>) lMess[0];
 		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
 		mess.name = (string) m.get('id');
 		mess.CVCH__Channel__c = 'D360';
@@ -546,6 +553,9 @@ else
 			mess.ImageURL__c = (string) ((map<string, object>) m.get('file')).get('url');
 		else if (mess.CVCH__InputType__c == 'button')
 			mess.CVCH__Text__c = (string) ((map<string, object>) m.get('button')).get('payload');
+		SM042_NexmoOut2.setInboundMessage(mess);
+		system.debug('D360Message.return');
+		system.debug(mess);
 		return mess;
 	}
 
@@ -555,11 +565,13 @@ else
 		Map<String, Object> m = (Map<String, Object>) JSON.deserializeUntyped(jsonbody);
 		system.debug(m);
 
+		if (m.containsKey('messages'))
+			return D360Message(m);
+
 		string message_uuid = (string) m.get('message_uuid');
 		if (message_uuid == null && (string) m.get('type') != null)
 		{
-			if (m.containsKey('message'))
-				return D360Message(m);
+
 			return getAzureMessage(m);
 		}
 
@@ -755,7 +767,7 @@ else
 		}
 		catch (Exception e)
 		{
-			system.debug('error: ' + e);
+			system.debug('error: ' + e.getMessage()+' '+e.getStackTraceString());
 			sendError(mess0, '' + e.getLineNumber() + ' ' + e.getMessage() + ' ' + e.getStackTraceString(), visr);
 			if (Test.isRunningTest())
 				throw e;

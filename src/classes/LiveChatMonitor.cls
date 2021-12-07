@@ -52,10 +52,14 @@ public with sharing class LiveChatMonitor
 	{
 		if (Test.isRunningTest())
 			return recordId;
-		return [
-				select id,ChatKey
-				from LiveChatTranscript
-				where id = :recordId
-		].ChatKey;
+		list<sobject> lObj = Database.query('select id,ChatKey from LiveChatTranscript where id = :recordId');
+		if(lObj.isEmpty())
+			throw new MyException('Can not find the Chat with the key '+recordId);
+		return (String) lObj[0].get('ChatKey');
+//		return [
+//				select id,ChatKey
+//				from LiveChatTranscript
+//				where id = :recordId
+//		].ChatKey;
 	}
 }

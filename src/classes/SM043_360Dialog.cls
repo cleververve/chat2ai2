@@ -7,122 +7,154 @@ Description:
 public with sharing class SM043_360Dialog
 {
 	/**
-	 * @param sTo
-	 * @param messageText
-	 * @param sFrom
+	 * sends the text message
+	 *
+	 * @param sTo client's phone number
+	 * @param messageText message text
 	 **/
-	public static void sendTextMessage(string sTo, string messageText, string sFrom)
+	public static void sendTextMessage(String sTo, String messageText)
 	{
-		Object o = SM003_Http.request(getMessagesURL(), 'POST', getHeaders(), JSON.serialize(getBodyText(sTo, messageText, sFrom)), 'D360OutText', null);
+		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(), JSON.serialize(getBodyText(sTo, messageText)), 'D360OutText', null, 'SM004_SMSMock');
 	}
 	/**
-	 * @param sTo
-	 * @param sImageURL
-	 * @param sFrom
+	 * @param sTo client's phone number
+	 * @param sImageURL image URL
+	 * @param caption image caption, not required
 	 **/
-	public static void sendImage(string sTo, string sImageURL, string sFrom)
+	public static void sendImage(String sTo, String sImageURL, String caption)
 	{
-		Object o = SM003_Http.request(getMessagesURL(), 'POST', getHeaders(), JSON.serialize(getImageBody(sTo, sImageURL, null, null)), 'D360OutImage', null);
+		sendLink(sTo,sImageURL,caption,'image' );
+//		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(), JSON.serialize(getImageBody(sTo, sImageURL, caption)), 'D360OutImage', null, 'SM004_SMSMock');
+	}
+
+	public static void sendVideo(String sTo, String sVideoURL, String caption)
+	{
+		sendLink(sTo,sVideoURL,caption,'video' );
+//		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(), JSON.serialize(getImageBody(sTo, sImageURL, caption)), 'D360OutImage', null, 'SM004_SMSMock');
+	}
+
+	public static void sendLink(String sTo, String sLinkURL, String caption,String sType)
+	{
+		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(), JSON.serialize(getLinkBody(sTo, sLinkURL, caption,sType)), 'D360Out'+sType, null, 'SM004_SMSMock');
+	}
+
+	/**
+	 * @param sTo client's phone number
+	 * @param type string, right now 'interactive' or 'template'
+	 * @param payload custom payload string or object
+	 **/
+	public static void sendCustom(String sTo, String type, Object payload)
+	{
+		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(), JSON.serialize(getCustomBody(sTo, payload, type)), 'D360OutCustom', null, 'SM004_SMSMock');
 	}
 	/**
-	 * @param sTo
-	 * @param type
-	 * @param payload
+	 * @return 360 dialog messages API URL
 	 **/
-	public static void sendCustom(string sTo, string type, object payload)
+	public static String getMessagesURL()
 	{
-		Object o = SM003_Http.request(getMessagesURL(), 'POST', getHeaders(), JSON.serialize(getCustomBody(sTo, payload, type)), 'D360OutCustom', null);
-	}
-	/**
-	 * @return
-	 **/
-	public static string getMessagesURL()
-	{
-		string sURL = SM010_Utils.getChat2aiValue2('D360URL');
-		string sRet = sURL + '/messages';
+		String sURL = SM010_Utils.getChat2aiValue2('D360URL');
+		String sRet = sURL + '/messages';
 		return sRet;
 	}
 	/**
-	 * @return
+	 * @return headers
 	 **/
-	public static map<string, string> getHeaders()
+	public static Map<String, String> getHeaders()
 	{
-		map<string, string>mRet = new map<string, string>();
+		Map<String, String>mRet = new Map<String, String>();
 		mRet.put('Accept', 'application/json');
-		mRet.put('D360-API-KEY', SM010_Utils.getChat2aiValue2('D360Key'));
+		mRet.put('Content-Type', 'application/json');
+		mRet.put('D360-API-KEY', SM010_Utils.getChat2aiValue2('D360-API-KEY'));
 		return mRet;
 	}
 	/**
-	 * @param sTo
+	 * @param sTo  client's phone number
 	 *
-	 * @return
+	 * @return template of request body
 	 **/
-	public static map<string, object> getBody(string sTo)
+	public static Map<String, Object> getBody(String sTo)
 	{
-		map<string, object>mRet = new map<string, object>();
-		mret.put('preview_url', false);
-		mret.put('recipient_type','individual');
+		Map<String, Object>mRet = new Map<String, Object>();
+		mRet.put('preview_url', false);
+		mRet.put('recipient_type', 'individual');
 
-		mret.put('to', sTo);
+		mRet.put('to', sTo);
 		return mRet;
 	}
 	/**
-	 * @param sTo
-	 * @param sText
-	 * @param sFrom
+	 * @param sTo client's phone number
+	 * @param sText message text
 	 *
-	 * @return
+	 * @return text message API body payload
 	 **/
-	public static map<string, object> getBodyText(string sTo, string sText, string sFrom)
+	public static Map<String, Object> getBodyText(String sTo, String sText)
 	{
-		map<string, object>mRet = getBody(sTo);
+		Map<String, Object>mRet = getBody(sTo);
 		mRet.put('type', 'text');
-		mRet.put('text', new map<string, object>
+		mRet.put('text', new Map<String, Object>
 		{
 				'body' => sText
 		});
 		return mRet;
 	}
 
-	/**
-	 * @param sTo
-	 * @param imageURL
-	 * @param caption
-	 * @param providerName
-	 *
-	 * @return
-	 **/
-	public static map<string, object> getImageBody(string sTo, string imageURL, string caption, string providerName)
-	{
-		map<string, object>mRet = getBody(sTo);
-		mRet.put('type', 'text');
-		map<string, object> mImage = new map<string, Object>();
-		mImage.put('link', imageURL);
-		if (caption != null && caption != '')
-		{
-			mImage.put('caption', caption);
-		}
-		mRet.put('image', mImage);
+//	/**
+//	 * @param sTo  client's phone number
+//	 * @param imageURL   image URL
+//	 * @param caption  image capture
+//	 *
+//	 * @return  API body payload
+//	 **/
+//	public static Map<String, Object> getImageBody(String sTo, String imageURL, String caption)
+//	{
+//		Map<String, Object>mRet = getBody(sTo);
+//		mRet.put('type', 'image');
+//		Map<String, Object> mImage = new Map<String, Object>();
+//		mImage.put('link', imageURL);
+//		if (caption != null && caption != '')
+//		{
+//			mImage.put('caption', caption);
+//		}
+//		mRet.put('image', mImage);
+//
+//		return mRet;
+//	}
 
-		return mRet;
-	}
-
 	/**
-	 * @param sTo
-	 * @param payload
-	 * @param sPayloadType
+	 * @param sTo  client's phone number
+	 * @param payload custom message payload
+	 * @param sPayloadType interactive or template
 	 *
-	 * @return
+	 * @return  API body payload
 	 **/
-	public static map<string, object> getCustomBody(string sTo, object payload, string sPayloadType)
+	public static Map<String, Object> getCustomBody(String sTo, Object payload, String sPayloadType)
 	{
-		map<string, object>mRet = new map<string, object>();
-		mret.put('to', sTo);
+		Map<String, Object>mRet = new Map<String, Object>();
+		mRet.put('to', sTo);
 		mRet.put('type', sPayloadType);
 		if (payload instanceof String)
-			mRet.put(sPayloadType, JSON.deserializeUntyped((string) payload));
+			mRet.put(sPayloadType, JSON.deserializeUntyped((String) payload));
 		else
 				mRet.put(sPayloadType, payload);
 		return mRet;
 	}
+
+	/**
+	 **/
+	public static Map<String, Object> getLinkBody(String sTo, String linkURL, String caption,string type)
+	{
+		Map<String, Object>mRet = getBody(sTo);
+		mRet.put('type', type);
+		Map<String, Object> mImage = new Map<String, Object>();
+		mImage.put('link', linkURL);
+		if (caption != null && caption != '')
+		{
+			mImage.put('caption', caption);
+		}
+		mRet.put(type, mImage);
+
+		return mRet;
+	}
+
+
 }

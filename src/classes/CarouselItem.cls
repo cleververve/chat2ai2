@@ -7,6 +7,7 @@ Description:
 global class CarouselItem
 {
 	@AuraEnabled @InvocableVariable global string imageURL;
+	@AuraEnabled @InvocableVariable global string videoURL;
 	@AuraEnabled @InvocableVariable global string title='';
 	@AuraEnabled @InvocableVariable global string subtitle='';
 	@AuraEnabled @InvocableVariable global string subtitle2='';

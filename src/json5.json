@@ -1,0 +1,21 @@
+{
+    "messages":[
+        {
+            "from":"380668657070",
+            "id":"ABEGOAZoZXBwAgo-sIa-DzGWaVND",
+            "text":{
+                "body":"567567"
+            },
+            "timestamp":"1637916988",
+            "type":"text"
+        }
+    ],
+    "contacts":[
+        {
+            "profile":{
+                "name":"Serhii Volynets"
+            },
+            "wa_id":"380668657070"
+        }
+    ]
+}

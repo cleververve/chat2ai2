@@ -40,7 +40,7 @@ global class SM003_Http
 		system.debug('request body is: '+body);
         HttpRequest request = buildRequest(headers, url, method.toUpperCase(), body);
 		HttpCalloutMock mock;
-		if (sMockName != null && (Test.isRunningTest() || SM010_Utils.getValue('MockEAI') == 'TRUE'))
+		if (sMockName != null && (Test.isRunningTest() || SM010_Utils.getChat2aiValue2('MockEAI') == 'TRUE'))
 		{
 			mock = (HttpCalloutMock) (Type.forName(sMockName).newInstance());
 			if (Test.isRunningTest())
@@ -56,7 +56,7 @@ global class SM003_Http
         {
 //            log('Request', request, getBodyForLog(request,callType));
             dtBeg = DateTime.now();
-			if(	SM010_Utils.getValue('MockEAI') == 'TRUE' && mock != null)
+			if(	SM010_Utils.getChat2aiValue2('MockEAI') == 'TRUE' && mock != null)
 				response = mock.respond(request);
 			else
             response = h.send(request);

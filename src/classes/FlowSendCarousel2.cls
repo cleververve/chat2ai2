@@ -26,6 +26,7 @@ global class FlowSendCarousel2
 		map<id,CVCH__Visitor__c> mVis = new map<id,CVCH__Visitor__c>(DM080_Visitor.getRecords(sids));
 		for(FlowSendCarousel2 inp : lParam)
 		{
+
 			CVCH__Visitor__c vis = mVis.get((id)inp.visitorId);
 			MessageOptions mo = new MessageOptions();
 			CarouselItem item = new CarouselItem();

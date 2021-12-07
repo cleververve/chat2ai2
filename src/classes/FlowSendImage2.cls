@@ -27,23 +27,14 @@ global class FlowSendImage2
 				inp.async = false;
 			CVCH__Visitor__c vis = mVis.get((id) inp.visitorId);
 
-//			if (SM042_NexmoOut2.getInboundChannel() == 'Azure')
-			{
-				MessageOptions mo = new MessageOptions();
-				CarouselItem item = new CarouselItem();
-				item.imageURL = inp.imageurl;
-				mo.lItems.add(item);
-				mo.sType = 'Carousel';
-				mo.visitorId = vis.Id;
-				SM042_NexmoOut2.sendComplexType(mo, vis.CVCH__Id__c, vis.CVCH__Chat_Number__c);
-			}
-//			else
-//			{
-//				if (inp.async)
-//					SM042_NexmoOut4.sendImageAsync(vis.CVCH__Id__c, vis.CVCH__Chat_Number__c, inp.imageURL);
-//				else
-//						SM042_NexmoOut4.sendImage(vis.CVCH__Id__c, vis.CVCH__Chat_Number__c, inp.imageURL);
-//			}
+			MessageOptions mo = new MessageOptions();
+			CarouselItem item = new CarouselItem();
+			item.imageURL = inp.imageurl;
+			mo.lItems.add(item);
+			mo.sType = 'Carousel';
+			mo.visitorId = vis.Id;
+			SM042_NexmoOut2.sendComplexType(mo, vis.CVCH__Id__c, vis.CVCH__Chat_Number__c);
+
 			SM042_NexmoOut2.pause(1000);
 		}
 	}

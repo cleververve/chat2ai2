@@ -10,7 +10,6 @@ global class FlowSendCustomMessage2
 	@AuraEnabled @InvocableVariable global string content;
 	@AuraEnabled @InvocableVariable global boolean async;
 
-
 	@InvocableMethod(label='Send Custom Message 2' description='sends a custom interactive message ')
 	global static void sendMessage(list<FlowSendCustomMessage2> lParam)
 	{

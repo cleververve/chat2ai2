@@ -307,17 +307,17 @@ global class SM010_Utils
     }
 
 
-    public static string getValue(string sName)
-    {
-        CVCH__Values__c val = CVCH__Values__c.getInstance(sName);
-        if(val == null)
-        {
-            if(Test.isRunningTest())
-                return '';
-            throw new MyException('Can\'t find '+sName+' in Values custom settings. Please notify admin.');
-        }
-        return val.CVCH__Value__c;
-    }
+//    public static string getValue(string sName)
+//    {
+//        CVCH__Values__c val = CVCH__Values__c.getInstance(sName);
+//        if(val == null)
+//        {
+//            if(Test.isRunningTest())
+//                return '';
+//            throw new MyException('Can\'t find '+sName+' in Values custom settings. Please notify admin.');
+//        }
+//        return val.CVCH__Value__c;
+//    }
     
     global static string getChat2aiValue(string sName)
     {
@@ -329,6 +329,17 @@ global class SM010_Utils
             throw new MyException('Can\'t find '+sName+' in Chat2ai 2 custom settings. Please notify admin.');
         }
         return val.CVCH__Value__c;
+    }
+
+    public static Decimal getMinResponseScore()
+    {
+        Decimal dRet = 40;
+        String sVal = SM010_Utils.getChat2aiValue2('Response minimum score');
+        if(sVal !='')
+        {
+            dRet = Decimal.valueOf(sVal);
+        }
+        return dRet;
     }
 
     public static string getChat2aiValue2(string sName)
@@ -515,7 +526,7 @@ global class SM010_Utils
             string sKey = getKey(str);
             sKeys.add(sKey);
         }
-        Boolean bIns = SM010_Utils.getValue('Insert Translations') == 'TRUE';
+        Boolean bIns = SM010_Utils.getChat2aiValue2('Insert Translations') != 'FALSE';
 
         string sQuery = 'select Id, key__c, default_value__c, '+sFieldName+' from Translation__c where  key__c in :sKeys and bFlow__c = false';
         system.debug('translate.sQuery = '+sQuery);

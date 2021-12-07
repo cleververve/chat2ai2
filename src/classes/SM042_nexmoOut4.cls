@@ -18,24 +18,6 @@ global class SM042_nexmoOut4
 	}
 
 
-	@future(CallOut=true)
-	global static void sendTextAsync(string sTo, string messageText,string sFrom,string sAuth)
-	{
-//		try
-//		{
-//			SM042_nexmoOut4.sendText(sTo,sFrom,messageText);
-//		}
-//		catch( Exception ex)
-//		{
-//			if(test.isRunningTest())
-//				throw ex;
-//		}
-//		finally
-//		{
-//			SM005_Logs.save();
-//		}
-	}
-
 	global static void sendText(string sTo,string sFrom, string messageText)
 	{
 		if (Test.isRunningTest())
@@ -118,43 +100,7 @@ global class SM042_nexmoOut4
 		return JSON.serialize(mret);//.replaceAll('%A9%','\r');//
 	}
 
-	@future(callout=true)
-	global static void sendImageAsync(string sTo,string sFrom, string sImageURL)
-    {
-//        sendImage(sTo,sFrom,sImageURL);
-    }
 
-	global static void sendImage(string sTo,string sFrom, string sImageURL)
-	{
-//		if (Test.isRunningTest())
-//			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-//		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyImage(sTo, sImageURL,sFrom), 'NexmoOut2', null);
-	}
-
-//	global static string getBodyImage(string sTo,string imageURL,string sFrom)
-//	{
-//		map<string,object> mret = new map<string,object>();
-//		map<string,string> mFrom = new map<string,string>();
-//		mFrom.put('type','whatsapp');
-//		mFrom.put('number',sFrom);
-//		mret.put('from', mFrom);
-//
-//
-//		map<string,string> mTo = new map<string,string>();
-//		mTo.put('type','whatsapp');
-//		mTo.put('number',sTo);
-//		mret.put('to', mTo);
-//
-//		map<string,object> mMess = new map<string,object>();
-//		map<string,object> mCont = new map<string,object>();
-//		mCont.put('type', 'image');
-//		map <string,object> mImage = new map<string,object>();
-//		mImage.put('url',imageURL);
-//		mCont.put('image', mImage);
-//		mMess.put('content',mCont);
-//		mret.put('message', mMess);
-//		return JSON.serialize(mret).replaceAll('\\n','\n');
-//	}
 
     @future(Callout=true)
 	global static void sendFile(string sTo,string sFrom, string sFile,string sCaption)
@@ -192,7 +138,7 @@ global class SM042_nexmoOut4
 		SM010_Utils.addResponse(mCont);
 		return JSON.serialize(mret);
 	}
-    
+
     @future(Callout=true)
 	global static void sendVideo(string sTo,string sFrom, string sVideoURL, string sCaption)
 	{
@@ -227,84 +173,61 @@ global class SM042_nexmoOut4
 		mret.put('message', mMess);
 		return JSON.serialize(mret);
 	}
-//	public static void sendTemplate(string sTo, string sFrom, string snamespace, string sTemplate)
-//	{
-//		if (Test.isRunningTest())
-//			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-//		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getMDMbody(sTo, sFrom,snamespace,sTemplate), 'NexmoOut2MDM', null);
-//
-//	}
 
-	//	public static string getMDMbody(string sTo,string sFrom, string sNamespace, string sTemplateName)
-//	{
-//		map<string, object> mRet = new map<string,object>();
-//		map<string,object> mMess = new map<string,object>();
-//		map<string,object> mContent = new map<string,object>();
-//		map<string,object> mTemplate = new map<string,object>();
-//		map<string, object> mFrom = new map<string,object>();
-//		map<string, object> mTo = new map<string,object>();
-//		mRet.put('message',mMess);
-//		mMess.put('content',mContent);
-//		mContent.put('template',mTemplate);
-//		mContent.put('type','template');
-//		mRet.put('from',mFrom);
-//		mRet.put('to',mTo);
-//
-//
-//		mTo.put('type','whatsapp');
-//		mTo.put('number',sTo);
-//
-//		mFrom.put('type','whatsapp');
-//		mFrom.put('number',sFrom);
-//
-//		mTemplate.put('parameters',new list<object>());
-//		mTemplate.put('name',sNamespace+':'+sTemplateName);
-//
-//		string sRet = JSON.serialize(mRet);
-//		return sRet;
-//
-//	}
+	@future(CallOut=true)
+	global static void sendTextAsync(string sTo, string messageText,string sFrom,string sAuth)
+	{
+	}
+	@future(callout=true)
+	global static void sendImageAsync(string sTo,string sFrom, string sImageURL)
+	{
+	}
 
-//    public static void send(string sTo, string sFrom, string message, string payload, string url, string type)
-//    {
-//
-//
-//    }
+	global static void sendImage(string sTo,string sFrom, string sImageURL)
+	{
 
-//	public static void sendButton(string sTo, string sFrom ,string payload, string text)
-//	{
-//		if (Test.isRunningTest())
-//			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-//		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyButton(sTo,sFrom,  payload,text), 'NexmoOut2', null);
-//
-//	}
+	}
+
+	global static void sendImage(string sTo, string sFrom, string imageurl, string caption)
+	{
+		if (Test.isRunningTest())
+			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyImage(sTo, sFrom, imageurl, caption), 'NexmoOut2', null);
+	}
 
 
-//	public static string getBodyButton(string sTo,string sFrom,string payload,string text)
-//	{
-//		map<string,object> mret = new map<string,object>();
-//		map<string,string> mFrom = new map<string,string>();
-//		mFrom.put('type','whatsapp');
-//		mFrom.put('number',sFrom);
-//		mret.put('from', mFrom);
-//
-//
-//		map<string,string> mTo = new map<string,string>();
-//		mTo.put('type','whatsapp');
-//		mTo.put('number',sTo);
-//		mret.put('to', mTo);
-//
-//		map<string,object> mMess = new map<string,object>();
-//		map<string,object> mCont = new map<string,object>();
-//		map<string,string> mButton = new map<string,string>();
-//		mCont.put('type', 'button');
-//
-//		mCont.put('button', mButton);
-//		mMess.put('content',mCont);
-//		mret.put('message', mMess);
-//		mButton.put('payload',payload);
-//		mButton.put('text',text);
-//		return JSON.serialize(mret);
-//	}
+	private static string getBodyImage(string sTo, string sFrom, string imageURL, string sCaption)
+	{
+		map<string, object> mret = new map<string, object>();
+		map<string, string> mFrom = new map<string, string>();
+		mFrom.put('type', 'whatsapp');
+		mFrom.put('number', sFrom);
+		mret.put('from', mFrom);
+
+
+		map<string, string> mTo = new map<string, string>();
+		mTo.put('type', 'whatsapp');
+		mTo.put('number', sTo);
+		mret.put('to', mTo);
+
+		map<string, object> mMess = new map<string, object>();
+		map<string, object> mCont = new map<string, object>();
+		mCont.put('type', 'image');
+		map <string, object> mImage = new map<string, object>();
+		mImage.put('url', imageURL);
+		if (sCaption != null)
+			mImage.put('caption', sCaption.replaceAll('/n/r', '\n'));
+		mCont.put('image', mImage);
+		mMess.put('content', mCont);
+		mret.put('message', mMess);
+		return JSON.serialize(mret).replaceAll('\\n', '\n');
+	}
+
+	global static string getBodyImage(string sTo,string imageURL,string sFrom)
+	{
+		return null;
+	}
+
+
 
 }
