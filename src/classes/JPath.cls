@@ -35,8 +35,12 @@ global class JPath
 			sr += '/' + s;
 		if (sr == '')
 			context.data = null;
-		system.debug(sr + ' and the path ' + path);
+		debug(sr + ' and the path ' + path);
 		return sr.removeStart('/') == path.removeStart('/');
+	}
+	static void debug(object o)
+	{
+	//	system.debug(o);
 	}
 	static void processList(JPathCOntext context, object untypedObjectThatWeKnowIsAList)
 	{
@@ -56,10 +60,10 @@ global class JPath
 			//remove the predicate in case it has
 			evalPredicate(context, false);
 
-			system.debug('value to search starting with a name after removing the predicate ' + context.toSearch);
+			debug('value to search starting with a name after removing the predicate ' + context.toSearch);
 
 			List<object> tmpd = (list<object>) untypedObjectThatWeKnowIsAList;
-			system.debug(tmpd + ' list of results ');
+			debug(tmpd + ' list of results ');
 			if (tmpd.size() > 0)
 			{
 				object o = null;
@@ -68,17 +72,17 @@ global class JPath
 				{
 					o = tmpd[i];
 
-					system.debug(o + ' object to check ');
+					debug(o + ' object to check ');
 					//looking for specific column values within the list items
 					if (ismap(o))
 					{
-						system.debug('is a map ' + o);
+						debug('is a map ' + o);
 						Map<string, object> omap = (Map<string, object>) o;
 
 						if (omap.containsKey(context.toSearch))
 						{
 
-							system.debug('found object by name in list ' + omap.get(context.toSearch));
+							debug('found object by name in list ' + omap.get(context.toSearch));
 							tmpFoundObjects.add(omap.get(context.toSearch));
 						}
 					}
@@ -94,7 +98,7 @@ global class JPath
 								Map<string, object> omap = (Map<string, object>) secondO;
 								if (omap.containsKey(context.toSearch))
 								{
-									system.debug('found match from list matching ' + omap.get(context.toSearch));
+									debug('found match from list matching ' + omap.get(context.toSearch));
 									tmpFoundObjects.add(omap.get(context.toSearch));
 								}
 							}
@@ -103,9 +107,9 @@ global class JPath
 				}
 
 
-				system.debug('data found ' + tmpFoundObjects);
-				system.debug('apply predicate ' + context.ApplyPredicate);
-				system.debug('predicate position ' + context.positionPredicate);
+				debug('data found ' + tmpFoundObjects);
+				debug('apply predicate ' + context.ApplyPredicate);
+				debug('predicate position ' + context.positionPredicate);
 
 				if (tmpFoundObjects.size() > 0)
 				{
@@ -140,14 +144,14 @@ global class JPath
 	}
 	static void processMap(JPathContext context, Map<string, object> mapData)
 	{
-		system.debug('toSearch in processmap ' + context.toSearch);
+		debug('toSearch in processmap ' + context.toSearch);
 		if (mapData.containsKey(context.toSearch))
 		{
 
 			context.data = mapData.get(context.toSearch);
-			system.debug('applyPredicate ' + context.applyPredicate);
-			system.debug('predicateToSearch ' + context.predicateToSearch);
-			system.debug('prediate position ' + context.positionPredicate);
+			debug('applyPredicate ' + context.applyPredicate);
+			debug('predicateToSearch ' + context.predicateToSearch);
+			debug('prediate position ' + context.positionPredicate);
 			if (context.applyPredicate)
 			{
 				applyRootPredicateForList(context);
@@ -169,11 +173,11 @@ global class JPath
 		if (context.data instanceof list<object>)
 		{
 			tmpd = (List<object>) context.data;
-			system.debug('its a list for index calculation');
-			system.debug('data ' + context.data);
-			system.debug(tmpd.size());
-			system.debug(tmpd[0]);
-			system.debug(context.positionPredicate);
+			debug('its a list for index calculation');
+			debug('data ' + context.data);
+			debug(tmpd.size());
+			debug(tmpd[0]);
+			debug(context.positionPredicate);
 
 
 		}
@@ -185,14 +189,14 @@ global class JPath
 			};
 		}
 
-		system.debug('search context apply predicate ' + context.toSearch);
+		debug('search context apply predicate ' + context.toSearch);
 
 		string fpath = '';
 		if (context.toSearch != context.predicateToSearch)//'['+context.positionPredicate+']')
 			fpath = context.toSearch + context.predicateToSearch;//+ '['+context.positionPredicate+']';
 		else fpath = context.predicateToSearch; //'['+context.positionPredicate+']';
 
-		system.debug('fpath ' + fpath);
+		debug('fpath ' + fpath);
 
 		CompositeSpecification specific = context.predicateRuleEvaluators.get(context.predicateTypeFound);
 
@@ -203,7 +207,7 @@ global class JPath
 		{
 			context.data = specific.getObjects();
 
-			system.debug('data after getting index ' + context.data);
+			debug('data after getting index ' + context.data);
 			if (context.foundPaths.size() == 0)
 				context.foundPaths.add(fpath);
 			else if (context.foundPaths.size() > 0 && context.foundPaths[context.foundPaths.size() - 1] != fpath)
@@ -228,7 +232,7 @@ global class JPath
 
 			string rawPredicate = context.toSearch.substringBetween('[', ']');
 			context.predicateToSearch = '[' + rawPredicate + ']';
-			system.debug('scope parser ' + rawPredicate + ' ' + context.predicateToSearch);
+			debug('scope parser ' + rawPredicate + ' ' + context.predicateToSearch);
 
 			CompositeSpecification indexSpecification = context.predicateRuleEvaluators.get('index').setPredicate(rawPredicate);
 			CompositeSpecification atributeSpecification = context.predicateRuleEvaluators.get('attribute').setPredicate(rawPredicate);
@@ -244,7 +248,7 @@ global class JPath
 
 		}
 
-		system.debug('tosearch from evalpredicate ' + context.toSearch);
+		debug('tosearch from evalpredicate ' + context.toSearch);
 
 	}
 	static void eval(JPathContext context, string pathToProcess, boolean isAList)
@@ -255,7 +259,7 @@ global class JPath
 
 		context.processingPath = pathToProcess;
 
-		system.debug('processing from eval ' + context.processingPath);
+		debug('processing from eval ' + context.processingPath);
 		if (context.processingPath.startsWith('[') && isAList == true)
 			evalPredicate(context, true);
 		else if (isAList != true)
@@ -264,7 +268,7 @@ global class JPath
 		/*if(context.processingPath.contains('/') ){
 context.toSearch= context.processingPath.substring(0,context.processingPath.indexOf('/'));
 
-system.debug('to search = '+ context.tosearch);
+debug('to search = '+ context.tosearch);
 
 context.processingPath = context.processingPath.substring(context.toSearch.length() + 1,context.processingPath.length());
 }
@@ -275,16 +279,16 @@ context.toSearch = context.processingPath;*/
 	}
 	static void compileQuery(JPathContext context, object untypedJson)
 	{
-		//	system.debug('compileQuery('+context+')');
+		//	debug('compileQuery('+context+')');
 		object dataToWork = (untypedJson == null) ? context.data : untypedJson;
 		context.cleanSearches();
 		if (isMap(dataToWork))
 		{
 			eval(context, context.popPath(), false);
-			system.debug(context.transPaths);
-			system.debug('target paths ' + context.targetPaths);
-			system.debug('is a map for the first time');
-			system.debug('to search before removing the starting predicates ' + context.toSearch);
+			debug(context.transPaths);
+			debug('target paths ' + context.targetPaths);
+			debug('is a map for the first time');
+			debug('to search before removing the starting predicates ' + context.toSearch);
 			Map<String, Object> rootMap = (Map<String, Object>) dataToWork;
 			processMap(context, rootMap);
 
@@ -292,14 +296,14 @@ context.toSearch = context.processingPath;*/
 		else if (isList(dataToWork))
 		{
 			eval(context, context.popPath(), true);
-			system.debug(context.transPaths);
-			system.debug('is a list for the first time');
-			system.debug('to search before removing the starting predicates ' + context.toSearch);
-			system.debug(context.foundPaths);
+			debug(context.transPaths);
+			debug('is a list for the first time');
+			debug('to search before removing the starting predicates ' + context.toSearch);
+			debug(context.foundPaths);
 			string sr = '';
 			for (string s : context.foundPaths)
 				sr += s;
-			system.debug(sr);
+			debug(sr);
 			processList(context, dataToWork);
 		}
 	}
@@ -315,19 +319,19 @@ context.toSearch = context.processingPath;*/
 			for (integer j = 0; j < context.targetPaths.size(); j++)
 			{
 
-				system.debug('initial path = ' + context.processingPath);
-				system.debug('nextPath = ' + context.toSearch);
+				debug('initial path = ' + context.processingPath);
+				debug('nextPath = ' + context.toSearch);
 
 				compileQuery(context, ((j == 0) ? untypedJson : null));
 
-				system.debug('processing ' + context.processingPath);
-				system.debug('data ' + context.data);
+				debug('processing ' + context.processingPath);
+				debug('data ' + context.data);
 
 				if (searchComplete(context, path))
 				{
-					system.debug('break!');
-					system.debug('targetPaths ' + context.transPaths);
-					system.debug('i ' + j);
+					debug('break!');
+					debug('targetPaths ' + context.transPaths);
+					debug('i ' + j);
 					break;
 
 				}
@@ -415,14 +419,14 @@ context.toSearch = context.processingPath;*/
 			string result = null;
 			if (transPaths != null && transPaths.size() > 0)
 			{
-				system.debug('target paths ' + targetPaths);
-				system.debug('trans paths ' + transPaths);
+				debug('target paths ' + targetPaths);
+				debug('trans paths ' + transPaths);
 
 				result = transPaths.remove(0);
 
-				system.debug('poppath ' + result);
-				system.debug('trans paths ' + transPaths);
-				system.debug('target paths ' + targetPaths);
+				debug('poppath ' + result);
+				debug('trans paths ' + transPaths);
+				debug('target paths ' + targetPaths);
 			}
 			return result;
 
@@ -630,7 +634,7 @@ context.toSearch = context.processingPath;*/
 		{
 			this.rawPredicate = predicate;
 			setIndex();
-			system.debug(' scope parser attribute predicate specification ' + predicate);
+			debug(' scope parser attribute predicate specification ' + predicate);
 			filter = new RecordsFilter(predicate);
 			return this;
 		}
@@ -735,7 +739,7 @@ context.toSearch = context.processingPath;*/
 			boolean innerScopesResult = MoreScopes.size() > 0;
 
 
-			system.debug('scope evaluation ' + rawExpression + ' operatorScope ' + operatorScope + ' scopeONly ' + scopeOnly + ' isopen ' + isOpen + ' innerexpressiosn ' + MoreScopes.size());
+			debug('scope evaluation ' + rawExpression + ' operatorScope ' + operatorScope + ' scopeONly ' + scopeOnly + ' isopen ' + isOpen + ' innerexpressiosn ' + MoreScopes.size());
 
 			if (!scopeOnly)
 			{
@@ -744,7 +748,7 @@ context.toSearch = context.processingPath;*/
 				for (ExpressionForMap exp : andExpressions)
 				{
 					andExpressionFlag = exp.compile(o, '&&');
-					system.debug('scope evaluation and expression evaluation = ' + andExpressionFlag + ' definition = ' + exp.operations + ' ' + o);
+					debug('scope evaluation and expression evaluation = ' + andExpressionFlag + ' definition = ' + exp.operations + ' ' + o);
 					if (!andExpressionFlag)
 						break;
 				}
@@ -753,7 +757,7 @@ context.toSearch = context.processingPath;*/
 				for (ExpressionForMap exp : orExpressions)
 				{
 					orExpressionFlag = exp.compile(o, '||');
-					system.debug('scope evaluation or  expression evaluation = ' + orExpressionFlag + ' definition = ' + exp.operations + ' ' + o);
+					debug('scope evaluation or  expression evaluation = ' + orExpressionFlag + ' definition = ' + exp.operations + ' ' + o);
 					if (orExpressionFlag)
 						break;
 				}
@@ -797,7 +801,7 @@ context.toSearch = context.processingPath;*/
 					(orResult || (andResult && innerExpResult))
 			);
 			// (operatorScope == null || operatorScope == '&&') ? (andResult && orResult ) : (operatorScope == '||' ? (andResult || orResult ) : false));
-			system.debug(operatorScope + ' scope inner scope evaluation = ' + finalResult + ' scope only ' + scopeOnly + ' final expression ' + rawExpression + ' object= ' + o);
+			debug(operatorScope + ' scope inner scope evaluation = ' + finalResult + ' scope only ' + scopeOnly + ' final expression ' + rawExpression + ' object= ' + o);
 			return finalResult;
 
 		}
@@ -826,7 +830,7 @@ context.toSearch = context.processingPath;*/
 					if (s.contains(token))
 					{
 						components = s.split(token);
-						system.debug(components);
+						debug(components);
 						leftSide = components[0];
 						rightSide = components[1];
 
@@ -883,7 +887,7 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 
 				for (string operator : operations.keyset())
 				{
-					system.debug('operator ' + operator + ' components ' + operations.get(operator));
+					debug('operator ' + operator + ' components ' + operations.get(operator));
 
 					for (Map<string, object> components : operations.get(operator))
 					{
@@ -894,7 +898,7 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 							if (result = mapRecord.containsKey(attr))
 							{
 								object v = mapRecord.get(attr);
-								system.debug(' value = ' + v + ' attr = ' + attr + ' component = ' + components.get(attr));
+								debug(' value = ' + v + ' attr = ' + attr + ' component = ' + components.get(attr));
 								result = supportedTokens.get(operator).Eval(v, components.get(attr));
 								if ((logicalOperator == '||' && result) || (logicalOperator == '&&' && !result))
 									break;
@@ -917,7 +921,7 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 			}
 
 
-			system.debug('final result from the valuation = ' + result);
+			debug('final result from the valuation = ' + result);
 			return result;
 		}
 		string trimStartQuote(string value)
@@ -954,7 +958,7 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 		public ScopeParser(string predicate)
 		{
 			Scopes = new set<EvaluationScopeDefinition>();
-			system.debug('scope parser ' + predicate);
+			debug('scope parser ' + predicate);
 			this.rawPredicate = predicate;
 			this.supportedTokens = new map<string, SupportedOPerator>
 			{
@@ -976,7 +980,7 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 			resd.orExpressions = new List<JPath.ExpressionForMap>();
 			resd.MoreScopes = new List<JPath.EvaluationScopeDefinition>();
 			resd.rawExpression = rawPredicate;
-			system.debug('scope parser ' + resd.rawExpression);
+			debug('scope parser ' + resd.rawExpression);
 			OpenEvalScopes.add(resd);
 
 			integer openParenthesis = 0;
@@ -997,7 +1001,7 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 
 				string leftChars = rawPredicate.substring(i, i + 1);
 
-				system.debug(leftChars);
+				debug(leftChars);
 
 				if (leftChars == '"' && !openDoubleQuote)
 				{
@@ -1071,7 +1075,7 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 					integer lastOPenParenthesis = openParenthesisIndexes.remove(openParenthesisIndexes.size() - 1);
 					string expression = rawPredicate.substring(lastOPenParenthesis, lastClosedParenthesisIndex + 1);
 					lastOPenScope.rawExpression = expression;
-					system.debug(' scope parser ' + expression);
+					debug(' scope parser ' + expression);
 
 					BuildExpressionMap(expression, lastOpenScope);
 
@@ -1083,20 +1087,20 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 			BuildExpressionMap(rawPredicate, resd);
 
 			scopes.add(resd);
-			system.debug(' scope parser scopes total ' + scopes);
+			debug(' scope parser scopes total ' + scopes);
 		}
 
 		public void BuildExpressionMap(string expression, EvaluationScopeDefinition lastOpenScope)
 		{
 			List<string> separatedAndExp = new List<string>();
 			List<string> separatedOrExp = new List<string>();
-			system.debug('scope parser full expre  ' + lastOpenScope.rawExpression);
+			debug('scope parser full expre  ' + lastOpenScope.rawExpression);
 			for (EvaluationScopeDefinition innerScope : lastOpenScope.moreScopes)
 			{
-				system.debug(' scope parser inner scope to remove ' + innerScope.rawExpression);
-				system.debug('expression is ' + expression);
+				debug(' scope parser inner scope to remove ' + innerScope.rawExpression);
+				debug('expression is ' + expression);
 				expression = expression.remove(innerScope.rawExpression);
-				system.debug('expression result is ' + expression);
+				debug('expression result is ' + expression);
 
 			}
 
@@ -1110,7 +1114,7 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 			{
 
 				List<string> splited = expression.trim().split('&&');
-				system.debug('scope parser && ' + splited);
+				debug('scope parser && ' + splited);
 				for (string s : splited)
 				{
 
@@ -1134,7 +1138,7 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 			else if (expression.contains('||'))
 			{
 				List<string> splited = expression.trim().split('\\|\\|');
-				system.debug('scope parser || ' + splited);
+				debug('scope parser || ' + splited);
 				for (string s : splited)
 				{
 					if (s.contains('&&'))
@@ -1156,12 +1160,12 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 			if (separatedAndExp.size() > 0 && lastOpenScope.scopeOnly != true)
 			{
 				lastOpenScope.AndExpressions.add(new ExpressionForMap(separatedAndExp, supportedTokens));
-				system.debug('scope parser size of separated and exp ' + separatedAndExp.size() + ' ' + separatedAndExp);
+				debug('scope parser size of separated and exp ' + separatedAndExp.size() + ' ' + separatedAndExp);
 			}
 			if (separatedOrExp.size() > 0 && lastOpenScope.scopeOnly != true)
 			{
 				lastOpenScope.OrExpressions.add(new ExpressionForMap(separatedOrExp, supportedTokens));
-				system.debug('scope parser size of separated or exp ' + separatedOrExp.size() + ' ' + separatedOrExp);
+				debug('scope parser size of separated or exp ' + separatedOrExp.size() + ' ' + separatedOrExp);
 			}
 
 			if (separatedAndExp.size() <= 0 && separatedOrExp.size() <= 0 && lastOpenScope.scopeOnly != true)
@@ -1170,12 +1174,12 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 				{
 						expression.remove('(').remove(')')
 				}, supportedTokens));
-				system.debug(lastOpenScope.MoreScopes.size() + ' scope parser size of expression and exp ' + expression);
+				debug(lastOpenScope.MoreScopes.size() + ' scope parser size of expression and exp ' + expression);
 			}
 
 			//lastOpenScope.operatorScope = lastOpenScope.operatorScope == null ? '&&' : lastOpenScope.operatorScope;
 
-			system.debug(lastOpenScope.operatorScope + 'scope parser separated and, or ' + lastOpenScope.AndExpressions + ' ' + lastOpenScope.OrExpressions + ' full expre ' + expression + ' scope only ' + lastOpenScope.scopeOnly);
+			debug(lastOpenScope.operatorScope + 'scope parser separated and, or ' + lastOpenScope.AndExpressions + ' ' + lastOpenScope.OrExpressions + ' full expre ' + expression + ' scope only ' + lastOpenScope.scopeOnly);
 
 
 		}
@@ -1193,11 +1197,11 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 
 				if (!result)
 				{
-					system.debug('break ' + toTest.substring(i, i + 1)); break;
+					debug('break ' + toTest.substring(i, i + 1)); break;
 				}
 
 			}
-			system.debug('is scope only evaluation  size ' + expression.length() + ' ' + result + ' ' + toTest);
+			debug('is scope only evaluation  size ' + expression.length() + ' ' + result + ' ' + toTest);
 			return result;
 		}
 
@@ -1212,7 +1216,7 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 		}
 		public override boolean Eval(object leftSide, object rightSide)
 		{
-			system.debug(' left side = ' + leftSide + ' right side = ' + rightside + ' ' + (leftside == rightside));
+			debug(' left side = ' + leftSide + ' right side = ' + rightside + ' ' + (leftside == rightside));
 			return leftSide == rightSide;
 		}
 		public override string getOperatorStr()
@@ -1356,7 +1360,7 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 		public set<EvaluationScopeDefinition> scopes;
 		public RecordsFilter(string conditionalExpression)
 		{
-			system.debug('scope parser ' + conditionalExpression);
+			debug('scope parser ' + conditionalExpression);
 			//expression parser
 			ScopeParser parser = new ScopeParser(conditionalExpression);
 			scopes = parser.Scopes;
@@ -1374,19 +1378,19 @@ this.operations.get(token).add(new map<string,object> {rightSide => leftSide.rem
 				{
 
 					passValidation = evalScope.EvaluateAllExpressions(o);
-					system.debug(scopes.size() + 'scope evaluation = ' + passValidation + ' object = ' + o);
+					debug(scopes.size() + 'scope evaluation = ' + passValidation + ' object = ' + o);
 					//if(!passValidation)
 					//  break;
 
 				}
 				if (passValidation)
 				{
-					system.debug('scope evaluation pass validation ' + o);
+					debug('scope evaluation pass validation ' + o);
 					result.add(o);
 				}
 				else
 				{
-					system.debug('scope evaluation didnt pass validation ' + o);
+					debug('scope evaluation didnt pass validation ' + o);
 				}
 			}
 

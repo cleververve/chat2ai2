@@ -32,4 +32,18 @@ public class FlowSendCustomMessageTest
         Test.stopTest();
     }
 
+    @IsTest
+    public static void sendMTM()
+    {
+        TestDataFactory data = new TestDataFactory();
+        FlowSendMTM inp = new FlowSendMTM();
+        inp.visitorId = data.vis.id;
+        inp.async = false;
+        inp.content = '{}';
+        inp.locale = '';
+        Test.startTest();
+        FlowSendMTM.sendMessage(new list<FlowSendMTM>{inp});
+        Test.stopTest();
+    }
+
 }

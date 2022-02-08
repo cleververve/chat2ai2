@@ -6,63 +6,78 @@ Description:
 
 global class SM093_LiveAgent
 {
-	public static string X_LIVEAGENT_API_VERSION = '45';
-	public static string sMockName = 'SM093_LiveAgentMock';
+	public static String X_LIVEAGENT_API_VERSION = '45';
+	public static String sMockName = 'SM093_LiveAgentMock';
 	global class InitSessionResponse
 	{
-		public string key;
-		public string id;
-		public integer clientPollTimeout;
-		public string affinityToken;
+		public String key;
+		public String id;
+		public Integer clientPollTimeout;
+		public String affinityToken;
 	}
-	global static InitSessionResponse initSession(string clientAffinity)
+	global static InitSessionResponse initSession(String clientAffinity)
 	{
 		HttpResponse resp = SM003_Http.request(
-				SM010_Utils.getChat2aiValue('Chat URL')+'System/SessionId',
+				SM010_Utils.getChat2aiValue('Chat URL') + 'System/SessionId',
 				'GET',
-				new map<string,string>{'X-LIVEAGENT-API-VERSION'=> X_LIVEAGENT_API_VERSION,'X-LIVEAGENT-AFFINITY' => clientAffinity},
-				null,'Salesforce Chat SessionId',
+				new Map<String, String>
+				{
+						'X-LIVEAGENT-API-VERSION' => X_LIVEAGENT_API_VERSION, 'X-LIVEAGENT-AFFINITY' => clientAffinity
+				},
+				null, 'Salesforce Chat SessionId',
 				null,
 				sMockName
 		);
-		map<string,object> mObj = (map<string,object>)JSON.deserializeUntyped(resp.getBody());
+		Map<String, Object> mObj = (Map<String, Object>) JSON.deserializeUntyped(resp.getBody());
 		InitSessionResponse ret = new InitSessionResponse();
-		ret.key= (string)mObj.get('key');
-		ret.id = (string)mObj.get('id');
-		ret.clientPollTimeout = (integer) mObj.get('clientPollTimeout');
-		ret.affinityToken = (string) mObj.get('affinityToken');
+		ret.key = (String) mObj.get('key');
+		ret.id = (String) mObj.get('id');
+		ret.clientPollTimeout = (Integer) mObj.get('clientPollTimeout');
+		ret.affinityToken = (String) mObj.get('affinityToken');
 		return ret;
 	}
 
 
-
-	public static string getBody(string sessionId,string sVisitorName)
+	public static String getBody(String sessionId, String sVisitorName, string sDetails)
 	{
-		string orgId = SM010_Utils.getChat2aiValue2('Org ID');
-		string deploymentId = SM010_Utils.getChat2aiValue2('Chat Deployment ID');
-		string buttonId = SM010_Utils.getChat2aiValue2('Chat Button ID');
-		return '{ "sessionId": "'+sessionId+'", "organizationId": "'+orgId+'", "deploymentId": "'+deploymentId+'", "buttonId": "'+buttonId+'", "userAgent": "", "language": "en-US", "screenResolution": "1900x1080", "visitorName": "'+sVisitorName+'", "prechatDetails": [], "prechatEntities": [], "receiveQueueUpdates": true, "isPost": true }';
+		String orgId = SM010_Utils.getChat2aiValue2('Org ID');
+		String deploymentId = SM010_Utils.getChat2aiValue2('Chat Deployment ID');
+		String buttonId = SM010_Utils.getChat2aiValue2('Chat Button ID');
+		return '{ "sessionId": "' + sessionId + '", "organizationId": "' + orgId + '", "deploymentId": "' + deploymentId + '", "buttonId": "' + buttonId + '", "userAgent": "", "language": "en-US", "screenResolution": "1900x1080", "visitorName": "' + sVisitorName + '", "prechatDetails": ' +
+				sDetails
+				+ ', "prechatEntities": [], "receiveQueueUpdates": true, "isPost": true }';
 	}
-
-	global static void ChasitorInit(string clientAffinity, string key,string sessionId, string sVisitorName)
+	global static void ChasitorInit(String clientAffinity, String key, String sessionId, String sVisitorName)
 	{
-		HttpResponse resp = SM003_Http.request(SM010_Utils.getChat2aiValue('Chat URL')+'Chasitor/ChasitorInit',
+		ChasitorInit(clientAffinity, key, sessionId, sVisitorName, '[]');
+	}
+	global static void ChasitorInit(String clientAffinity, String key, String sessionId, String sVisitorName, string sDetails)
+	{
+		HttpResponse resp = SM003_Http.request(SM010_Utils.getChat2aiValue('Chat URL') + 'Chasitor/ChasitorInit',
 				'POST',
-				new map<string,string>{'X-LIVEAGENT-API-VERSION'=> X_LIVEAGENT_API_VERSION,'X-LIVEAGENT-AFFINITY' => clientAffinity, 'X-LIVEAGENT-SESSION-KEY' => key, 'X-LIVEAGENT-SEQUENCE' => '1'  },
-				getBody(sessionId,sVisitorName),
+				new Map<String, String>
+				{
+						'X-LIVEAGENT-API-VERSION' => X_LIVEAGENT_API_VERSION, 'X-LIVEAGENT-AFFINITY' => clientAffinity, 'X-LIVEAGENT-SESSION-KEY' => key, 'X-LIVEAGENT-SEQUENCE' => '1'
+				},
+				getBody(sessionId, sVisitorName, sDetails),
 				'Salesforce Chat ChasitorInit',
 				null,
 				sMockName
 		);
 	}
 
-
-	global static void ChatMessage(string sMessage, string clientAffinity, string key)
+	global static void ChatMessage(String sMessage, String clientAffinity, String key)
 	{
-		string sBody = JSON.serialize(new map<string,Object>{'text'=> sMessage});
-		HttpResponse resp = SM003_Http.request(SM010_Utils.getChat2aiValue('Chat URL')+'Chasitor/ChatMessage',
+		String sBody = JSON.serialize(new Map<String, Object>
+		{
+				'text' => sMessage
+		});
+		HttpResponse resp = SM003_Http.request(SM010_Utils.getChat2aiValue('Chat URL') + 'Chasitor/ChatMessage',
 				'POST',
-				new map<string,string>{'X-LIVEAGENT-API-VERSION'=> X_LIVEAGENT_API_VERSION,'X-LIVEAGENT-AFFINITY' => clientAffinity, 'X-LIVEAGENT-SESSION-KEY' => key },
+				new Map<String, String>
+				{
+						'X-LIVEAGENT-API-VERSION' => X_LIVEAGENT_API_VERSION, 'X-LIVEAGENT-AFFINITY' => clientAffinity, 'X-LIVEAGENT-SESSION-KEY' => key
+				},
 				sBody,
 				'Salesforce Chat ChatMessage',
 				null,
@@ -70,15 +85,15 @@ global class SM093_LiveAgent
 		);
 	}
 
-	global static boolean isAvailable()
+	global static Boolean isAvailable()
 	{
-		string orgId = SM010_Utils.getChat2aiValue2('Org ID');
-		string deploymentId = SM010_Utils.getChat2aiValue2('Chat Deployment ID');
-		string buttonId = SM010_Utils.getChat2aiValue2('Chat Button ID');
+		String orgId = SM010_Utils.getChat2aiValue2('Org ID');
+		String deploymentId = SM010_Utils.getChat2aiValue2('Chat Deployment ID');
+		String buttonId = SM010_Utils.getChat2aiValue2('Chat Button ID');
 
 		HttpResponse resp = SM003_Http.request(SM010_Utils.getChat2aiValue('Chat URL') + 'Visitor/Availability?Availability.prefix=Visitor&Availability.ids=' + buttonId + '&deployment_id=' + deploymentId + '&org_id=' + orgId,
 				'GET',
-				new map<string, string>
+				new Map<String, String>
 				{
 						'X-LIVEAGENT-API-VERSION' => X_LIVEAGENT_API_VERSION
 				},
@@ -87,11 +102,11 @@ global class SM093_LiveAgent
 				null,
 				sMockName
 		);
-		object obj = JSON.deserializeUntyped(resp.getBody());
-		boolean bRet = (boolean)JPath.get0(obj,'messages/[1]/message/results/[1]/isAvailable');
-		if(bRet != true)
+		Object obj = JSON.deserializeUntyped(resp.getBody());
+		Boolean bRet = (Boolean) JPath.get0(obj, 'messages/[1]/message/results/[1]/isAvailable');
+		if (bRet != true)
 			bRet = false;
-		if(test.isRunningTest())
+		if (Test.isRunningTest())
 			bRet = true;
 		return bRet;
 	}

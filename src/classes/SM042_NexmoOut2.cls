@@ -98,8 +98,8 @@ global class SM042_NexmoOut2 implements Queueable
 			}
 			else if (mess.CVCH__Type__c == 'Custom' || mess.CVCH__Type__c == 'Custom2')
 				SM041_WhatsApp.sendCustom(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c, mess.CVCH__Channel__c);
-//			else if (mess.CVCH__Type__c == 'Custom2')
-//				SM042_nexmoOut4.sendCustom2(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c);
+			else if (mess.CVCH__Type__c == 'Template')
+				SM041_WhatsApp.sendTemplate(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c,mess.CVCH__Locale__c,mess.CVCH__Channel__c);
 			else
 				SM041_WhatsApp.sendText(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c,mess.CVCH__Channel__c);
 		}
@@ -148,8 +148,7 @@ global class SM042_NexmoOut2 implements Queueable
 						CVCH__JSON__c,CVCH__Type__c,
 						CVCH__From__c,CVCH__From_Name__c,
 						CVCH__To__c,CVCH__To_Name__c,
-						CVCH__activityId__c,CVCH__conversationId__c,CVCH__conversationName__c,CVCH__Channel__c
-
+						CVCH__activityId__c,CVCH__conversationId__c,CVCH__conversationName__c,CVCH__Channel__c,CVCH__Locale__c
 				FROM CVCH__NexmoMessage__c
 				WHERE Id = :messId
 		];
@@ -221,6 +220,7 @@ global class SM042_NexmoOut2 implements Queueable
 		{
 			mess.CVCH__From__c = sFrom;
 			mess.CVCH__To__c = sTo;
+			mess.Channel__c = SM010_Utils.getChat2aiValue2('Default Outbound Channel');
 		}
 		system.debug('initMessage.return');
 		system.debug(mess);

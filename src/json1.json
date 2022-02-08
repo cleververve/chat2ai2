@@ -1,21 +1,23 @@
 {
-    "contacts":[
+    "sessionId":"2f171e70-9df3-4d94-bac1-c1c988fcd8df",
+    "organizationId":"00D3V000000Bc8m",
+    "deploymentId":"5723V000000PHhh",
+    "buttonId":"5733V000000TTuP",
+    "userAgent":"",
+    "language":"en-US",
+    "screenResolution":"1900x1080",
+    "visitorName":"V00000001",
+    "prechatDetails":[
         {
-            "profile":{
-                "name":"Kerry Fisher"
-            },
-            "wa_id":"16315551234"
+            "displayToAgent":true,
+            "transcriptFields":[
+                "WhatsApp_Visitor__c"
+            ],
+            "value":"a053V000007Iif0QAC",
+            "label":"Visitor"
         }
     ],
-    "messages":[
-        {
-            "from":"16315551234",
-            "id":"ABGGFlA5FpafAgo6tHcNmNjXmuSf",
-            "timestamp":"1518694235",
-            "text":{
-                "body":"Hello this is an answer"
-            },
-            "type":"text"
-        }
-    ]
+    "prechatEntities":[],
+    "receiveQueueUpdates":true,
+    "isPost":true
 }

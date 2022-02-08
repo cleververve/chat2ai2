@@ -17,7 +17,6 @@ global class SM042_nexmoOut4
 		return headers;
 	}
 
-
 	global static void sendText(string sTo,string sFrom, string messageText)
 	{
 		if (Test.isRunningTest())

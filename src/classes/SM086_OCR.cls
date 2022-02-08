@@ -9,42 +9,66 @@ global class SM086_OCR
 	global class OCRInput
 	{
 
-		@AuraEnabled @InvocableVariable global string imageurl;
-		@AuraEnabled @InvocableVariable global string fileName;
+		@AuraEnabled @InvocableVariable global String imageurl;
+		@AuraEnabled @InvocableVariable global String fileName;
 	}
 
 
 	global class OCROutput
 	{
-		@AuraEnabled @InvocableVariable global string status;
-		@AuraEnabled @InvocableVariable global string error;
-		@AuraEnabled @InvocableVariable global string category;
-		@AuraEnabled @InvocableVariable global string currency_code;
-		@AuraEnabled @InvocableVariable global string sDate;
-		@AuraEnabled @InvocableVariable global date dtDate;
-		@AuraEnabled @InvocableVariable global datetime dtDateTime;
-		@AuraEnabled @InvocableVariable global string invoice_number;
-		@AuraEnabled @InvocableVariable global decimal subtotal;
-		@AuraEnabled @InvocableVariable global decimal tax;
-		@AuraEnabled @InvocableVariable global decimal total;
-		@AuraEnabled @InvocableVariable global string address;
-		@AuraEnabled @InvocableVariable global string name;
+		@AuraEnabled @InvocableVariable global String status;
+		@AuraEnabled @InvocableVariable global String error;
+		@AuraEnabled @InvocableVariable global String category;
+		@AuraEnabled @InvocableVariable global String currency_code;
+		@AuraEnabled @InvocableVariable global String sDate;
+		@AuraEnabled @InvocableVariable global Date dtDate;
+		@AuraEnabled @InvocableVariable global Datetime dtDateTime;
+		@AuraEnabled @InvocableVariable global String invoice_number;
+		@AuraEnabled @InvocableVariable global Decimal subtotal;
+		@AuraEnabled @InvocableVariable global Decimal tax;
+		@AuraEnabled @InvocableVariable global Decimal total;
+		@AuraEnabled @InvocableVariable global String address;
+		@AuraEnabled @InvocableVariable global String name;
 		@AuraEnabled @InvocableVariable global Integer is_duplicate;
-		@AuraEnabled @InvocableVariable global string ocr_text;
-		@AuraEnabled @InvocableVariable global decimal lines_total;
-		@AuraEnabled @InvocableVariable global string check_number;
-		@AuraEnabled @InvocableVariable global string store_number;
-		@AuraEnabled @InvocableVariable global string notes;
-		@AuraEnabled @InvocableVariable global string barcode;
-		@AuraEnabled @InvocableVariable global string id;
+		@AuraEnabled @InvocableVariable global String ocr_text;
+		@AuraEnabled @InvocableVariable global Decimal lines_total;
+		@AuraEnabled @InvocableVariable global String check_number;
+		@AuraEnabled @InvocableVariable global String store_number;
+		@AuraEnabled @InvocableVariable global String notes;
+		@AuraEnabled @InvocableVariable global String barcode;
+		@AuraEnabled @InvocableVariable global String id;
+		@AuraEnabled @InvocableVariable global String externalId;
+		@AuraEnabled@InvocableVariable global List<OCRItem> items;
+	}
+
+	global class OCRItem
+	{
+		@AuraEnabled @InvocableVariable global Date dtDate;
+		@AuraEnabled @InvocableVariable global String sDate;
+		@AuraEnabled @InvocableVariable global String description;
+		@AuraEnabled @InvocableVariable global Decimal discount;
+		@AuraEnabled @InvocableVariable global String id;
+		@AuraEnabled @InvocableVariable global Integer order;
+		@AuraEnabled @InvocableVariable global Decimal price;
+		@AuraEnabled @InvocableVariable global Decimal quantity;
+
+		@AuraEnabled @InvocableVariable global String reference;
+		@AuraEnabled @InvocableVariable global String section;
+		@AuraEnabled @InvocableVariable global String sku;
+		@AuraEnabled @InvocableVariable global Decimal tax;
+		@AuraEnabled @InvocableVariable global Decimal tax_rate;
+		@AuraEnabled @InvocableVariable global Decimal total;
+
+		@AuraEnabled @InvocableVariable global String type;
+		@AuraEnabled @InvocableVariable global String unit_of_measure;
 	}
 
 
 	@InvocableMethod(label='OCR' description='OCR')
-	global static list<OCROutput> OCR(list<OCRInput> lParam)
+	global static List<OCROutput> OCR(List<OCRInput> lParam)
 	{
 
-		list<OCROutput> lRet = new list<OCROutput>();
+		List<OCROutput> lRet = new List<OCROutput>();
 		for (OCRInput inp : lParam)
 		{
 			OCROutput out = callIt(inp.imageurl, inp.fileName);
@@ -54,7 +78,7 @@ global class SM086_OCR
 		return lRet;
 	}
 
-	public static OCROutput callIt(string sURL, string sName)
+	public static OCROutput callIt(String sURL, String sName)
 	{
 		OCROutput ret;
 		try
@@ -90,15 +114,16 @@ global class SM086_OCR
 //		}
 //		return sRet;
 //	}
-	public static OCROutput parse(string sBodyResp)
+	public static OCROutput parse(String sBodyResp)
 	{
-		system.debug('parse '+sBodyResp);
-		map<string, object> mResp = (map<string, object>) JSON.deserializeUntyped(sBodyResp);
+		System.debug('parse '+sBodyResp);
+		Map<String, Object> mResp = (Map<String, Object>) JSON.deserializeUntyped(sBodyResp);
 		OCROutput resp = new OCROutput();
+		resp.items = new List<OCRItem>();
 		resp.status = 'success';
-		resp.category = (string) mResp.get('category');
-		resp.currency_code = (string) mResp.get('currency_code');
-		resp.sDate = (string) mResp.get('date');
+		resp.category = (String) mResp.get('category');
+		resp.currency_code = (String) mResp.get('currency_code');
+		resp.sDate = (String) mResp.get('date');
 		try
 		{
 			resp.dtDate = Date.valueOf(resp.sDate);
@@ -119,21 +144,21 @@ global class SM086_OCR
 				throw e;
 		}
 
-		resp.invoice_number = (string) mResp.get('invoice_number');
-		resp.subtotal = (decimal) mResp.get('subtotal');
-		resp.tax = (decimal) mResp.get('tax');
-		resp.total = (decimal) mResp.get('total');
-		resp.is_duplicate = (integer) mResp.get('is_duplicate');
-		resp.ocr_text = (string) mResp.get('ocr_text');
-		resp.notes = (string) mResp.get('notes');
-		resp.id =  ''+(integer) mResp.get('id');
-		list<object> lbarcodes = (list<object>) mResp.get('barcodes');
+		resp.invoice_number = (String) mResp.get('invoice_number');
+		resp.subtotal = (Decimal) mResp.get('subtotal');
+		resp.tax = (Decimal) mResp.get('tax');
+		resp.total = (Decimal) mResp.get('total');
+		resp.is_duplicate = (Integer) mResp.get('is_duplicate');
+		resp.ocr_text = (String) mResp.get('ocr_text');
+		resp.notes = (String) mResp.get('notes');
+		resp.id =  ''+(Integer) mResp.get('id');
+		List<Object> lbarcodes = (List<Object>) mResp.get('barcodes');
 		if(lbarcodes != null)
 		{
-			for(object obj : lbarcodes)
+			for(Object obj : lbarcodes)
 			{
-				map<string,object> mBar = (map<string,object>)obj;
-				resp.barcode = (string)mBar.get('data');
+				Map<String,Object> mBar = (Map<String,Object>)obj;
+				resp.barcode = (String)mBar.get('data');
 			}
 		}
 
@@ -142,47 +167,75 @@ global class SM086_OCR
 //			resp.store_number=checknumber(resp.ocr_text,'DFC');
 
 
-		map<string, object> mAddress = (map<string, object>) mResp.get('vendor');
+		Map<String, Object> mAddress = (Map<String, Object>) mResp.get('vendor');
 		if (mAddress != null)
 		{
-			system.debug('mAddress='+mAddress);
-			resp.store_number=(string)mAddress.get('vendor_type');
-			resp.address = (string) mAddress.get('address');
-			resp.name = (string) mAddress.get('name');
+			System.debug('mAddress='+mAddress);
+			resp.store_number=(String)mAddress.get('vendor_type');
+			resp.address = (String) mAddress.get('address');
+			resp.name = (String) mAddress.get('name');
+			resp.externalId = (String) mAddress.get('external_id');
 		}
 		if(mResp.get('line_items') != null)
 		{
 			resp.lines_total = 0;
-			list<object> lObj = (list<object>)mResp.get('line_items');
-			for(object obj: lObj)
+			List<Object> lObj = (List<Object>)mResp.get('line_items');
+			for(Object obj: lObj)
 			{
-				map<string,object> mLine = (map<string,object>) obj;
+				OCRItem item = new OCRItem();
+
+
+
+				Map<String,Object> mLine = (Map<String,Object>) obj;
+				item.sDate = (String)mLine.get('date');
+				try
+				{
+					item.dtDate = Date.valueOf(item.sDate);
+				}
+				catch(Exception e)
+				{
+				}
+				item.type =  (String)mLine.get('type');
+				item.total = (Decimal)mLine.get('total');
+				item.id = ''+(integer)mLine.get('id');
+				item.description = (String)mLine.get('description');
+				item.discount = (Decimal)mLine.get('discount');
+				item.order = (Integer)mLine.get('order');
+				item.price = (Decimal)mLine.get('price');
+				item.quantity =(Decimal)mLine.get('quantity');
+				item.reference = (String)mLine.get('reference');
+				item.section = (String)mLine.get('section');
+				item.sku = (String)mLine.get('sku');
+				item.tax = (Decimal)mLine.get('tax');
+				item.tax_rate = (Decimal)mLine.get('tax_rate');
+				item.unit_of_measure = (String)mLine.get('unit_of_measure');
+				resp.items.add(item);
 				if(mLine.get('total') != null)
 				{
-					resp.lines_total += (decimal) mLine.get('total');
+					resp.lines_total += (Decimal) mLine.get('total');
 				}
 			}
 		}
-		system.debug('resp');
-		system.debug(resp);
+		System.debug('resp');
+		System.debug(resp);
 		return resp;
 	}
 	public static Map<String, String> headers()
 	{
-		map<string, string> mRet = new map<string, string>();
+		Map<String, String> mRet = new Map<String, String>();
 		mRet.put('AUTHORIZATION', SM010_Utils.getChat2aiValue('Veryfi AUTHORIZATION'));//'apikey admin.viafone:e4a4b481e34e238557250d4605baeb09');
 		mRet.put('CLIENT-ID', SM010_Utils.getChat2aiValue('Veryfi CLIENT-ID'));//'vrfkh1ka3NNMlU9hK8Psw4dv8Sa99Op1Rxffy5N');
 		mRet.put('Content-Type', 'application/json');
-		system.debug(mRet);
+		System.debug(mRet);
 		return mRet;
 	}
 
 
-	public static string getBody(string sURL, string sName)
+	public static String getBody(String sURL, String sName)
 	{
-		map<string, string> mRet = new map<string, string>();
+		Map<String, String> mRet = new Map<String, String>();
 		mRet.put('file_url', sURL);
 		mRet.put('file_name', sName);
-		return json.serialize(mRet);
+		return JSON.serialize(mRet);
 	}
 }

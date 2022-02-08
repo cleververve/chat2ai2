@@ -445,7 +445,7 @@ global class SM010_Utils
         Translation__c tr  = new Translation__c();
         tr.en__c = tran.translation;
         tr.default_value__c = tran.translation;
-        tr.key__c = tran.text;
+        tr.key__c = sKey;
         tr.API_Translation__c = true;
         tr.DetectedLang__c = tran.detectedlang;
         lTrans.add(tr);

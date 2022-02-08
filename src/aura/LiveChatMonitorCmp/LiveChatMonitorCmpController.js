@@ -42,32 +42,36 @@
             // Display toast message to indicate load status
             // var toastEvent = $A.get("e.force:showToast");
             if (state === 'SUCCESS') {
+                console.log('live chat send success');
                 // toastEvent.setParams({
                 //     "title": "Success!",
                 //     "message": " Audit Log is created ."
                 // });
             } else {
+                console.log('live chat send error:'+response.getError());
                 // toastEvent.setParams({
                 //     "title": "Error!",
                 //     "message": " Something has gone wrong."
                 // });
             }
             // toastEvent.fire();
+
         });
         $A.enqueueAction(action);
     },
     onChatEnded: function (cmp, evt, helper) {
-        // var recordId = evt.getParam("recordId");
-        //
-        // console.log("recordId:" + recordId);
-        // var action = cmp.get("c.chatEnded");
-        // action.setParams({"recordId": recordId});
-        // action.setCallback(this, function (response) {
-        //     var state = response.getState();
-        //     if (state === 'SUCCESS') {
-        //     } else {
-        //     }
-        // });
-        // $A.enqueueAction(action);
+        var recordId = evt.getParam("recordId");
+        console.log("recordId:" + recordId);
+        var action = cmp.get("c.chatEnded");
+        action.setParams({"recordId": recordId});
+        action.setCallback(this, function (response) {
+            var state = response.getState();
+            if (state === 'SUCCESS') {
+                console.log('live chat end success');
+            } else {
+                console.log('live chat end error:'+response.getError());
+            }
+        });
+        $A.enqueueAction(action);
     }
 })
