@@ -64,44 +64,36 @@ global class SM042_NexmoOut2 implements Queueable
 				MessageOptions mo = (MessageOptions) JSON.deserializeStrict(mess.CVCH__JSON__c, MessageOptions.class);
 				if (mo.sMessage != null && mo.sMessage != '')
 				{
-					SM041_WhatsApp.sendText(mess.CVCH__To__c, mess.CVCH__From__c, mo.sMessage,mess.CVCH__Channel__c);
+					SM041_WhatsApp.sendText(mess.CVCH__To__c, mess.CVCH__From__c, mo.sMessage, mess.CVCH__Channel__c);
 					SM042_NexmoOut2.pause(800);
 				}
 				for (CarouselItem it : mo.lItems)
 				{
-					if (it.imageURL != null && it.imageURL != '')
+					try
 					{
-						try
+						if (it.imageURL != null && it.imageURL != '')
+							SM041_WhatsApp.sendImage(mess.CVCH__To__c, mess.CVCH__From__c, it.imageURL, it.getBody(), mess.CVCH__Channel__c);
+						else if (it.videoURL != null && it.videoURL != '')
 						{
-							SM041_WhatsApp.sendImage(mess.CVCH__To__c, mess.CVCH__From__c, it.imageURL, it.getBody(),mess.CVCH__Channel__c);
-							SM042_NexmoOut2.pause(800);
+							if (it.contentType == 'file')
+								SM041_WhatsApp.sendFile(mess.CVCH__To__c, mess.CVCH__From__c, it.videoURL, it.getBody(), mess.CVCH__Channel__c);
+							else
+								SM041_WhatsApp.sendVideo(mess.CVCH__To__c, mess.CVCH__From__c, it.videoURL, it.getBody(), mess.CVCH__Channel__c);
 						}
-						catch (Exception e)
-						{
-							SM041_WhatsApp.sendText(mess.CVCH__To__c, mess.CVCH__From__c, e.getMessage(),mess.CVCH__Channel__c);
-						}
+						SM042_NexmoOut2.pause(800);
 					}
-
-					else if(it.videoURL != null && it.videoURL != '')
+					catch (Exception e)
 					{
-						try
-						{
-							SM041_WhatsApp.sendVideo(mess.CVCH__To__c, mess.CVCH__From__c, it.videoURL, it.getBody(),mess.CVCH__Channel__c);
-							SM042_NexmoOut2.pause(800);
-						}
-						catch (Exception e)
-						{
-							SM041_WhatsApp.sendText(mess.CVCH__To__c, mess.CVCH__From__c, e.getMessage(),mess.CVCH__Channel__c);
-						}
+						SM041_WhatsApp.sendText(mess.CVCH__To__c, mess.CVCH__From__c, e.getMessage(), mess.CVCH__Channel__c);
 					}
 				}
 			}
 			else if (mess.CVCH__Type__c == 'Custom' || mess.CVCH__Type__c == 'Custom2')
 				SM041_WhatsApp.sendCustom(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c, mess.CVCH__Channel__c);
 			else if (mess.CVCH__Type__c == 'Template')
-				SM041_WhatsApp.sendTemplate(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c,mess.CVCH__Locale__c,mess.CVCH__Channel__c);
+				SM041_WhatsApp.sendTemplate(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c, mess.CVCH__Locale__c, mess.CVCH__Channel__c);
 			else
-				SM041_WhatsApp.sendText(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c,mess.CVCH__Channel__c);
+					SM041_WhatsApp.sendText(mess.CVCH__To__c, mess.CVCH__From__c, mess.CVCH__FullText__c, mess.CVCH__Channel__c);
 		}
 	}
 
@@ -334,7 +326,7 @@ global class SM042_NexmoOut2 implements Queueable
 
 	global static void sendText2(String sTo, String sFrom, String messageText)
 	{
-		SM003_Http.request(getNexmoURL(), 'POST', getAuthHeader(), getBody(sTo, messageText, sFrom), 'NexmoOut2', null,'SM004_SMSMock');
+		SM003_Http.request(getNexmoURL(), 'POST', getAuthHeader(), getBody(sTo, messageText, sFrom), 'NexmoOut2', null, 'SM004_SMSMock');
 	}
 
 	@Future(Callout=true)

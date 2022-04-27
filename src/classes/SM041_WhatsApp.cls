@@ -19,7 +19,7 @@ public class SM041_WhatsApp
 
 	public static void sendImage(String sTo, String sFrom, String imageURL, String sCaption, String channel)
 	{
-		system.debug('sendImage.caption='+sCaption);
+		system.debug('sendImage.caption=' + sCaption);
 		if (channel == 'D360')
 			SM043_360Dialog.sendImage(sTo, imageURL, sCaption);
 		else if (channel == 'NexmoV1')
@@ -39,12 +39,12 @@ public class SM041_WhatsApp
 				SM042_nexmoOut4.sendCustom(sTo, sFrom, (String) payload);
 	}
 
-	public static void sendTemplate(String sTo, String sFrom, Object payload,String locale,  String channel)
+	public static void sendTemplate(String sTo, String sFrom, Object payload, String locale, String channel)
 	{
 		if (channel == 'D360')
 			SM043_360Dialog.sendCustom(sTo, 'template', payload);
 		else if (channel == 'NexmoV1')
-			SM044_NexmoV1.sendTemplate(sTo, sFrom, (String) payload,locale);
+			SM044_NexmoV1.sendTemplate(sTo, sFrom, (String) payload, locale);
 		else
 				SM042_nexmoOut4.sendCustom(sTo, sFrom, (String) payload);
 	}
@@ -57,5 +57,13 @@ public class SM041_WhatsApp
 			SM044_NexmoV1.sendLink(sTo, sFrom, videoURL, sCaption, 'video');
 		else
 				SM042_nexmoOut4.sendVideo(sTo, sFrom, videoURL, sCaption);
+	}
+
+	public static void sendFile(String sTo, String sFrom, String sFile, String sCaption, String channel)
+	{
+		if (channel == 'D360')
+			SM043_360Dialog.sendFile(sTo, sFile, sCaption);
+		else
+				SM042_NexmoOut4.sendFile(sTo, sFrom, sFile, sCaption);
 	}
 }

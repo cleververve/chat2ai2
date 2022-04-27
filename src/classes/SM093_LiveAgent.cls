@@ -17,8 +17,19 @@ global class SM093_LiveAgent
 	}
 	global static InitSessionResponse initSession(String clientAffinity)
 	{
+		return initSession(clientAffinity,null);
+	}
+
+	global static InitSessionResponse initSession(String clientAffinity,string sChatNumber)
+	{
+
+		string sSettingName = 'Chat URL';
+		if(SM010_Utils.getChat2aiValue2('Multi ChatBots')=='TRUE')
+		{
+			sSettingName = sSettingName+'_'+sChatNumber;
+		}
 		HttpResponse resp = SM003_Http.request(
-				SM010_Utils.getChat2aiValue('Chat URL') + 'System/SessionId',
+				SM010_Utils.getChat2aiValue(sSettingName) + 'System/SessionId',
 				'GET',
 				new Map<String, String>
 				{

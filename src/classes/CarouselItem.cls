@@ -14,6 +14,8 @@ global class CarouselItem
 	@AuraEnabled @InvocableVariable global Option button1;
 	@AuraEnabled @InvocableVariable global Option button2;
 	@AuraEnabled @InvocableVariable global Option button3;
+	@AuraEnabled @InvocableVariable global string contentType;
+
 	public string getBody()
 	{
 		string sRet = '';

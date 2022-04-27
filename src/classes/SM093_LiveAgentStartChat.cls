@@ -68,7 +68,7 @@ global class SM093_LiveAgentStartChat
 			}
 			else
 			{
-				SM093_LiveAgent.InitSessionResponse resp = SM093_LiveAgent.initSession('null');
+				SM093_LiveAgent.InitSessionResponse resp = SM093_LiveAgent.initSession('null',vis.Chat_Number__c);
 				SM093_LiveAgent.ChasitorInit(resp.affinityToken, resp.key, resp.id, vis.Name,getChatDetails(inp));
 				SM042_NexmoOut2.sendText(vis.CVCH__Id__c, SM010_Utils.translate('Connected to live chat', vis.CVCH__language__c), vis.CVCH__Chat_Number__c, false);
 				mUpdate.put(vis.Id, new CVCH__Visitor__c(Id = vis.Id, CVCH__Livechat_Session_Key__c = resp.key, Livechat_affinityToken__c = resp.affinityToken, Livechat_Session_Id__c = resp.id));

@@ -33,6 +33,13 @@ public with sharing class SM043_360Dialog
 //		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(), JSON.serialize(getImageBody(sTo, sImageURL, caption)), 'D360OutImage', null, 'SM004_SMSMock');
 	}
 
+
+	public static void sendFile(String sTo, String sVideoURL, String caption)
+	{
+		sendLink(sTo,sVideoURL,caption,'document' );
+	}
+
+
 	public static void sendLink(String sTo, String sLinkURL, String caption,String sType)
 	{
 		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(), JSON.serialize(getLinkBody(sTo, sLinkURL, caption,sType)), 'D360Out'+sType, null, 'SM004_SMSMock');
@@ -91,6 +98,8 @@ public with sharing class SM043_360Dialog
 	{
 		Map<String, Object>mRet = getBody(sTo);
 		mRet.put('type', 'text');
+		if(sText != null)
+			sText = sText.replaceAll('/n/r', '\n');
 		mRet.put('text', new Map<String, Object>
 		{
 				'body' => sText

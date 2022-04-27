@@ -25,6 +25,7 @@ public class FlowSendFileTest
 		FlowSendFile2 inp = new FlowSendFile2();
 		inp.visitorId = data1.vis.Id;
 		inp.caption = 'caption';
+		inp.fileURL = 'test123';
 		Test.startTest();
 		FlowSendFile2.sendFile(new list<FlowSendFile2>{inp});
 		Test.stopTest();

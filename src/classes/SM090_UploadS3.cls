@@ -45,8 +45,15 @@ global class SM090_UploadS3
 	{
 		map<string, object> mRet = new map<string, object>();
 		mRet.put('filename', sURL);
+		if(SM010_Utils.getChat2aiValue2('Default Outbound Channel') =='D360')
+		{
+			map<string, object> mHeaders = new map<string, object>();
+			mHeaders.put('D360-API-KEY',SM010_Utils.getChat2aiValue2('D360-API-KEY'));
+			mHeaders.put('Content-Type','application/json');
+			mRet.put('headers',mHeaders);
+			mRet.put('folder','GV');
+		}
 		return JSOn.serialize(mRet);
-
 	}
 	global static S3Output getS3URL(string sURL)
 	{
@@ -58,11 +65,14 @@ global class SM090_UploadS3
 
 			map<string, object> mResp = (map<string, object>) JSON.deserializeUntyped(resp.getBody());
 			ret.Error = (string) mResp.get('Error');
+			system.debug('S3Resp');
+			system.debug(mResp);
 			if (ret.Error == null || ret.Error == '')
 				ret.S3URL = CVCH.SM010_Utils.getChat2aiValue('S3URL') + (string) mResp.get('URL');
 
 		}catch (Exception e)
 		{
+			system.debug('Error: '+e.getMessage());
 			ret.Error = 'Error: '+e.getMessage();
 		}
 		return ret;

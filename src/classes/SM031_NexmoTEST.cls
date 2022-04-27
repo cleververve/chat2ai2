@@ -56,7 +56,7 @@ public class SM031_NexmoTEST
 		vis.CVCH__Had_First_Interaction__c = true;
 		vis.CVCH__Chat_Number__c = '1234567890';
 		vis.CVCH__id__c = '009876543211';
-		vis.CVCH__chanel__c = 'whatsapp';
+		vis.CVCH__chanel__c = 'D360';
 		vis.CVCH__language__c = 'it';
 		insert vis;
 		return vis;
@@ -98,6 +98,25 @@ public class SM031_NexmoTEST
 		Test.stopTest();
 	}
 
+	@IsTest
+	public static  void TestLocation()
+	{
+		RestRequest req = new RestRequest();
+		RestResponse res = new RestResponse();
+
+		req.requestURI = '/services/apexrest/nexmo/';
+		req.httpMethod = 'POST';
+		req.requestBody = Blob.ValueOf('{"to":"971600555559", "from":"009876543211", "channel":"whatsapp", "message_uuid":"b30de73b-7c55-4a8b-963c-9d0e1fe0b10b", "timestamp":"2022-02-17T06:13:13Z", "message_type":"location", "location":{"address":"Dubai, Dubai", "name":"Cricket Stadium Bus Stop", "url":"https://foursquare.com/v/5a34e3a9bed4831f48b6700f", "lat":25.04334831237793, "long":55.21806335449219}, "profile":{"name":"Vika"}}');
+
+		RestContext.request = req;
+		RestContext.response = res;
+
+		createExistingVisitor('Full Access');
+		Test.startTest();
+		SM031_Nexmo.getMessage();
+		Test.stopTest();
+	}
+
 
 	@isTest
     public static void testAzure()
@@ -119,7 +138,7 @@ public class SM031_NexmoTEST
 				from CVCH__NexmoMessage__c
 				where CVCH__Channel__c = 'Azure'
 		];
-		system.assert(lmess.size() > 1);
+		system.assert(lmess.size() >= 1);
 		list<CVCH__NexmoMessage__c> lmess2 =
 		[
 				select id, CVCH__Channel__c
@@ -290,6 +309,16 @@ public class SM031_NexmoTEST
 	{
 		Test.startTest();
 		SM031_Nexmo.getMessage0('{"message_uuid":"5a6dbb4e-cde7-4664-a40f-81d5854a03c4","to":{"type":"whatsapp","number":"1234567890"},"from":{"type":"whatsapp","number":"380668657070"},"timestamp":"2021-05-19T09:12:44.151Z","message":{"content":{"type":"button","button":{"text":"Consent 1","payload":"Yes-Button-Payload"}}},"direction":"inbound"}');
+		Test.stopTest();
+	}
+
+
+	@isTest
+	public static void TestD360ReplyButton()
+	{
+		createExistingVisitor('Full Access');
+		Test.startTest();
+		SM031_Nexmo.getMessage0('{"contacts": [{"profile": {"name": "Vika"}, "wa_id": "009876543211"}], "messages": [{"context": {"from": "1234567890", "id": "gBEGlxVScTJ4Agm_0rU46jCic50"}, "from": "971552713278", "id": "ABEGlxVScTJ4Ago-sGYSQkms-X6m", "interactive": {"button_reply": {"id": "disagree", "title": "Do not accept"}, "type": "button_reply"}, "timestamp": "1650811917", "type": "interactive"}]}');
 		Test.stopTest();
 	}
 

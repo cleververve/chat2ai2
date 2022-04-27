@@ -1,0 +1,43 @@
+{
+    "type":"list",
+    "body":{
+        "text":"You may ask me anything related to the shopping at Doha Festival City or choose one of the options below.\n\nType *menu* to view these options at anytime.",
+    },
+    "action":{
+        "button":"Menu",
+        "sections":[
+            {
+                "rows":[
+                    {
+                        "id":"what is on",
+                        "title":"Whatˈs On"
+                    },
+                    {
+                        "id":"offers",
+                        "title":"Offers"
+                    },
+                    {
+                        "id":"wayfinder",
+                        "title":"Wayfinder"
+                    },
+                    {
+                        "id":"flow_CB_Memberships",
+                        "title":"Membership Clubs"
+                    },
+                    {
+                        "id":"flow_CB_Store_Welcome",
+                        "title":"Stores"
+                    },
+                    {
+                        "id":"flow_CB_Browse_Dining",
+                        "title":"Dining"
+                    },
+                    {
+                        "id":"flow_CB_Entertainment_Browse",
+                        "title":"Entertainment"
+                    }
+                ]
+            }
+        ]
+    }
+}

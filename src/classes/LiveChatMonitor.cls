@@ -49,7 +49,7 @@ public with sharing class LiveChatMonitor
 			String sFlow = SM010_Utils.getChat2aiValue2('Livechat Survey Flow');
 			if (sFlow != '')
 			{
-				Flow.Interview.createInterview(sFlow, params).start();
+				SM010_Utils.getFlow(sFlow,vis.Chat_Number__c, params).start();
 			}
 		}
 	}
@@ -64,7 +64,7 @@ public with sharing class LiveChatMonitor
 
 			List<CVCH__Visitor__c> lvisr =
 			[
-					SELECT Id, CVCH__Id__c,CVCH__Chat_Number__c,CVCH__language__c,CVCH__Livechat_affinityToken__c,CVCH__Livechat_Session_Id__c,CVCH__Livechat_Session_Key__c
+					SELECT Id, CVCH__Id__c,CVCH__Chat_Number__c,CVCH__language__c,CVCH__Livechat_affinityToken__c,CVCH__Livechat_Session_Id__c,CVCH__Livechat_Session_Key__c,Chat_Number__c
 					from CVCH__Visitor__c
 					where CVCH__Livechat_Session_Id__c = :sKey
 			];

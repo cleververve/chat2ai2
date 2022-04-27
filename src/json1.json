@@ -1,23 +1,29 @@
 {
-    "sessionId":"2f171e70-9df3-4d94-bac1-c1c988fcd8df",
-    "organizationId":"00D3V000000Bc8m",
-    "deploymentId":"5723V000000PHhh",
-    "buttonId":"5733V000000TTuP",
-    "userAgent":"",
-    "language":"en-US",
-    "screenResolution":"1900x1080",
-    "visitorName":"V00000001",
-    "prechatDetails":[
+    "contacts":[
         {
-            "displayToAgent":true,
-            "transcriptFields":[
-                "WhatsApp_Visitor__c"
-            ],
-            "value":"a053V000007Iif0QAC",
-            "label":"Visitor"
+            "profile":{
+                "name":"Vika"
+            },
+            "wa_id":"971552713278"
         }
     ],
-    "prechatEntities":[],
-    "receiveQueueUpdates":true,
-    "isPost":true
+    "messages":[
+        {
+            "context":{
+                "from":"97145243300",
+                "id":"gBEGlxVScTJ4Agm_0rU46jCic50"
+            },
+            "from":"971552713278",
+            "id":"ABEGlxVScTJ4Ago-sGYSQkms-X6m",
+            "interactive":{
+                "button_reply":{
+                    "id":"disagree",
+                    "title":"Do not accept"
+                },
+                "type":"button_reply"
+            },
+            "timestamp":"1650811917",
+            "type":"interactive"
+        }
+    ]
 }

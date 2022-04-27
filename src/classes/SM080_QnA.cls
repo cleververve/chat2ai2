@@ -42,19 +42,35 @@ global class SM080_QnA
 	}
 	global static QnAResponse queryPhrase(string sPhrase,string language)
 	{
-		return queryPhrase(sPhrase, null,language);
+		return queryPhrase(sPhrase, null,language,null);
+	}
+	global static QnAResponse queryPhrase(string sPhrase,string language, string sChatNumber)
+	{
+		return queryPhrase(sPhrase, null,language,sChatNumber);
+	}
+
+	public static QnAResponse getQNA(integer  qnaid, string language, string sChatNumber)
+	{
+		return queryPhrase(null, qnaid, language,sChatNumber);
 	}
 
 	public static QnAResponse getQNA(integer  qnaid, string language)
 	{
-		return queryPhrase(null, qnaid, language);
+		return queryPhrase(null, qnaid, language,null);
 	}
 
+
 	global static QnAResponse queryPhrase(string sPhrase, integer qnaid, string language)
+	{
+		return queryPhrase(sPhrase,  qnaid,  language, null);
+	}
+	global static QnAResponse queryPhrase(string sPhrase, integer qnaid, string language, string sChatNumber)
 	{
 		QnAResponse ret = new QnAResponse();
 		ret.dScore =0;
 		string sURL = 'callout:QnA';
+		if(SM010_Utils.getChat2aiValue2('Multi ChatBots')=='TRUE')
+			sURL = sURL +'_'+sChatNumber;
 		system.debug('qna url='+sURL);
 		HttpResponse resp = SM003_Http.request(
 				sURL

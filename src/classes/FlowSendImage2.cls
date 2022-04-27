@@ -10,7 +10,6 @@ global class FlowSendImage2
 	@AuraEnabled @InvocableVariable global string imageURL;
 	@AuraEnabled @InvocableVariable global boolean async;
 
-
 	@InvocableMethod(label='Send Image' description='sends an image')
 	global static void sendImage(list<FlowSendImage2> lParam)
 	{
