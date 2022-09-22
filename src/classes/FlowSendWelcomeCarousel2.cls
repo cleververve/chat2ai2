@@ -24,7 +24,7 @@ global class FlowSendWelcomeCarousel2
 			item.imageURL = inp.imageurl;
 			mo.lItems.add(item);
 			mo.sType = 'Carousel';
-			mo.sMessage = inp.caption;
+//			mo.sMessage = inp.caption;
 			mo.async = inp.async;
 			SM042_NexmoOut2.sendComplexType(mo, inp.visphone, inp.ChatNumber);
 		}

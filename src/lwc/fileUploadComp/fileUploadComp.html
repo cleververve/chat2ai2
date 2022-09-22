@@ -1,0 +1,20 @@
+<!--
+-Author:         serhiivolynets
+-Date:           28.08.2022
+-Description:   
+-->
+
+<!-- File Upload Comp -->
+<template>
+    <lightning-card title="File Upload" icon-name="custom:custom13">
+        <div class="slds-m-around_medium">
+            <lightning-input type="file"
+                             accept=".xlsx, .xls, .csv, .png, .doc, .docx, .pdf, .jpg"
+                             onchange={openfileUpload}></lightning-input>
+        </div>
+        <template if:true={fileURL}>
+            <input value='{fileURL}' class='copy-me' readonly='readonly'/>
+            <lightning-button variant="brand" label="Copy" title="Copy" onclick={handleCopy} class="slds-m-left_x-small copyFrom"></lightning-button>
+        </template>
+    </lightning-card>
+</template>

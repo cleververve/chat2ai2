@@ -1,6 +1,7 @@
 @RestResource(urlMapping='/nexmo/*')
 global class SM031_Nexmo
 {
+
 	global static Boolean bContextChanged = false;
 	global static Decimal scoreLUIS = 0;
 	global static Decimal scoreQnA = 0;
@@ -8,6 +9,7 @@ global class SM031_Nexmo
 	global static String triggeredFlow = '';
 	global static SM080_LUIS.LuisResponse respLuis = null;
 	global static Boolean triggeredLUIS = false;
+	public static Visitor__c visUpdate = null;
 
 	@HttpPost
 	global static List<CVCH__NexmoMessage__c> getMessage()
@@ -27,6 +29,24 @@ global class SM031_Nexmo
 		SM005_Logs.save();
 		return 'hello';
 	}
+
+
+
+	public static void updateVisitor(Visitor__c v)
+	{
+		if (visUpdate == null)
+			visUpdate = v.clone();
+		else
+		{
+			Map<String, Object> mFields = v.getPopulatedFieldsAsMap();
+			for (String sFld : mFields.keySet())
+			{
+				visUpdate.put(sFld, mFields.get(sFld));
+			}
+		}
+	}
+
+
 
 	public static List<MessageOptions> getResponse(CVCH__NexmoMessage__c mess, CVCH__Visitor__c visr)
 	{
@@ -86,10 +106,11 @@ global class SM031_Nexmo
 
 
 			//system.debug('Translated input: ' + translatedText);
-			respLuis = SM080_LUIS.queryPhrase(translatedText, visr.CVCH__language__c);
+
+			respLuis = SM080_LUIS.queryPhrase(translatedText, visr.CVCH__language__c, mess.To__c);
 			if (visr.CVCH__GDPR_Consent__c != 'No Access')
 			{
-				respQnA = SM080_QnA.queryPhrase(translatedText, visr.CVCH__language__c,mess.To__c);
+				respQnA = SM080_QnA.queryPhrase(translatedText, visr.CVCH__language__c, mess.To__c);
 				scoreQnA = respQnA.dScore;
 			}
 			scoreLUIS = respLuis.dScore;
@@ -128,17 +149,10 @@ global class SM031_Nexmo
 			if (/*mess.Text__c == 'end chat' || */(respLuis != null && respLuis.sIntent == 'EndChat'))
 			{
 				LiveChatMonitor.Disconnect(visr);
-//				Visitor__c vis = new Visitor__c();
-//				vis.Id = visr.Id;
-//				vis.Livechat_Session_Key__c = null;
-//				vis.Livechat_Session_Id__c = null;
-//				vis.Livechat_affinityToken__c = null;
-//				update vis;
-//				SM042_NexmoOut2.sendText(vis.CVCH__Id__c, SM010_Utils.translate('The chat is disconnected', vis.CVCH__language__c), vis.CVCH__Chat_Number__c, false);
 			}
 			else
 			{
-				if (respLuis.sIntent == 'Image')
+				if (respLuis.sIntent == 'Image' && mess.CVCH__Text__c != null && !mess.CVCH__Text__c.startsWith(CVCH.SM010_Utils.getChat2aiValue('S3URL')))
 				{
 					if (SM010_Utils.getChat2aiValue2('Skip LiveChat File S3 Upload') != 'TRUE')
 					{
@@ -151,21 +165,34 @@ global class SM031_Nexmo
 				}
 				try
 				{
-					SM093_LiveAgent.ChatMessage(mess.CVCH__Text__c, visr.Livechat_affinityToken__c, visr.CVCH__Livechat_Session_Key__c);
+					SM093_LiveAgent.ChatMessage(SM093_LiveAgent.getMessageText(mess), visr);
 				}
 				catch (Exception e)
 				{
 					String errorMess = e.getMessage();
-					if (errorMess.indexOf('Session required but was invalid') >= 0)
+					if (errorMess.indexOf(SM093_LiveAgent.sessionRequired) >= 0)
 					{
-						CVCH.SM042_NexmoOut2.sendText(visr.CVCH__Id__c, SM010_Utils.translate('Sorry, your chat session is expired..', visr.CVCH__language__c), visr.CVCH__Chat_Number__c, false);
-
-						CVCH__Visitor__c vis = new CVCH__Visitor__c();
-						vis.Id = visr.Id;
-						vis.CVCH__Livechat_Session_Key__c = null;
-						vis.CVCH__Livechat_Session_Id__c = null;
-						vis.CVCH__Livechat_affinityToken__c = null;
-						update vis;
+						LiveChatStatusBatch.terminateChat(visr);
+//						SM010_Utils.setVisitor(visr);
+//						String sFlowName = SM010_Utils.getChat2aiValue2('Session Expired Flow');
+//						if(sFlowName!= '')
+//						{
+//							Map<String, Object> params = new Map<String, Object>();
+//							params.put('visitorId', visr.Id);
+//							Flow.Interview flow = SM010_Utils.getFlow(sFlowName, mess.CVCH__To__c, params);
+//							flow.start();
+//						}
+//						else
+//						{
+//							CVCH.SM042_NexmoOut2.sendText(visr.CVCH__Id__c, SM010_Utils.translate('Sorry, your chat session is expired..', visr.CVCH__language__c), visr.CVCH__Chat_Number__c, false);
+//						}
+//
+//						CVCH__Visitor__c vis = new CVCH__Visitor__c();
+//						vis.Id = visr.Id;
+//						vis.CVCH__Livechat_Session_Key__c = null;
+//						vis.CVCH__Livechat_Session_Id__c = null;
+//						vis.CVCH__Livechat_affinityToken__c = null;
+//						update vis;
 					}
 				}
 			}
@@ -179,6 +206,7 @@ global class SM031_Nexmo
 				Map<String, Object> params = new Map<String, Object>();
 
 				params.put('visphone', visr.CVCH__Id__c);
+				params.put('visitorName', mess.From_Name__c);
 				params.put('ChatNumber', visr.CVCH__Chat_Number__c);
 				params.put('channel', visr.CVCH__Chanel__c);
 				params.put('originalmessage', mess.CVCH__Text__c);
@@ -191,14 +219,14 @@ global class SM031_Nexmo
 
 				if (SM010_Utils.getChat2aiValue2('CREATE VISITOR BEFORE FLOWS') == 'TRUE' || visr.Id != null)
 					params.put('visitorId', visr.Id);
+				params.put('visitorName', mess.From_Name__c);
 				System.debug('visitor=' + visr);
 
 				String sFlow = SM010_Utils.getChat2aiValue2('Welcome Flow');
 				if (sFlow != '')
 				{
-					system.debug('Welcome Flow: ' + JSON.serialize(params));
-//					SM010_Utils.getFlow(sFlow, params).start();
-					SM010_Utils.getFlow(sFlow,mess.To__c,params).start();
+					System.debug('Welcome Flow: ' + JSON.serialize(params));
+					SM010_Utils.getFlow(sFlow, mess.To__c, params).start();
 					triggeredFlow = 'Welcome Flow';
 				}
 			}
@@ -208,9 +236,10 @@ global class SM031_Nexmo
 				bProceeded = true;
 				Map<String, Object> params = new Map<String, Object>();
 				params.put('visitorId', visr.Id);
+				params.put('visitorName', mess.From_Name__c);
 				params.put('originalmessage', mess.CVCH__Text__c);
 
-				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('GDPR Flow'),mess.To__c, params);
+				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('GDPR Flow'), mess.To__c, params);
 				flow.start();
 			}
 			else if (apexGDPR() && visr.CVCH__GDPR_Consent__c == 'No Access' && visr.CVCH__Context__c != '' && visr.CVCH__Context__c != null)
@@ -219,6 +248,7 @@ global class SM031_Nexmo
 				bProceeded = true;
 				Map<String, Object> params = new Map<String, Object>();
 				params.put('visitorId', visr.Id);
+				params.put('visitorName', mess.From_Name__c);
 				params.put('originalmessage', mess.CVCH__Text__c);
 
 				MessageOptions mo = (MessageOptions) JSON.deserialize(visr.CVCH__Context__c, MessageOptions.class);
@@ -236,13 +266,13 @@ global class SM031_Nexmo
 						params.put(opt.sName2, opt.sValue2);
 					if (opt.sName3 != null)
 						params.put(opt.sName3, opt.sValue3);
-					Flow.Interview flow = SM010_Utils.getFlow(opt.sFlow,mess.To__c, params);
+					Flow.Interview flow = SM010_Utils.getFlow(opt.sFlow, mess.To__c, params);
 					flow.start();
 					triggeredFlow = 'GDPR Flow';
 				}
 				else if (SM010_Utils.getChat2aiValue2('GDPR Flow') != '')
 				{
-					Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('GDPR Flow'),mess.To__c, params);
+					Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('GDPR Flow'), mess.To__c, params);
 					flow.start();
 					triggeredFlow = 'GDPR Flow';
 				}
@@ -254,8 +284,9 @@ global class SM031_Nexmo
 				bProceeded = true;
 				Map<String, Object> params = new Map<String, Object>();
 				params.put('visitorId', visr.Id);
+				params.put('visitorName', mess.From_Name__c);
 				params.put('originalmessage', mess.CVCH__Text__c);
-				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue2('Main Menu Flow'),mess.To__c, params);
+				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue2('Main Menu Flow'), mess.To__c, params);
 				flow.start();
 				CVCH__Visitor__c v = new CVCH__Visitor__c(Id = visr.Id, CVCH__Next_Flow__c = null);
 				if (visr.Current_Flow__c != null && visr.Current_Flow__c != '')
@@ -290,9 +321,10 @@ global class SM031_Nexmo
 				bProceeded = true;
 				Map<String, Object> params = new Map<String, Object>();
 				params.put('visitorId', visr.Id);
+				params.put('visitorName', mess.From_Name__c);
 				params.put('input', mess.CVCH__Text__c);
 
-				Flow.Interview flow = SM010_Utils.getFlow(visr.CVCH__Next_Flow__c,mess.To__c, params);
+				Flow.Interview flow = SM010_Utils.getFlow(visr.CVCH__Next_Flow__c, mess.To__c, params);
 				flow.start();
 				triggeredFlow = visr.Next_Flow__c;
 			}
@@ -300,8 +332,9 @@ global class SM031_Nexmo
 			{
 				Map<String, Object> params = new Map<String, Object>();
 				params.put('visitorId', visr.Id);
+				params.put('visitorName', mess.From_Name__c);
 				params.put('originalmessage', mess.CVCH__Text__c);
-				Flow.Interview flow = SM010_Utils.getFlow(mess.CVCH__Flow__c,mess.To__c, params);
+				Flow.Interview flow = SM010_Utils.getFlow(mess.CVCH__Flow__c, mess.To__c, params);
 				flow.start();
 				triggeredFlow = visr.Next_Flow__c;
 				bProceeded = true;
@@ -328,8 +361,9 @@ global class SM031_Nexmo
 						{
 							Map<String, Object> params = new Map<String, Object>();
 							params.put('visitorId', visr.Id);
+							params.put('visitorName', mess.From_Name__c);
 							params.put('type', 'Email');
-							Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('Input Validation Error Flow'),mess.To__c, params);
+							Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('Input Validation Error Flow'), mess.To__c, params);
 							flow.start();
 							return lret;
 						}
@@ -344,8 +378,9 @@ global class SM031_Nexmo
 						{
 							Map<String, Object> params = new Map<String, Object>();
 							params.put('visitorId', visr.Id);
+							params.put('visitorName', mess.From_Name__c);
 							params.put('type', 'Name');
-							Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('Input Validation Error Flow'),mess.To__c, params);
+							Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('Input Validation Error Flow'), mess.To__c, params);
 							flow.start();
 							return lret;
 						}
@@ -406,12 +441,13 @@ global class SM031_Nexmo
 							}
 						}
 						params.put('visitorId', visr.Id);
+						params.put('visitorName', mess.From_Name__c);
 						if (mo.sParamName != '' && mo.sParamName != null)
 						{
 							params.put(mo.sParamName, mess.Text__c);
 						}
 
-						Flow.Interview flow = SM010_Utils.getFlow(mo.sFlow,mess.To__c, params);
+						Flow.Interview flow = SM010_Utils.getFlow(mo.sFlow, mess.To__c, params);
 						flow.start();
 						triggeredFlow = mo.sFlow;
 					}
@@ -440,7 +476,7 @@ global class SM031_Nexmo
 						{
 							Integer qnaid = Integer.valueOf(opt.sValue);
 
-							SM080_QnA.QnAResponse respQnA2 = SM080_QnA.getQNA(qnaid, visr.CVCH__language__c,mess.To__c);
+							SM080_QnA.QnAResponse respQnA2 = SM080_QnA.getQNA(qnaid, visr.CVCH__language__c, mess.To__c);
 							lret.add(new MessageOptions(respQnA2));
 							bProceeded = true;
 						}
@@ -451,6 +487,7 @@ global class SM031_Nexmo
 							{
 								Map<String, Object> params = new Map<String, Object>();
 								params.put('visitorId', visr.Id);
+								params.put('visitorName', mess.From_Name__c);
 								params.put('originalmessage', mess.CVCH__Text__c);
 								if (opt.sName != null)
 									params.put(opt.sName, opt.sValue);
@@ -458,7 +495,7 @@ global class SM031_Nexmo
 									params.put(opt.sName2, opt.sValue2);
 								if (opt.sName3 != null)
 									params.put(opt.sName3, opt.sValue3);
-								Flow.Interview flow = SM010_Utils.getFlow(opt.sFlow,mess.To__c, params);
+								Flow.Interview flow = SM010_Utils.getFlow(opt.sFlow, mess.To__c, params);
 								flow.start();
 								triggeredFlow = opt.sFlow;
 							}
@@ -474,10 +511,11 @@ global class SM031_Nexmo
 				bProceeded = true;
 				Map<String, Object> params = new Map<String, Object>();
 				params.put('visitorId', visr.Id);
+				params.put('visitorName', mess.From_Name__c);
 				params.put('originalmessage', mess.Text__c);
 				params.put('language', tran.detectedlang);
 				params.put('visitorlanguage', visr.language__c);
-				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue2('Default Flow 2'),mess.To__c, params);
+				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue2('Default Flow 2'), mess.To__c, params);
 				flow.start();// trigger default flow 2
 				triggeredFlow = 'Default Flow 2';
 //}
@@ -489,36 +527,12 @@ global class SM031_Nexmo
 				bProceeded = true;
 				Map<String, Object> params = new Map<String, Object>();
 				params.put('visitorId', visr.Id);
+				params.put('visitorName', mess.From_Name__c);
 				params.put('originalmessage', mess.Text__c);
-				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue2('Default Flow'),mess.To__c, params);
+				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue2('Default Flow'), mess.To__c, params);
 				flow.start();// trigger default flow
 				triggeredFlow = 'Default Flow';
-//VF-438
-/*if (visr.language__c == 'en')
-{
-    tran = SM080_Translate.translate0(mess.Text__c);
-    if (visr.language__c != tran.detectedlang)
-    {
-        params.put('language',tran.detectedlang);
-        params.put('visitorlanguage',visr.language__c);
-        Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('Default Flow 2'), params);
-        flow.start();// trigger default flow 2
-        triggeredFlow = 'Default Flow 2';
-    }
-    else
-    {
-        Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('Default Flow'), params);
-        flow.start();// trigger default flow
-        triggeredFlow = 'Default Flow';
-    }
-}
-else
-{
-    Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('Default Flow'), params);
-    flow.start();// trigger default flow
-    triggeredFlow = 'Default Flow';
-}
-*/
+
 			}
 			if (!bProceeded)
 			{
@@ -528,10 +542,11 @@ else
 				{
 					Map<String, Object> params = new Map<String, Object>();
 					params.put('visitorId', visr.Id);
+					params.put('visitorName', mess.From_Name__c);
 					params.put('intent', respLuis.sIntent);
 					params.put('entities', respLuis.getEntities());
 					params.put('originalmessage', mess.CVCH__Text__c);
-					Flow.Interview chat2aiflow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('Chat2ai Flow'),mess.To__c, params);
+					Flow.Interview chat2aiflow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('Chat2ai Flow'), mess.To__c, params);
 					chat2aiflow.start();
 					triggeredFlow = intentLUIS;
 					triggeredLUIS = true;
@@ -558,11 +573,32 @@ else
 
 	global static CVCH__NexmoMessage__c getAzureMessage(Map<String, Object> m)
 	{
+		System.debug('getAzureMessage.start');
 		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
 		mess.Name = (String) m.get('id');
 		mess.CVCH__Text__c = (String) m.get('text');
+
 		if (mess.CVCH__Text__c == null || mess.CVCH__Text__c == '')
-			return null;
+		{
+			mess.CVCH__Text__c = (String) JPath.get0(m, '/channelData/message/text');
+		}
+		System.debug('mess.CVCH__Text__c=' + mess.CVCH__Text__c);
+
+		if (mess.CVCH__Text__c == null || mess.CVCH__Text__c == '')
+		{
+			list<object>lAttachments = (list<object>) m.get('attachments');
+			if (lAttachments != null && !lAttachments.isEmpty())
+			{
+				map<string, object> mAttachment = (map<string, object>) lAttachments[0];
+				string contentType = (string) mAttachment.get('contentType');
+				String sURL = (String) mAttachment.get('contentUrl');
+				if (contentType.startsWith('image'))
+					mess.CVCH__InputType__c = 'image';
+				else
+						mess.CVCH__InputType__c = 'file';
+				mess.ImageURL__c = sURL;
+			}
+		}
 		Map<String, Object> mFrom = (Map<String, Object>) m.get('from');
 		mess.CVCH__From__c = (String) mFrom.get('id');
 		mess.CVCH__From_Name__c = (String) mFrom.get('name');
@@ -570,14 +606,19 @@ else
 		Map<String, Object> mTo = (Map<String, Object>) m.get('recipient');
 		mess.CVCH__To__c = (String) mTo.get('id');
 		mess.CVCH__To_Name__c = (String) mTo.get('name');
-		mess.CVCH__ChannelId__c = (String) mTo.get('channelId');
+		mess.CVCH__ChannelId__c = (String) m.get('channelId');
 		mess.CVCH__Channel__c = 'Azure';
 		Map<String, Object> mConv = (Map<String, Object>) m.get('conversation');
 
 		mess.CVCH__conversationId__c = (String) mConv.get('id');
 		mess.CVCH__conversationName__c = (String) mConv.get('name');
-		SM042_NexmoOut2.setInboundMessage(mess);
-		system.debug(mess);
+		mess.CVCH__ExternalId__c = mess.Name;
+		if (mess.name.length() > 80)
+			mess.name = mess.name.substring(0, 79);
+		mess.ReplyToId__c = (String) JPath.safeGet(m,'/context/message_uuid');
+
+		System.debug('getAzureMessage.return');
+		System.debug(mess);
 		return mess;
 	}
 
@@ -591,27 +632,55 @@ else
 		mess.CVCH__Channel__c = 'D360';
 		mess.CVCH__From__c = (String) m.get('from');
 		mess.From_Name__c = (String) JPath.get0(mObj, '/contacts/[1]/profile/name');
+		mess.To__c = (String)mObj.get('to');
 		mess.CVCH__InputType__c = (String) m.get('type');
+
 		if (mess.CVCH__InputType__c == 'text')
 			mess.CVCH__Text__c = (String) ((Map<String, Object>) m.get('text')).get('body');
 		else if (mess.CVCH__InputType__c == 'image')
 		{
 			mess.ImageURL__c = (String) ((Map<String, Object>) m.get('image')).get('url');
-			if(mess.ImageURL__c == null || mess.ImageURL__c == '')
+			if (mess.ImageURL__c == null || mess.ImageURL__c == '')
 			{
-				string sURL = SM010_Utils.getChat2aiValue2('D360URL')+'/media/'+((String) ((Map<String, Object>) m.get('image')).get('id'));
-				mess.ImageURL__c = SM090_UploadS3.getS3URL(sURL).S3URL;
+				String sURL = SM010_Utils.getChat2aiValue2('D360URL') + '/media/' + ((String) ((Map<String, Object>) m.get('image')).get('id'));
+				mess.ImageURL__c = SM090_UploadS3.getS3URL(sURL,mess.CVCH__Channel__c,mess.To__c).S3URL;
 			}
 		}
 
 		else if (mess.CVCH__InputType__c == 'file')
 			mess.ImageURL__c = (String) ((Map<String, Object>) m.get('file')).get('url');
 		else if (mess.CVCH__InputType__c == 'button')
-			mess.CVCH__Text__c = (String) ((Map<String, Object>) m.get('button')).get('payload');
+		{
+			String sId = (String) ((Map<String, Object>) m.get('button')).get('payload');
+			String sTitle = (String) ((Map<String, Object>) m.get('button')).get('text');
+			if (sId.startsWith('flow_'))
+			{
+				mess.CVCH__Flow__c = sId.replaceFirst('flow_', '');
+				mess.CVCH__Text__c = sTitle;
+			}
+			else
+			{
+				mess.CVCH__Text__c = sId;
+			}
+		}
 		else if (mess.CVCH__InputType__c == 'interactive')
 		{
-			string sId = (String) JPath.get0(m, '/interactive/button_reply/id');
-			string sTitle = (String) JPath.get0(m, '/interactive/button_reply/title');
+			String sId = null;
+			String sTitle = null;
+			try
+			{
+				sId = (String) JPath.get0(m, '/interactive/button_reply/id');
+				sTitle = (String) JPath.get0(m, '/interactive/button_reply/title');
+			}
+			catch (Exception e)
+			{
+			}
+			if (sId == null || sId == '')
+			{
+				sId = (String) JPath.get0(m, '/interactive/list_reply/id');
+				sTitle = (String) JPath.get0(m, '/interactive/list_reply/title');
+			}
+
 			if (sId.startsWith('flow_'))
 			{
 				mess.CVCH__Flow__c = sId.replaceFirst('flow_', '');
@@ -623,16 +692,10 @@ else
 			}
 		}
 
-		List<CVCH__NexmoMessage__c> lold =
-		[
-				select Id
-				from CVCH__NexmoMessage__c
-				where Name = :mess.Name
-		];
-		if (!lold.isEmpty())
-			mess = null;
-
-		SM042_NexmoOut2.setInboundMessage(mess);
+		mess.CVCH__ExternalId__c = mess.Name;
+		if (mess.name.length() > 80)
+			mess.name = mess.name.substring(0, 79);
+		mess.ReplyToId__c = (String) JPath.safeGet(m,'/context/message_uuid');
 		System.debug('D360Message.return');
 		System.debug(mess);
 		return mess;
@@ -649,23 +712,29 @@ else
 		mess.CVCH__To__c = (String) m.get('to');
 		mess.From_Name__c = (String) JPath.get0(m, '/profile/name');
 		mess.CVCH__InputType__c = (String) m.get('message_type');
-		system.debug('mess.CVCH__InputType__c =  ' + mess.CVCH__InputType__c);
+
+		System.debug('mess.CVCH__InputType__c =  ' + mess.CVCH__InputType__c);
 		if (mess.CVCH__InputType__c == 'text')
+		{
 			mess.CVCH__Text__c = (String) m.get('text');
+		}
 		else if (mess.CVCH__InputType__c == 'image')
+		{
 			mess.ImageURL__c = (String) ((Map<String, Object>) m.get('image')).get('url');
+		}
 		else if (mess.CVCH__InputType__c == 'file')
+		{
 			mess.ImageURL__c = (String) ((Map<String, Object>) m.get('file')).get('url');
+		}
 		else if (mess.CVCH__InputType__c == 'button')
 		{
 			mess.CVCH__Text__c = (String) ((Map<String, Object>) m.get('button')).get('payload');
-			system.debug('CVCH__InputType__c = button, CVCH__Text__c=' + mess.CVCH__Text__c + ', m=' + JSON.serialize(m));
+			System.debug('CVCH__InputType__c = button, CVCH__Text__c=' + mess.CVCH__Text__c + ', m=' + JSON.serialize(m));
 		}
-
 		else if (mess.CVCH__InputType__c == 'reply')
 		{
-			string sId = (String) ((Map<String, Object>) m.get('reply')).get('id');
-			string sTitle = (String) ((Map<String, Object>) m.get('reply')).get('title');
+			String sId = (String) ((Map<String, Object>) m.get('reply')).get('id');
+			String sTitle = (String) ((Map<String, Object>) m.get('reply')).get('title');
 			if (sId.startsWith('flow_'))
 			{
 				mess.CVCH__Flow__c = sId.replaceFirst('flow_', '');
@@ -678,34 +747,46 @@ else
 		}
 		else if (mess.InputType__c == 'location')
 		{
-			map<string, object> mLoc = (map<string, object>) m.get('location');
+			Map<String, Object> mLoc = (Map<String, Object>) m.get('location');
 
 			Location loc = new Location();
-			loc.address = (string) mLoc.get('address');
-			loc.name = (string) mLoc.get('name');
-			loc.url = (string) mLoc.get('url');
+			loc.address = (String) mLoc.get('address');
+			loc.name = (String) mLoc.get('name');
+			loc.url = (String) mLoc.get('url');
 
 			loc.latitude = (Decimal) mLoc.get('lat');
 			loc.longitude = (Decimal) mLoc.get('long');
 			Location.setLocation(loc);
 		}
 
-		system.debug('mess.CVCH__Text__c = ' + mess.CVCH__Text__c);
-		List<CVCH__NexmoMessage__c> lold =
-		[
-				select Id
-				from CVCH__NexmoMessage__c
-				where Name = :mess.Name
-		];
-		if (!lold.isEmpty())
-			mess = null;
-
-		SM042_NexmoOut2.setInboundMessage(mess);
+		System.debug('mess.CVCH__Text__c = ' + mess.CVCH__Text__c);
+		mess.CVCH__ExternalId__c = mess.Name;
+		if (mess.name.length() > 80)
+		{
+			mess.name = mess.name.substring(0, 79);
+		}
+		mess.ReplyToId__c = (String) JPath.safeGet(m,'/context/message_uuid');
 		System.debug('NexmoV1Message.return');
 		System.debug(mess);
 		return mess;
 	}
 
+	global static CVCH__NexmoMessage__c parseWithUniqueCheck(String jsonbody)
+	{
+		CVCH__NexmoMessage__c mess = parse(jsonbody);
+		List<CVCH__NexmoMessage__c> lold = DM014_Message.getRecordByExtID(mess.CVCH__ExternalId__c);
+
+		if (!lold.isEmpty())
+		{
+			mess = null;
+		}
+		else
+		{
+			SM042_NexmoOut2.setInboundMessage(mess);
+		}
+
+		return mess;
+	}
 	global static CVCH__NexmoMessage__c parse(String jsonbody)
 	{
 		System.debug('parse.start ' + jsonbody);
@@ -730,7 +811,7 @@ else
 			return NexmoV1Message(m);
 		}
 
-		String sFrom = SM010_Utils.phone((string) mFrom.get('number'));
+		String sFrom = SM010_Utils.phone((String) mFrom.get('number'));
 		String sChannel = (String) mFrom.get('type');
 		Map<String, Object> mTo = (Map<String, Object>) m.get('to');
 		String sTo = (String) mTo.get('number');
@@ -782,16 +863,10 @@ else
 		mess.CVCH__conversationId__c = '';
 		mess.CVCH__conversationName__c = '';
 
-		List<CVCH__NexmoMessage__c> lold =
-		[
-				select Id
-				from CVCH__NexmoMessage__c
-				where Name = :mess.Name
-		];
-		if (!lold.isEmpty())
-			mess = null;
+		mess.CVCH__ExternalId__c = mess.Name;
+		if (mess.name.length() > 80)
+			mess.name = mess.name.substring(0, 79);
 		System.debug('parse.return ' + mess);
-		SM042_NexmoOut2.setInboundMessage(mess);
 		return mess;
 	}
 
@@ -825,7 +900,20 @@ else
 
 		if (mess0 != null && mess0.CVCH__From__c != null)
 		{
-			SM042_NexmoOut2.sendText(mess0.CVCH__From__c, sErrorMessage, mess0.CVCH__To__c);
+			String sErrorFlow = SM010_Utils.getChat2aiValue2('Error Flow');
+			if (sErrorFlow != '')
+			{
+				Map<String, Object> params = new Map<String, Object>();
+				params.put('visitorId', vis.Id);
+				params.put('errorMessage', sErrorMessage);
+
+				Flow.Interview flow = SM010_Utils.getFlow(sErrorFlow, mess0.CVCH__To__c, params);
+				flow.start();
+			}
+			else
+			{
+				SM042_NexmoOut2.sendText(mess0.CVCH__From__c, sErrorMessage, mess0.CVCH__To__c);
+			}
 		}
 	}
 	public static void sendError(CVCH__NexmoMessage__c mess0, String sErrorMessage, CVCH__Visitor__c vis)
@@ -859,12 +947,30 @@ else
 			{
 			}
 		}
-		if (mess0 != null && mess0.CVCH__From__c != null)
+		String sErrorFlow = SM010_Utils.getChat2aiValue2('Error Flow');
+		if (sErrorFlow != '')
+		{
+			Map<String, Object> params = new Map<String, Object>();
+			if (vis != null)
+				params.put('visitorId', vis.Id);
+			if (mess0 != null)
+			{
+				params.put('ChatNumber', mess0.To__c);
+				params.put('visphone', mess0.From__c);
+			}
+
+
+			params.put('errorMessage', sErrorMessage);
+
+			Flow.Interview flow = SM010_Utils.getFlow(sErrorFlow, mess0.CVCH__To__c, params);
+			flow.start();
+		}
+		else if (mess0 != null && mess0.CVCH__From__c != null)
 		{
 			SM042_NexmoOut2.sendText(mess0.CVCH__From__c, sErrorMessage, mess0.CVCH__To__c);
 		}
 	}
-	@Future(Callout = true)
+	@Future(Callout=true)
 	global static void proceedAsync(String jsonbody)
 	{
 		getMessage0(jsonbody);
@@ -878,38 +984,46 @@ else
 		String errMsg = '';
 		String sOutput = '';
 		CVCH__NexmoMessage__c mess0 = new CVCH__NexmoMessage__c();
-		List<CVCH__NexmoMessage__c>lMess = new List<CVCH__NexmoMessage__c>();
 		try
 		{
-			mess0 = parse(jsonbody);
+			mess0 = parseWithUniqueCheck(jsonbody);
 			if (mess0 == null)
-				return lMess;
-			lMess.add(mess0);
-			visr = getVisitor(mess0.CVCH__From__c, mess0.CVCH__To__c, mess0.CVCH__Channel__c);
+				return new List<CVCH__NexmoMessage__c>();
 
-			mess0.CVCH__Received__c = dtBeg;
-
-			List<MessageOptions> aRetStr = getResponse(mess0, visr);
-			System.debug(aRetStr);
-			if (aRetStr != null)
+			FacebookMessage fm;
+			if (mess0.Channel__c == 'D360')
+				fm = FacebookMessage.parse(jsonbody);
+			if (fm != null && fm.isValid)
 			{
-				mess0.CVCH__Response2__c = String.join(aRetStr, '\t');
-				if (mess0.CVCH__Response2__c != null && mess0.CVCH__Response2__c.length() > 32000)
-					mess0.CVCH__Response2__c = mess0.CVCH__Response2__c.substring(0, 32000);
-				String sPrevContext = visr.CVCH__Context__c;
-				for (MessageOptions opt : aRetStr)
+				fm.handledInFlow();
+			}
+			else
+			{
+				visr = getVisitor(mess0.CVCH__From__c, mess0.CVCH__To__c, mess0.CVCH__Channel__c);
+				mess0.CVCH__Received__c = dtBeg;
+
+				List<MessageOptions> aRetStr;
+				aRetStr = getResponse(mess0, visr);
+				System.debug(aRetStr);
+				if (aRetStr != null)
 				{
-					opt.send(visr);
-					sOutput += '\t' + opt.getBody();
+					mess0.CVCH__Response2__c = String.join(aRetStr, '\t');
+					if (mess0.CVCH__Response2__c != null && mess0.CVCH__Response2__c.length() > 32000)
+						mess0.CVCH__Response2__c = mess0.CVCH__Response2__c.substring(0, 32000);
+					String sPrevContext = visr.CVCH__Context__c;
+					for (MessageOptions opt : aRetStr)
+					{
+						opt.send(visr);
+						sOutput += '\t' + opt.getBody();
+					}
+					if (sOutput != null && sOutput.length() > 32000)
+						sOutput = sOutput.substring(0, 32000);
+					if (sPrevContext != visr.CVCH__Context__c)
+					{
+						CVCH__Visitor__c v = new CVCH__Visitor__c(Id = visr.Id, CVCH__Context__c = visr.CVCH__Context__c);
+						update v;
+					}
 				}
-				if (sOutput != null && sOutput.length() > 32000)
-					sOutput = sOutput.substring(0, 32000);
-				if (sPrevContext != visr.CVCH__Context__c)
-				{
-					CVCH__Visitor__c v = new CVCH__Visitor__c(Id = visr.Id, CVCH__Context__c = visr.CVCH__Context__c);
-					update v;
-				}
-//				lMess.add(mess0);
 			}
 		}
 		catch (MyException e)
@@ -928,33 +1042,36 @@ else
 		}
 		finally
 		{
-//			if (mess0 != null)
-//			{
+			system.debug('inside getMessage0 catch:');
+			system.debug(mess0);
 			try
 			{
-				SM005_Logs.LogCallOut('', 'Nexmo', jsonbody, JSON.serialize(lMess), dtBeg, Datetime.now(), errMsg);
+
+				SM005_Logs.LogCallOut('', 'Nexmo', jsonbody, JSON.serialize(mess0), dtBeg, Datetime.now(), errMsg);
 				SM005_Logs.save();
 				SM010_Utils.saveTran();
 				if (mess0 != null)
 				{
 					mess0.CVCH__Responded__c = Datetime.now();
 					mess0.CVCH__Duration__c = mess0.CVCH__Responded__c.getTime() - mess0.CVCH__Received__c.getTime();
+					insert mess0;
+					updateVisitor(new Visitor__c(Id = visr.Id, Last_Inbound_Message__c = mess0.Id));
 				}
-				if (lMess != null)
-					insert lMess;
 				SM010_Utils.insertConversation(scoreLUIS, scoreQnA, intentLUIS, triggeredFlow, visr.language__c, visr.CVCH__Id__c, mess0.Text__c, sOutput, visr.Id, errMsg);
 				if (triggeredLUIS)
 				{ // if we got LUIS response for query - log Search Request for keyword, if present
 					SM010_Utils.logSearchRequest(respLuis);
 				}
+				updateVisitor(new Visitor__c(Id = visr.Id, CVCH__Last_Interaction_Date__c = Datetime.now()));
+
+				if (visUpdate != null)
+					update visUpdate;
 			}
 			catch (Exception e)
 			{
 
 			}
-
-//			}
 		}
-		return lMess;
+		return new List<CVCH__NexmoMessage__c>();
 	}
 }

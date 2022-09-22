@@ -9,19 +9,21 @@ public class SM041_WhatsApp
 
 	public static void sendText(String sTo, String sFrom, String sMessage, String channel)
 	{
+
 		if (channel == 'D360')
-			SM043_360Dialog.sendTextMessage(sTo, sMessage);
+			SM043_360Dialog.sendTextMessage(sTo,sFrom, sMessage);
 		else if (channel == 'NexmoV1')
 			SM044_NexmoV1.sendText(sTo, sFrom, sMessage);
 		else
 				SM042_nexmoOut4.sendText(sTo, sFrom, sMessage);
 	}
 
+
 	public static void sendImage(String sTo, String sFrom, String imageURL, String sCaption, String channel)
 	{
 		system.debug('sendImage.caption=' + sCaption);
 		if (channel == 'D360')
-			SM043_360Dialog.sendImage(sTo, imageURL, sCaption);
+			SM043_360Dialog.sendImage(sTo,sFrom, imageURL, sCaption);
 		else if (channel == 'NexmoV1')
 			SM044_NexmoV1.sendLink(sTo, sFrom, imageURL, sCaption, 'image');
 		else
@@ -32,7 +34,7 @@ public class SM041_WhatsApp
 	public static void sendCustom(String sTo, String sFrom, Object payload, String channel)
 	{
 		if (channel == 'D360')
-			SM043_360Dialog.sendCustom(sTo, 'interactive', payload);
+			SM043_360Dialog.sendCustom(sTo,  sFrom,'interactive', payload);
 		else if (channel == 'NexmoV1')
 			SM044_NexmoV1.sendCustom(sTo, sFrom, (String) payload);
 		else
@@ -42,7 +44,7 @@ public class SM041_WhatsApp
 	public static void sendTemplate(String sTo, String sFrom, Object payload, String locale, String channel)
 	{
 		if (channel == 'D360')
-			SM043_360Dialog.sendCustom(sTo, 'template', payload);
+			SM043_360Dialog.sendCustom(sTo, sFrom, 'template', payload);
 		else if (channel == 'NexmoV1')
 			SM044_NexmoV1.sendTemplate(sTo, sFrom, (String) payload, locale);
 		else
@@ -52,7 +54,7 @@ public class SM041_WhatsApp
 	public static void sendVideo(String sTo, String sFrom, String videoURL, String sCaption, String channel)
 	{
 		if (channel == 'D360')
-			SM043_360Dialog.sendVideo(sTo, videoURL, sCaption);
+			SM043_360Dialog.sendVideo(sTo,sFrom, videoURL, sCaption);
 		else if (channel == 'NexmoV1')
 			SM044_NexmoV1.sendLink(sTo, sFrom, videoURL, sCaption, 'video');
 		else
@@ -62,7 +64,7 @@ public class SM041_WhatsApp
 	public static void sendFile(String sTo, String sFrom, String sFile, String sCaption, String channel)
 	{
 		if (channel == 'D360')
-			SM043_360Dialog.sendFile(sTo, sFile, sCaption);
+			SM043_360Dialog.sendFile(sTo,sFrom, sFile, sCaption);
 		else
 				SM042_NexmoOut4.sendFile(sTo, sFrom, sFile, sCaption);
 	}

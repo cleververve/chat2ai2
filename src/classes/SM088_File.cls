@@ -64,6 +64,7 @@ global class SM088_File
 		}catch(Exception e)
 		{
 			sErr = e.getMessage();
+			throw new MyException('The content can not be downloaded from '+sURL);
 		}
 		finally
 		{

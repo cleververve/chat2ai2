@@ -22,6 +22,7 @@ global class FlowSendVideo
 			CVCH__Visitor__c vis = mVis.get((id)inp.visitorId);
             if(vis.CVCH__language__c != 'en' && vis.CVCH__language__c != null && vis.CVCH__language__c != '')
 				inp.caption = SM010_Utils.translate(inp.caption,vis.CVCH__language__c);
+			SM010_Utils.setVisitor(vis);
 			SM042_NexmoOut4.sendVideo(vis.CVCH__Id__c,vis.CVCH__Chat_Number__c,inp.fileURL, inp.caption);
             SM042_NexmoOut2.pause(800);
 		}

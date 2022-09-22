@@ -1,0 +1,33 @@
+{
+    "attachments":[
+        {
+            "contentType":"application/vnd.microsoft.card.hero",
+            "content":{
+                "title":"",
+                "subtitle":"",
+                "text":"",
+                "images":[
+                    {
+                        "url":"https://s3-ap-south-1.amazonaws.com:443/bot-bkt/prod/37039/37039-a67e2576-daf5-44b5-bdca-3a9b0ac86625.jpeg",
+
+                    }
+                ],
+                "buttons":[]
+            }
+        }
+    ],
+    "type":"message",
+    "from":{
+        "id":"104342924748948",
+        "name":"BotCannels"
+    },
+    "conversation":{
+        "id":"5397409610315298-104342924748948",
+        "name":"5397409610315298-104342924748948"
+    },
+    "recipient":{
+        "id":"5397409610315298",
+        "name":"Serhii Volynets"
+    },
+    "replyToId":"m_q_wHnlRAgVojR8FRZW3s9N-bXIlxTvbBjS8MYl8YbOU5QBnyZ7AGxGkryisMoMet-EuChk4RjW6Oe"
+}

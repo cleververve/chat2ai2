@@ -31,6 +31,8 @@ global class CarouselItem
 			sRet = sRet+button2.getBody()+'\n';
 		if(button3 != null && button3.sLabel != '' && button3.sLabel != null)
 			sRet = sRet+button3.getBody();
+		if(sRet.endsWith('\n'))
+			sRet = sRet.substring(0,sRet.length()-1);
 		return sRet;
 	}
 

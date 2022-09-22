@@ -1,19 +1,19 @@
 global class SM005_Logs
 {
-    public static list<CVCH__CallOut__c>lLog = new list<CVCH__CallOut__c> ();
-    public static CVCH__CallOut__c LogCallOut(string recordId,string callType, string reqBody, string respBody, datetime dtBeg, datetime dtEnd,string sErrorMessage,string sURL, string sAuth, map<string,string> headers, string sMethod)
+    public static List<CVCH__CallOut__c>lLog = new List<CVCH__CallOut__c> ();
+    public static CVCH__CallOut__c LogCallOut(String recordId,String callType, String reqBody, String respBody, Datetime dtBeg, Datetime dtEnd,String sErrorMessage,String sURL, String sAuth, Map<String,String> headers, String sMethod)
     {
         return LogCallOut(recordId,callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, sURL,sAuth,null,null,headers, sMethod);
     }
-            public static CVCH__CallOut__c LogCallOut(string recordId,string callType, string reqBody, string respBody, datetime dtBeg, datetime dtEnd,string sErrorMessage,string sURL, string sAuth)
+            public static CVCH__CallOut__c LogCallOut(String recordId,String callType, String reqBody, String respBody, Datetime dtBeg, Datetime dtEnd,String sErrorMessage,String sURL, String sAuth)
         {
             return LogCallOut(recordId,callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, sURL,sAuth,null,null, null, null);
         }
-        public static CVCH__CallOut__c LogCallOut(string recordId,string callType, string reqBody, string respBody, datetime dtBeg, datetime dtEnd,string sErrorMessage)
+        public static CVCH__CallOut__c LogCallOut(String recordId,String callType, String reqBody, String respBody, Datetime dtBeg, Datetime dtEnd,String sErrorMessage)
         {
             return LogCallOut(recordId,callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, null,null,null,null,null,null);
         }
-    public static CVCH__CallOut__c LogCallOut(string recordId,string callType, string reqBody, string respBody, datetime dtBeg, datetime dtEnd,string sErrorMessage,string sURL, string sAuth,string reqBody2)
+    public static CVCH__CallOut__c LogCallOut(String recordId,String callType, String reqBody, String respBody, Datetime dtBeg, Datetime dtEnd,String sErrorMessage,String sURL, String sAuth,String reqBody2)
     {
         return LogCallOut(recordId,callType, reqBody, respBody, dtBeg, dtEnd, sErrorMessage, sURL,sAuth,reqBody2,null, null,null);
     }
@@ -29,7 +29,7 @@ global class SM005_Logs
  * @return: ---
  * */
     
-    public static CVCH__CallOut__c LogCallOut(string recordId,string callType, string reqBody, string respBody, datetime dtBeg, datetime dtEnd,string sErrorMessage,string sURL, string sAuth,string reqBody2, string respBody2, map<string,string> headers, string sMethod)
+    public static CVCH__CallOut__c LogCallOut(String recordId,String callType, String reqBody, String respBody, Datetime dtBeg, Datetime dtEnd,String sErrorMessage,String sURL, String sAuth,String reqBody2, String respBody2, Map<String,String> headers, String sMethod)
     {
         CVCH__CallOut__c c = new CVCH__CallOut__c();
         if(dtBeg != null && dtEnd != null)
@@ -68,17 +68,35 @@ global class SM005_Logs
             sURL = sURL.substring(255);
         c.CVCH__URL__c = sURL;
         c.CVCH__Authorization__c = sAuth;
-
-        
+        c.CVCH__responseId__c = getResponseId(respBody);
 		add(c);
         return c;
 //        insert  c;       
+    }
+    public static String getResponseId (String respBody)
+    {
+        String sRet = null;
+
+        if(respBody != null)
+        {
+            try
+            {
+                Object o = JSON.deserializeUntyped(respBody);
+                String uuid = (String)JPath.safeGet(o,'/message_uuid');
+                if(uuid != '' && uuid != null)
+                    sRet = uuid;
+
+            }catch(Exception e)
+            {}
+        }
+        return sRet;
     }
     
     
     public static void add(CVCH__CallOut__c c)
     {
         lLog.add(c);
+
     }
     
     global static void save()
@@ -86,7 +104,7 @@ global class SM005_Logs
         if(!lLog.isEmpty())
         {
             Database.insert(lLog,false);
-            lLog =  new list<CVCH__CallOut__c> ();
+            lLog =  new List<CVCH__CallOut__c> ();
         }
     }
 }

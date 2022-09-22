@@ -1,6 +1,7 @@
 global class MessageOptions2
 {
 	@AuraEnabled @InvocableVariable global string sMessage;
+	@AuraEnabled @InvocableVariable global string sBody;
 	@AuraEnabled @InvocableVariable global id visitorId;
 
 	@AuraEnabled @InvocableVariable global Option option1;
@@ -35,6 +36,7 @@ global class MessageOptions2
 			mo.sType = 'Options';
 			mo.visitorId = mess.visitorId;
 			mo.sMessage = mess.sMessage;
+			mo.sBody = mess.sBody;
 			mo.async = mess.async;
 			lMess.add(mo);
 			MessageOptions.sendWF(lMess);

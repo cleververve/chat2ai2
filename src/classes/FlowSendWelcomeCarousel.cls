@@ -22,18 +22,8 @@ global class FlowSendWelcomeCarousel
 			item.imageURL = inp.imageurl;
 			mo.lItems.add(item);
 			mo.sType = 'Carousel';
-			mo.sMessage = inp.caption;
 			mo.async = inp.async;
 			SM042_NexmoOut2.sendComplexType(mo, inp.visphone, inp.ChatNumber);
-//            if(inp.async == null || inp.async == false)
-//        	{
-//            	sm042_nexmoout2.sendcarousel(inp.visphone,inp.ChatNumber, inp.imageurl, inp.caption);
-//                SM042_NexmoOut2.pause(800);
-//        	}
-//            else
-//            {
-//                sm042_nexmoout2.sendCarouselAsync(inp.visphone,inp.ChatNumber, inp.imageurl, inp.caption);
-//            }
 		}
 	}
 }

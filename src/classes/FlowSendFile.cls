@@ -20,6 +20,7 @@ global class FlowSendFile
 		for(SendFileInput inp: lParam)
 		{
 			Visitor__c vis = mVis.get((id)inp.visitorId);
+			SM010_Utils.setVisitor(vis);
 			SM042_NexmoOut4.sendFile(vis.Id__c,vis.Chat_Number__c,inp.fileURL,inp.caption);
             SM042_NexmoOut2.pause(2000);
 		}

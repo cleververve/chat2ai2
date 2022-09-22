@@ -38,6 +38,8 @@ global class SM086_OCR
 		@AuraEnabled @InvocableVariable global String barcode;
 		@AuraEnabled @InvocableVariable global String id;
 		@AuraEnabled @InvocableVariable global String externalId;
+		@AuraEnabled @InvocableVariable global Decimal cashback;
+		@AuraEnabled @InvocableVariable global Decimal discount;
 		@AuraEnabled@InvocableVariable global List<OCRItem> items;
 	}
 
@@ -61,6 +63,7 @@ global class SM086_OCR
 
 		@AuraEnabled @InvocableVariable global String type;
 		@AuraEnabled @InvocableVariable global String unit_of_measure;
+		@AuraEnabled @InvocableVariable global Decimal cashback;
 	}
 
 
@@ -152,6 +155,10 @@ global class SM086_OCR
 		resp.ocr_text = (String) mResp.get('ocr_text');
 		resp.notes = (String) mResp.get('notes');
 		resp.id =  ''+(Integer) mResp.get('id');
+
+		resp.discount = (Decimal)mResp.get('discount');
+		resp.cashback = (Decimal)mResp.get('cashback');
+
 		List<Object> lbarcodes = (List<Object>) mResp.get('barcodes');
 		if(lbarcodes != null)
 		{
@@ -175,6 +182,7 @@ global class SM086_OCR
 			resp.address = (String) mAddress.get('address');
 			resp.name = (String) mAddress.get('name');
 			resp.externalId = (String) mAddress.get('external_id');
+
 		}
 		if(mResp.get('line_items') != null)
 		{
@@ -200,6 +208,7 @@ global class SM086_OCR
 				item.id = ''+(integer)mLine.get('id');
 				item.description = (String)mLine.get('description');
 				item.discount = (Decimal)mLine.get('discount');
+				item.cashback = (Decimal)mLine.get('cashback');
 				item.order = (Integer)mLine.get('order');
 				item.price = (Decimal)mLine.get('price');
 				item.quantity =(Decimal)mLine.get('quantity');

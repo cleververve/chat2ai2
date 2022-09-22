@@ -6,27 +6,28 @@ Description:
 
 global class FlowSendCustomMessage2
 {
-	@AuraEnabled @InvocableVariable global id visitorId;
-	@AuraEnabled @InvocableVariable global string content;
-	@AuraEnabled @InvocableVariable global boolean async;
+	@AuraEnabled @InvocableVariable global Id visitorId;
+	@AuraEnabled @InvocableVariable global String content;
+	@AuraEnabled @InvocableVariable global Boolean async;
 
-	@InvocableMethod(label='Send Custom Message 2' description='sends a custom interactive message ')
-	global static void sendMessage(list<FlowSendCustomMessage2> lParam)
+	@InvocableMethod(Label='Send Custom Message 2' Description='sends a custom interactive message ')
+	global static void sendMessage(List<FlowSendCustomMessage2> lParam)
 	{
-		system.debug('FlowSendCustomMessage2.start');
+		System.debug('FlowSendCustomMessage2.start');
 
-		set<id>sids = new set<id>();
+		Set<Id>sids = new Set<Id>();
 		for(FlowSendCustomMessage2 inp: lParam)
 		{
-			sids.add((id)inp.visitorId);
+			sids.add((Id)inp.visitorId);
 		}
-		map<id,CVCH__Visitor__c> mVis = new map<id,CVCH__Visitor__c>(DM080_Visitor.getRecords(sids));
+		Map<Id,CVCH__Visitor__c> mVis = new Map<Id,CVCH__Visitor__c>(DM080_Visitor.getRecords(sids));
 		for(FlowSendCustomMessage2 inp: lParam)
 		{
 			if(inp.async == null)
 				inp.async = false;
-			CVCH__Visitor__c vis = mVis.get((id)inp.visitorId);
-			system.debug('inp.message: '+inp.content);
+			CVCH__Visitor__c vis = mVis.get((Id)inp.visitorId);
+			SM010_Utils.setVisitor(vis);
+			System.debug('inp.message: '+inp.content);
 			SM042_NexmoOut2.sendCustomText2(vis.CVCH__Id__c,inp.content,vis.CVCH__Chat_Number__c,inp.async);
 			if (inp.async == true)
 				SM010_Utils.saveTran();

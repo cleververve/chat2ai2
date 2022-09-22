@@ -12,12 +12,10 @@ public class JWT {
     public static final String RS256 = 'RS256';
     public static final String NONE = 'none';
 
-
     public JWT() {
         this.alg = RS256;
         this.validFor = 300;
     }
-
 
     public String issue() {
 
@@ -71,12 +69,17 @@ public class JWT {
         return output;
     }
 
-    public static String getAccessToken()
+    public static String getAccessToken(string sPhone)
     {
         JWT jwt = new JWT();
         if(!Test.isRunningTest())
         {
-            CVCH__Key__c rec = [select id, CVCH__Value__c,CVCH__Application_Id__c  from CVCH__Key__c where CVCH__Active_Flag__c = true limit 1];
+            list<CVCH__Key__c> lRec = [select id, CVCH__Value__c,CVCH__Application_Id__c  from CVCH__Key__c where CVCH__Active_Flag__c = true and CVCH__Phone__c = :sPhone ];
+            CVCH__Key__c rec;
+            if(lRec.size()>0)
+                rec = lRec[0];
+            else
+                rec = [select id, CVCH__Value__c,CVCH__Application_Id__c  from CVCH__Key__c where CVCH__Active_Flag__c = true and CVCH__Phone__c = null limit 1];
             jwt.pkcs8 = rec.CVCH__Value__c;
             if(rec.CVCH__Application_Id__c != '' && rec.CVCH__Application_Id__c != null)
                 jwt.applicationId = rec.CVCH__Application_Id__c;

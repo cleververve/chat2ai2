@@ -1,21 +1,42 @@
 {
-    "messages":[
-        {
-            "from":"380668657070",
-            "id":"ABEGOAZoZXBwAgo-sIa-DzGWaVND",
-            "text":{
-                "body":"567567"
-            },
-            "timestamp":"1637916988",
-            "type":"text"
-        }
-    ],
     "contacts":[
         {
             "profile":{
-                "name":"Serhii Volynets"
+                "name":"Me"
             },
-            "wa_id":"380668657070"
+            "wa_id":"971501084679"
+        }
+    ],
+    "messages":[
+        {
+            "from":"971501084679",
+            "id":"ABEGlxUBCEZ5Ago-sLHU3nt8DUkE",
+            "order":{
+                "catalog_id":"679615539743464",
+                "product_items":[
+                    {
+                        "currency":"AED",
+                        "item_price":20,
+                        "product_retailer_id":"tl8zro85g0",
+                        "quantity":1
+                    },
+                    {
+                        "currency":"AED",
+                        "item_price":20,
+                        "product_retailer_id":"ujootwm3or",
+                        "quantity":4
+                    },
+                    {
+                        "currency":"AED",
+                        "item_price":20,
+                        "product_retailer_id":"bvr32hajb6",
+                        "quantity":8
+                    }
+                ],
+                "text":"Please deliver this items"
+            },
+            "timestamp":"1654241486",
+            "type":"order"
         }
     ]
 }

@@ -34,8 +34,6 @@ global class FlowSendCarousel2
 			item.imageURL = inp.imageurl;
 			mo.lItems.add(item);
 			mo.sType = 'Carousel';
-//			mo.visitorId = mess.visitorId;
-			mo.sMessage = inp.caption;
 			mo.async = inp.async;
 			SM042_NexmoOut2.sendComplexType(mo, vis.CVCH__id__c, vis.CVCH__Chat_Number__c);
 			SM042_NexmoOut2.pause(1000);

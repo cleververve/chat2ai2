@@ -18,13 +18,15 @@ public with sharing class SM080_LUIS
 			return json.serialize(mParameters);
 		}
 	}
-	public static LuisResponse queryPhrase(string sPhrase,string language)
+	public static LuisResponse queryPhrase(string sPhrase,string language,string sChatNumber)
 	{
 		LuisResponse ret = new LuisResponse();
 		ret.dScore=0;
 		if(Test.isRunningTest())
 			ret.dScore = 90;
 		string sURLSetting = 'Luis URL';
+		if(SM010_Utils.getChat2aiValue2('Multi ChatBots')=='TRUE')
+			sURLSetting = sURLSetting+'_'+sChatNumber;
 		//if(language != null && language != 'en' && language != '')
 		//	sURLSetting = sURLSetting+'_'+language;
 		string sURL = SM010_Utils.getChat2aiValue2(sURLSetting);

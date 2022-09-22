@@ -1,14 +1,22 @@
 global class SM010_Utils
 {
+	public static Visitor__c visr;
+	public static void setVisitor(Visitor__c v)
+	{
+		visr = v;
+	}
 
 	public class pageReturn
 	{
-		public list<object>lObj = new list<object>();
-		public boolean bEnd = true;
-		public boolean bBegin = true;
+		public List<Object>lObj = new List<Object>();
+		public Boolean bEnd = true;
+		public Boolean bBegin = true;
 	}
 
-	public static pageReturn getPage(list<object>lObj, integer iTab, integer iSize, boolean bReserveSlotForPrev, boolean bReserveSlotForNext)
+
+
+
+	public static pageReturn getPage(List<Object>lObj, Integer iTab, Integer iSize, Boolean bReserveSlotForPrev, Boolean bReserveSlotForNext)
 	{
 
 		pageReturn ret = new pageReturn();
@@ -17,20 +25,20 @@ global class SM010_Utils
 			ret.lObj = lObj;
 		else
 		{
-			integer iBegin;
-			integer iCurSize = iSize;
+			Integer iBegin;
+			Integer iCurSize = iSize;
 
-			integer iBeginSize = iSize;
-			integer iMidSize = iSize;
-			integer iEndSize = iSize;
+			Integer iBeginSize = iSize;
+			Integer iMidSize = iSize;
+			Integer iEndSize = iSize;
 			if (bReserveSlotForPrev)
 			{
-				iMidsize -= 1;
+				iMidSize -= 1;
 				iEndSize -= 1;
 			}
 			if (bReserveSlotForNext)
 			{
-				iMidsize -= 1;
+				iMidSize -= 1;
 				iBeginSize -= 1;
 			}
 
@@ -45,11 +53,11 @@ global class SM010_Utils
 				ret.bBegin = false;
 
 				//определяем, сколько вообще пейджей есть в данном массиве, как
-				decimal dMidSize = lObj.size() - iBeginSize;
+				Decimal dMidSize = lObj.size() - iBeginSize;
 
-				decimal iMidCnt = dMidSize / iMidSize ; //длина массива минус длина первого пейджа деленная на длину среднего пейджа
-				system.debug('iMidCnt=' + iMidCnt);
-				integer nTabs = Integer.valueOf(Math.ceil(iMidCnt)) + 1;
+				Decimal iMidCnt = dMidSize / iMidSize ; //длина массива минус длина первого пейджа деленная на длину среднего пейджа
+				System.debug('iMidCnt=' + iMidCnt);
+				Integer nTabs = Integer.valueOf(Math.ceil(iMidCnt)) + 1;
 
 				System.debug('lObj.size=' + lObj.size() + ', iBeginSize=' + iBeginSize + ',nTabs=' + nTabs + ',iMidSize=' + iMidSize);
 				if ((lObj.size() - (iBeginSize + (nTabs - 2) * iMidSize) == 1)// если в последнем пейдже - всего один элемент
@@ -71,14 +79,14 @@ global class SM010_Utils
 				iBegin = iBeginSize + (iTab - 1) * iMidSize ;
 			}
 
-			system.debug('iCurSize =' + iCurSize + ' iBegin=' + iBegin + ' lAcc.size()=' + lObj.size());
-			for (integer i = 0; i < iCurSize && (iBegin + i < lObj.size()); i++)
+			System.debug('iCurSize =' + iCurSize + ' iBegin=' + iBegin + ' lAcc.size()=' + lObj.size());
+			for (Integer i = 0; i < iCurSize && (iBegin + i < lObj.size()); i++)
 			{
-				object m = lObj[iBegin + i];
+				Object m = lObj[iBegin + i];
 				ret.lObj.add(m);
 			}
 		}
-		system.debug('getPage(' + iTab + ')=' + ret);
+		System.debug('getPage(' + iTab + ')=' + ret);
 		return ret;
 	}
 
@@ -122,25 +130,25 @@ global class SM010_Utils
 //        return emoji;
 //    }
 
-	public static Option getOption(map<string, option> mOption, string input)
+	public static Option getOption(Map<String, Option> mOption, String input)
 	{
 		Option ret = null;
 		if (input == null || input == '')
 		{
 			return ret;
 		}
-		for (string index : mOption.keySet())
+		for (String index : mOption.keySet())
 		{
 			Option opt = mOption.get(index);
-			if (opt.slabel == null)
+			if (opt.sLabel == null)
 			{
 				continue;
 			}
-			if (opt.slabel.containsIgnoreCase(input) && input.length() > 1)
+			if (opt.sLabel.containsIgnoreCase(input) && input.length() > 1)
 			{ // found match
 				ret = opt;
 			}
-			if (opt.slabel.equalsignorecase(input))
+			if (opt.sLabel.equalsIgnoreCase(input))
 			{ // found exact match - returning this value immediately
 				ret = opt;
 				break;
@@ -148,14 +156,14 @@ global class SM010_Utils
 		}
 		return ret;
 	}
-	public static set<string> lResponses = new set<string>();
-	public static void addResponse(object o)
+	public static Set<String> lResponses = new Set<String>();
+	public static void addResponse(Object o)
 	{
-		string sResp = JSON.serialize(o);
+		String sResp = JSON.serialize(o);
 		lResponses.add(sResp);
 	}
 
-	public static void insertConversation(decimal scoreLUIS, decimal scoreQnA, string intentLUIS, string triggeredFlow, string language, string phone, string input, string output, id visitorId, string errMsg)
+	public static void insertConversation(Decimal scoreLUIS, Decimal scoreQnA, String intentLUIS, String triggeredFlow, String language, String phone, String input, String output, Id visitorId, String errMsg)
 	{
 		Conversation__c conv = new Conversation__c();
 		try
@@ -163,29 +171,29 @@ global class SM010_Utils
 			if (scoreLUIS > scoreQnA)
 			{
 				conv.NLP__c = 'LUIS';
-				conv.score__c = scoreLUIS;
-				conv.intent__c = intentLUIS;
+				conv.CVCH__Score__c = scoreLUIS;
+				conv.CVCH__Intent__c = intentLUIS;
 			}
 			else
 			{
 				conv.NLP__c = 'QnA';
-				conv.score__c = scoreQnA;
+				conv.CVCH__Score__c = scoreQnA;
 			}
-			conv.language__c = language;
-			conv.phone__c = phone;
+			conv.CVCH__Language__c = language;
+			conv.CVCH__Phone__c = phone;
 			conv.Error__c = errMsg;
-			conv.output__c = output;
+			conv.CVCH__Output__c = output;
 			if (input != null && input.length() > 32000)
 				input = input.substring(0, 32000);
-			conv.input__c = input;
+			conv.CVCH__Input__c = input;
 			if (input != null && input.length() > 255)
 				input = input.substring(0, 255);
 			conv.Input2__c = input;
-			conv.visitor__c = visitorId;
-			conv.triggered_flow__c = triggeredflow;
-			list<string>lResp = new list<string>();
+			conv.CVCH__Visitor__c = visitorId;
+			conv.CVCH__Triggered_Flow__c = triggeredFlow;
+			List<String>lResp = new List<String>();
 			lResp.addAll(lResponses);
-			conv.Responses__c = string.join(lResp, '; ');
+			conv.Responses__c = String.join(lResp, '; ');
 			insert conv;
 		}
 		catch (Exception e)
@@ -200,14 +208,14 @@ global class SM010_Utils
 		//if (respLuis.sIntent != 'category search' && respLuis.sIntent != 'outlet search' && respLuis.sIntent != 'ikea') {
 		//    return;
 		//}
-		string keyword1 = '';//found shop
-		string keyword2 = '';//found item
-		string keyword3 = '';//found item from fashion
-		Map<string, object> mEntities = new map<string, object>();
-		string entities = respLuis.getEntities();
+		String keyword1 = '';//found shop
+		String keyword2 = '';//found item
+		String keyword3 = '';//found item from fashion
+		Map<String, Object> mEntities = new Map<String, Object>();
+		String entities = respLuis.getEntities();
 		if (entities != null && entities != '')
 		{
-			mEntities = (Map<string, object>) JSON.deserializeUntyped(respLuis.getEntities());
+			mEntities = (Map<String, Object>) JSON.deserializeUntyped(respLuis.getEntities());
 		}
 		else
 		{
@@ -215,15 +223,15 @@ global class SM010_Utils
 		}
 
 		if (mEntities.get('shops') != null)
-			keyword1 = String.valueOf(((list<object>) mEntities.get('shops'))[0]);
+			keyword1 = String.valueOf(((List<Object>) mEntities.get('shops'))[0]);
 		if (mEntities.get('item') != null)
-			keyword2 = String.valueOf(((list<object>) mEntities.get('item'))[0]);
+			keyword2 = String.valueOf(((List<Object>) mEntities.get('item'))[0]);
 		if (mEntities.get('fashion men') != null)
-			keyword3 = String.valueOf(((list<object>) mEntities.get('fashion men'))[0]);
+			keyword3 = String.valueOf(((List<Object>) mEntities.get('fashion men'))[0]);
 		else if (mEntities.get('fashion women') != null)
-			keyword3 = String.valueOf(((list<object>) mEntities.get('fashion women'))[0]);
+			keyword3 = String.valueOf(((List<Object>) mEntities.get('fashion women'))[0]);
 		else if (mEntities.get('fashion kids') != null)
-			keyword3 = string.valueOf(((list<object>) mEntities.get('fashion kids'))[0]);
+			keyword3 = String.valueOf(((List<Object>) mEntities.get('fashion kids'))[0]);
 
 		if (keyword1 == keyword2)
 		{
@@ -238,30 +246,30 @@ global class SM010_Utils
 			keyword3 = '';
 		}
 
-		list<Search_Request__c> lIns = new list<Search_Request__c>();
-		list<Search_Request__c> lUpd = new list<Search_Request__c>();
+		List<Search_Request__c> lIns = new List<Search_Request__c>();
+		List<Search_Request__c> lUpd = new List<Search_Request__c>();
 		// then, if we have keywords, log search requests
 
 		if (keyword1 != '' && keyword1 != null)
 		{ // shop request
 			Search_Request__c SR = new Search_Request__c();
-			list<Search_Request__c> lSearch = new list<Search_Request__c>();
+			List<Search_Request__c> lSearch = new List<Search_Request__c>();
 			lSearch =
 			[
-					select id, count__c, name
+					select Id, CVCH__Count__c, Name
 					from Search_Request__c
-					where name = :keyword1
+					where Name = :keyword1
 			];
 			if (lSearch.isEmpty())
 			{
-				SR.name = keyword1;
-				SR.count__c = 1;
+				SR.Name = keyword1;
+				SR.CVCH__Count__c = 1;
 				lIns.add(SR);
 			}
 			else
 			{
 				SR = lSearch[0];
-				SR.count__c++;
+				SR.CVCH__Count__c++;
 				lUpd.add(SR);
 			}
 		}
@@ -269,23 +277,23 @@ global class SM010_Utils
 		if (keyword2 != '' && keyword2 != null)
 		{ // item request
 			Search_Request__c SR = new Search_Request__c();
-			list<Search_Request__c> lSearch = new list<Search_Request__c>();
+			List<Search_Request__c> lSearch = new List<Search_Request__c>();
 			lSearch =
 			[
-					select id, count__c, name
+					select Id, CVCH__Count__c, Name
 					from Search_Request__c
-					where name = :keyword2
+					where Name = :keyword2
 			];
 			if (lSearch.isEmpty())
 			{
-				SR.name = keyword2;
-				SR.count__c = 1;
+				SR.Name = keyword2;
+				SR.CVCH__Count__c = 1;
 				lIns.add(SR);
 			}
 			else
 			{
 				SR = lSearch[0];
-				SR.count__c++;
+				SR.CVCH__Count__c++;
 				lUpd.add(SR);
 			}
 		}
@@ -293,23 +301,23 @@ global class SM010_Utils
 		if (keyword3 != '' && keyword3 != null)
 		{ // fashion item request
 			Search_Request__c SR = new Search_Request__c();
-			list<Search_Request__c> lSearch = new list<Search_Request__c>();
+			List<Search_Request__c> lSearch = new List<Search_Request__c>();
 			lSearch =
 			[
-					select id, count__c, name
+					select Id, CVCH__Count__c, Name
 					from Search_Request__c
-					where name = :keyword3
+					where Name = :keyword3
 			];
 			if (lSearch.isEmpty())
 			{
-				SR.name = keyword3;
-				SR.count__c = 1;
+				SR.Name = keyword3;
+				SR.CVCH__Count__c = 1;
 				lIns.add(SR);
 			}
 			else
 			{
 				SR = lSearch[0];
-				SR.count__c++;
+				SR.CVCH__Count__c++;
 				lUpd.add(SR);
 			}
 		}
@@ -338,9 +346,9 @@ global class SM010_Utils
 //        return sRet;
 //    }
 //
-	public static string getRestParam(string sParamName)
+	public static String getRestParam(String sParamName)
 	{
-		string sRet = (string) RestContext.request.params.get(sParamName);
+		String sRet = (String) RestContext.request.params.get(sParamName);
 		if (sRet == null)
 			sRet = '';
 		sRet = sRet.trim();
@@ -362,7 +370,7 @@ global class SM010_Utils
 //        return val.CVCH__Value__c;
 //    }
 
-	global static string getChat2aiValue(string sName)
+	global static String getChat2aiValue(String sName)
 	{
 		CVCH__Chat2ai__c val = CVCH__Chat2ai__c.getInstance(sName);
 		if (val == null)
@@ -385,7 +393,7 @@ global class SM010_Utils
 		return dRet;
 	}
 
-	public static string getChat2aiValue2(string sName)
+	public static String getChat2aiValue2(String sName)
 	{
 		CVCH__Chat2ai__c val = CVCH__Chat2ai__c.getInstance(sName);
 		if (val == null)
@@ -410,22 +418,22 @@ global class SM010_Utils
         return ret;
     }
 */
-	public static list< CVCH__Translation__c> lTrans = new list< CVCH__Translation__c>();
+	public static List< CVCH__Translation__c> lTrans = new List< CVCH__Translation__c>();
 	public static void saveTran()
 	{
 		if (!lTrans.isEmpty())
 		{
 			insert lTrans;
-			lTrans = new list< CVCH__Translation__c>();
+			lTrans = new List< CVCH__Translation__c>();
 		}
 	}
-	public static string sProgramId = null;
-	public static string lang = null;
-	public static string translate(string str)
+	public static String sProgramId = null;
+	public static String lang = null;
+	public static String translate(String str)
 	{
 		return translate(str, lang, false);
 	}
-	public static string translate(string str, string sLang)
+	public static String translate(String str, String sLang)
 	{
 		return translate(str, sLang, false);
 	}
@@ -460,17 +468,17 @@ global class SM010_Utils
         lTrans.add(tr);
     }
 */
-	public static MTranslation translateAPI0(string str)
+	public static MTranslation translateAPI0(String str)
 	{
 		MTranslation tran = new MTranslation();
 		if (str != null)
 		{
-			string sKey = getKey(str);
+			String sKey = getKey(str);
 			if (sKey.length() > 254)
 				return null;
 			if (sKey != '')
 			{
-				list<Translation__c> sObj =
+				List<Translation__c> sObj =
 				[
 						select Id, key__c, en__c, DetectedLang__c
 						from Translation__c
@@ -490,7 +498,7 @@ global class SM010_Utils
 	}
 	public static void addTranslationAPI0(MTranslation tran)
 	{
-		string sKey = getKey(tran.text);
+		String sKey = getKey(tran.text);
 		if (sKey.length() > 254)
 			return;
 		Translation__c tr = new Translation__c();
@@ -501,7 +509,7 @@ global class SM010_Utils
 		tr.DetectedLang__c = tran.detectedlang;
 		lTrans.add(tr);
 	}
-	public static string translate(string str, string sLang, boolean bFlow)
+	public static String translate(String str, String sLang, Boolean bFlow)
 	{
 		if (sLang == null || sLang == '')
 			sLang = 'en';
@@ -509,20 +517,20 @@ global class SM010_Utils
 		// это не подходит потому что при появлении нового языка фактически надо править маппы в апексе, а это пользователь сам не сможет делать
 		// , и по-этому если мы скажем ему что надо будет доплачивать за время разработчиков при появлении нового языка - клиент не поймет этого.
 		//нужно сделать что-то типа такого. если будет несколько/много вызовов translate за один поток выполнения, то видимо надо добавить кеширование
-		string sRet;
-		string sFieldName = sLang + '__c';
-		string sPrId = null;
+		String sRet;
+		String sFieldName = sLang + '__c';
+		String sPrId = null;
 		if (sProgramId != null)
 			sPrId = sProgramId.trim();//'a067E0000072LnR';
-		string sKey = getKey(str);
+		String sKey = getKey(str);
 
-		string sQuery = 'select Id, key__c, default_value__c, ' + sFieldName + ' from Translation__c where key__c = \'' + sKey + '\' and bFlow__c = ' + bFlow;
+		String sQuery = 'select Id, key__c, default_value__c, ' + sFieldName + ' from Translation__c where key__c = \'' + sKey + '\' and bFlow__c = ' + bFlow;
 //        if(sPrID != null)
 //            sQuery = sQuery +' and Loy_Program__c =\''+sPrId+'\'';
-		system.debug('translate.sQuery = ' + sQuery);
-		list<sobject> sObj = Database.query(sQuery);
+		System.debug('translate.sQuery = ' + sQuery);
+		List<SObject> sObj = Database.query(sQuery);
 		CVCH__Translation__c tr;
-		system.debug(sObj);
+		System.debug(sObj);
 		if (sObj.isEmpty())
 		{
 			tr = new CVCH__Translation__c();
@@ -541,7 +549,7 @@ global class SM010_Utils
 		{
 			tr = (CVCH__Translation__c) sObj[0];
 		}
-		sRet = (string) tr.get(sFieldName);
+		sRet = (String) tr.get(sFieldName);
 		if (sRet == null || sRet == '')
 		{
 			if ((tr.CVCH__default_value__c != null && tr.CVCH__default_value__c != '') || Test.isRunningTest()) // для флоу, если нет перевода, берем значение по-умолчанию
@@ -552,45 +560,45 @@ global class SM010_Utils
 		if (str.startsWith(' '))
 			sRet = ' ' + sRet;
 		if (str.endsWith(' '))
-			sRet = '' + sret + ' ';
+			sRet = '' + sRet + ' ';
 		return sRet;
 	}
 
-	public static string getKey(string str)
+	public static String getKey(String str)
 	{
 //        string sKey =  str.replaceAll('[^a-zA-Z0-9 -]','').trim();
-		string sKey = str.trim();
+		String sKey = str.trim();
 		if (sKey.length() > 254)
 			sKey = sKey.substring(0, 253).trim();
 		return sKey;
 	}
 
-	public static map<string, string> translateBatch(set<string>lTranslate, string sLang)
+	public static Map<String, String> translateBatch(Set<String>lTranslate, String sLang)
 	{
-		map<string, string> mRet = new map<string, string>();
+		Map<String, String> mRet = new Map<String, String>();
 
-		set<string>sKeys = new set<string>();
+		Set<String>sKeys = new Set<String>();
 
-		string sFieldName = sLang + '__c';
-		for (string str : lTranslate)
+		String sFieldName = sLang + '__c';
+		for (String str : lTranslate)
 		{
-			string sKey = getKey(str);
+			String sKey = getKey(str);
 			sKeys.add(sKey);
 		}
 		Boolean bIns = SM010_Utils.getChat2aiValue2('Insert Translations') != 'FALSE';
 
-		string sQuery = 'select Id, key__c, default_value__c, ' + sFieldName + ' from Translation__c where  key__c in :sKeys and bFlow__c = false';
-		system.debug('translate.sQuery = ' + sQuery);
-		list<sobject> sObj = Database.query(sQuery);
-		map<string, CVCH__Translation__c>mTr = new map<string, CVCH__Translation__c>();
-		for (sobject obj : sObj)
+		String sQuery = 'select Id, key__c, default_value__c, ' + sFieldName + ' from Translation__c where  key__c in :sKeys and bFlow__c = false';
+		System.debug('translate.sQuery = ' + sQuery);
+		List<SObject> sObj = Database.query(sQuery);
+		Map<String, CVCH__Translation__c>mTr = new Map<String, CVCH__Translation__c>();
+		for (SObject obj : sObj)
 		{
 			CVCH__Translation__c tr = (CVCH__Translation__c) obj;
 			mTr.put(tr.CVCH__key__c, tr);
 		}
-		for (string str : lTranslate)
+		for (String str : lTranslate)
 		{
-			string sKey = getKey(str);
+			String sKey = getKey(str);
 			CVCH__Translation__c tr = mTr.get(sKey);
 			if (tr == null)
 			{
@@ -611,18 +619,18 @@ global class SM010_Utils
 			}
 			else
 			{
-				string sRet = (string) tr.get(sFieldName);
+				String sRet = (String) tr.get(sFieldName);
 				if (str.startsWith(' '))
 					sRet = ' ' + sRet;
 				if (str.endsWith(' '))
-					sRet = '' + sret + ' ';
+					sRet = '' + sRet + ' ';
 				mRet.put(str, sRet);
 			}
 		}
 		return mRet;
 	}
 
-	public static string phone(string sPhone)
+	public static String phone(String sPhone)
 	{
 		if (sPhone == null)
 			return null;
@@ -971,48 +979,48 @@ global class SM010_Utils
 	}
 */
 
-	public static string encodeId(string sName)
+	public static String encodeId(String sName)
 	{
-		long int1 = long.valueof('1' + sName.substring(4));
+		Long int1 = Long.valueOf('1' + sName.substring(4));
 		return toAlpha(int1);
 	}
 
-	public static string decodeId(string sEncoded, string prefix)
+	public static String decodeId(String sEncoded, String prefix)
 	{
-		string str = '' + toInt(sEncoded);
+		String str = '' + toInt(sEncoded);
 		return prefix + str.substring(1);
 	}
 
-	static string sStr = 'QWERTYUIPASDFGHJKLZXCVBNM123456789';
-	public static string toAlpha(long d)
+	static String sStr = 'QWERTYUIPASDFGHJKLZXCVBNM123456789';
+	public static String toAlpha(Long d)
 	{
-		string sRet = '';
-		long left = d;
-		integer len = sStr.length();
-		system.debug('len=' + len);
+		String sRet = '';
+		Long left = d;
+		Integer len = sStr.length();
+		System.debug('len=' + len);
 		while (left > 0)
 		{
-			integer curDigit = integer.valueOf(math.mod(left, len));
+			Integer curDigit = Integer.valueOf(Math.mod(left, len));
 			//		system.debug('curDigit='+curDigit);
-			string sadd = sStr.substring(curDigit, curDigit + 1);
+			String sadd = sStr.substring(curDigit, curDigit + 1);
 			//		system.debug('sadd='+sadd);
 			sRet = sRet + sadd;
-			left = Integer.valueOf(math.floor(left / len));
+			left = Integer.valueOf(Math.floor(left / len));
 		}
 		return sRet;
 	}
 
-	public static long toInt(string str)
+	public static Long toInt(String str)
 	{
-		integer len = sStr.length();
+		Integer len = sStr.length();
 
-		long ret = 0;
-		integer strLen = str.length();
-		for (integer i = 0; i < strLen; i++)
+		Long ret = 0;
+		Integer strLen = str.length();
+		for (Integer i = 0; i < strLen; i++)
 		{
-			string sChar = str.substring(str.length() - i - 1, str.length() - i);
+			String sChar = str.substring(str.length() - i - 1, str.length() - i);
 			//		system.debug(sChar);
-			integer idx = sStr.indexOf(sChar);
+			Integer idx = sStr.indexOf(sChar);
 			//		system.debug(idx);
 			ret *= len;
 			ret += idx;
@@ -1020,10 +1028,10 @@ global class SM010_Utils
 		return ret;
 	}
 
-	public static Flow.Interview getFlow(string sFlowName, string sTo, Map<String, Object> params)
+	public static Flow.Interview getFlow(String sFlowName, String sTo, Map<String, Object> params)
 	{
 		Flow.Interview ret;
-		if (SM010_Utils.getChat2aiValue2('Multi ChatBots') == 'TRUE')
+		if (SM010_Utils.getChat2aiValue2('Multi ChatBots') == 'TRUE' && sTo != null && sTo != '')
 		{
 			sFlowName = sFlowName + '_' + sTo;
 		}

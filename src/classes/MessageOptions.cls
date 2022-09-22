@@ -7,6 +7,7 @@ Description:
 global class MessageOptions implements iMessage
 {
 	@AuraEnabled @InvocableVariable global string sMessage='';
+	@AuraEnabled @InvocableVariable global string sBody='';
 	@AuraEnabled @InvocableVariable global id visitorId;
 	@AuraEnabled @InvocableVariable global string content;
 	@AuraEnabled @InvocableVariable global string sType;
@@ -126,6 +127,7 @@ global class MessageOptions implements iMessage
 
 	public void send(CVCH__Visitor__c visr)
 	{
+		system.debug('this.sType='+this);
 		string sFrom = visr.CVCH__Chat_Number__c;
 		string sTo = visr.CVCH__Id__c;
 		if (mOptions.isEmpty() && !lOptions.isEmpty())
@@ -158,6 +160,7 @@ global class MessageOptions implements iMessage
 					}
 				}
 			}
+			SM010_Utils.setVisitor(visr);
 			SM042_NexmoOut2.sendComplexType(this, sTo, sFrom);
 		}
 		else if (SM042_NexmoOut2.getInboundChannel() == 'Azure')
@@ -194,6 +197,7 @@ global class MessageOptions implements iMessage
 	global MessageOptions()
 	{
 		this.sMessage = '';
+		this.sBody = '';
 	}
 
 	global MessageOptions(id visitorId)

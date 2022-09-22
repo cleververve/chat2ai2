@@ -341,6 +341,21 @@ context.toSearch = context.processingPath;*/
 		return context.data;
 	}
 
+
+	public static object safeGet(object untypedJson, string path)
+	{
+		object ret = null;
+		try
+		{
+			ret = get0(untypedJson,path);
+
+		}catch(Exception e)
+		{
+
+		}
+		return ret;
+	}
+
 	public static object get(string rawJson, string path)
 	{
 		object untypedJson = JSON.deserializeUntyped(rawJson);

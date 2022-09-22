@@ -1,7 +1,6 @@
 global class SM042_NexmoOut2 implements Queueable
 {
 	global Id messId;
-
 	global static String getNexmoURL()
 	{
 		String sRet = SM010_Utils.getChat2aiValue2('Nexmo URL');
@@ -10,7 +9,6 @@ global class SM042_NexmoOut2 implements Queueable
 		return sRet;
 	}
 
-
 	global static String getNexmoURLV1()
 	{
 		String sRet = SM010_Utils.getChat2aiValue2('Nexmo URLV1');
@@ -18,7 +16,6 @@ global class SM042_NexmoOut2 implements Queueable
 			sRet = 'https://api.nexmo.com/v1/messages';
 		return sRet;
 	}
-
 
 	global SM042_NexmoOut2(Id messId0)
 	{
@@ -40,6 +37,7 @@ global class SM042_NexmoOut2 implements Queueable
 
 	global static void send(CVCH__NexmoMessage__c mess)
 	{
+		System.debug('SM042_NexmoOut2.send:');
 		System.debug(mess);
 
 		if (mess.CVCH__Channel__c == 'Azure')
@@ -100,17 +98,7 @@ global class SM042_NexmoOut2 implements Queueable
 	@Future(Callout =true)
 	global static void executeF(Id messId)
 	{
-		CVCH__NexmoMessage__c mess =
-		[
-				SELECT Id,CVCH__Text__c,CVCH__Status__c,CVCH__FullText__c,
-						CVCH__JSON__c,CVCH__Type__c,
-						CVCH__From__c,CVCH__From_Name__c,
-						CVCH__To__c,CVCH__To_Name__c,
-						CVCH__activityId__c,CVCH__conversationId__c,CVCH__conversationName__c,CVCH__Channel__c
-
-				FROM CVCH__NexmoMessage__c
-				WHERE Id = :messId
-		];
+		CVCH__NexmoMessage__c mess  = DM014_Message.getRecord(messId);
 		try
 		{
 			send(mess);
@@ -134,16 +122,7 @@ global class SM042_NexmoOut2 implements Queueable
 	@Future(Callout =true)
 	global static void sendOrEnqueueF(Id messId)
 	{
-		CVCH__NexmoMessage__c mess =
-		[
-				SELECT Id,CVCH__Text__c,CVCH__Status__c,CVCH__FullText__c,
-						CVCH__JSON__c,CVCH__Type__c,
-						CVCH__From__c,CVCH__From_Name__c,
-						CVCH__To__c,CVCH__To_Name__c,
-						CVCH__activityId__c,CVCH__conversationId__c,CVCH__conversationName__c,CVCH__Channel__c,CVCH__Locale__c
-				FROM CVCH__NexmoMessage__c
-				WHERE Id = :messId
-		];
+		CVCH__NexmoMessage__c mess = DM014_Message.getRecord(messId);
 		try
 		{
 			send(mess);
@@ -160,15 +139,23 @@ global class SM042_NexmoOut2 implements Queueable
 		}
 	}
 
-
 	global static void sendOrEnqueue(CVCH__NexmoMessage__c mess, Boolean async)
 	{
+		System.debug('sendOrEnqueue.start');
 		SM010_Utils.addResponse(mess.FullText__c);
 		System.debug(mess);
 		if (async == true)
 		{
 			insert mess;
-			sendOrEnqueueF(mess.Id);
+			try
+			{
+				sendOrEnqueueF(mess.Id);
+			}
+			catch(Exception e2)
+			{
+				SM042_NexmoOut2 job = new SM042_NexmoOut2(mess.Id);
+				System.enqueueJob(job);
+			}
 		}
 		else
 		{
@@ -177,13 +164,75 @@ global class SM042_NexmoOut2 implements Queueable
 				SM042_NexmoOut2.send(mess);
 				insert mess;
 			}
-			catch (Exception e)
+			catch (System.CalloutException e)
 			{
-				System.debug('Err: ' + e.getMessage() + ' ' + e.getStackTraceString());
-				insert mess;
-				sendOrEnqueueF(mess.Id);
+				System.debug('error: '+e.getMessage());
+				if(e.getMessage().indexOf('You have uncommitted work pending.') == 0)
+				{
+					System.debug('Err: ' + e.getMessage() + ' ' + e.getStackTraceString());
+					insert mess;
+					try
+					{
+						sendOrEnqueueF(mess.Id);
+					}
+					catch(Exception e2)
+					{
+						SM042_NexmoOut2 job = new SM042_NexmoOut2(mess.Id);
+						System.enqueueJob(job);
+					}
+				}
+				else
+				{
+					sendErrorMessage(e.getMessage(),mess.From__c,mess.To__c,mess.Channel__c);
+				}
+			}
+			catch(Exception e)
+			{
+				System.debug('error: '+e.getMessage());
+				sendErrorMessage(e.getMessage(),mess.From__c,mess.To__c,mess.Channel__c);
 			}
 		}
+	}
+
+	public static void sendErrorMessage(String sErrorMessage, String sFrom, String sTo,String sChannel)
+	{
+		if (SM010_Utils.getChat2aiValue2('SEND DEV ERRORS') != 'TRUE')
+			sErrorMessage = 'Oops, something went wrong. Please try again.';
+		Visitor__c vis = SM010_Utils.visr;
+		if(vis != null)
+		{
+			vis = DM080_Visitor.getVisitorByPhone(sTo);
+		}
+		if (vis != null && vis.CVCH__language__c != '' && vis.CVCH__language__c != null && vis.CVCH__language__c != 'en')
+		{
+			try
+			{
+				sErrorMessage = SM010_Utils.translate(sErrorMessage, vis.CVCH__language__c);
+			}
+			catch (Exception e)
+			{
+			}
+		}
+		Id visId;
+		if(vis!= null)
+			visId = vis.Id;
+		if(sChannel == 'Azure')
+		{
+			CVCH__NexmoMessage__c mess = initMessage(sTo, sFrom,visId);
+			mess.CVCH__Text__c = sErrorMessage;
+			if (mess.CVCH__Text__c != null && mess.CVCH__Text__c.length() > 254)
+				mess.CVCH__Text__c = mess.CVCH__Text__c.substring(0, 254);
+			mess.CVCH__FullText__c = sErrorMessage;
+			mess.CVCH__Status__c = 'Queued';
+			mess.Channel__c = 'Azure';
+			SM081_Azure.sendText(mess);
+			insert mess;
+		}
+		else
+		{
+			SM041_WhatsApp.sendText(sTo, sFrom, sErrorMessage, sChannel);
+		}
+
 	}
 
 	global static CVCH__NexmoMessage__c inboundMess;
@@ -194,12 +243,20 @@ global class SM042_NexmoOut2 implements Queueable
 	}
 	global static CVCH__NexmoMessage__c initMessage(String sTo, String sFrom)
 	{
-		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
-		if (inboundMess != null)
-		{
-			mess.CVCH__To__c = inboundMess.CVCH__From__c;
-			mess.CVCH__To_Name__c = inboundMess.CVCH__From_Name__c;
+		return null;
+	}
 
+
+	global static CVCH__NexmoMessage__c initMessage(String sTo, String sFrom, Id visitorId)
+	{
+		CVCH__NexmoMessage__c mess = new CVCH__NexmoMessage__c();
+		mess.CVCH__To__c = sTo;
+		mess.CVCH__Visitor__c = visitorId;
+		Visitor__c vis;
+
+		if (inboundMess != null && inboundMess.CVCH__From__c == sTo)
+		{
+			mess.CVCH__To_Name__c = inboundMess.CVCH__From_Name__c;
 			mess.CVCH__From__c = inboundMess.CVCH__To__c;
 			mess.CVCH__From_Name__c = inboundMess.CVCH__To_Name__c;
 			mess.CVCH__conversationId__c = inboundMess.CVCH__conversationId__c;
@@ -208,25 +265,38 @@ global class SM042_NexmoOut2 implements Queueable
 			mess.CVCH__Channel__c = inboundMess.CVCH__Channel__c;
 			mess.CVCH__ChannelId__c = inboundMess.CVCH__ChannelId__c;
 		}
+		else if((vis = DM080_Visitor.getVisitorByPhone(sTo)) != null && vis.Last_Inbound_Message__r != null && vis.Last_Inbound_Message__r.Id != null)
+		{
+			NexmoMessage__c inbMess = vis.Last_Inbound_Message__r;
+			mess.CVCH__To_Name__c = inbMess.CVCH__From_Name__c;
+			mess.CVCH__From__c = inbMess.CVCH__To__c;
+			mess.CVCH__From_Name__c = inbMess.CVCH__To_Name__c;
+			mess.CVCH__conversationId__c = inbMess.CVCH__conversationId__c;
+			mess.CVCH__conversationName__c = inbMess.CVCH__conversationName__c;
+			mess.CVCH__activityId__c = inbMess.Name;
+			mess.CVCH__Channel__c = inbMess.CVCH__Channel__c;
+			mess.CVCH__ChannelId__c = inbMess.CVCH__ChannelId__c;
+		}
 		else
 		{
 			mess.CVCH__From__c = sFrom;
-			mess.CVCH__To__c = sTo;
 			mess.Channel__c = SM010_Utils.getChat2aiValue2('Default Outbound Channel');
 		}
-		system.debug('initMessage.return');
-		system.debug(mess);
+
+		System.debug('initMessage.return');
+		System.debug(mess);
 		return mess;
 	}
 	global static String getInboundChannel()
 	{
 		if (inboundMess != null)
 			return inboundMess.CVCH__Channel__c;
-		return '';
+		return SM010_Utils.getChat2aiValue2('Default Outbound Channel');
 	}
 	global static void sendText(String sTo, String sText, String sFrom, Boolean async)
 	{
-		CVCH__NexmoMessage__c mess = initMessage(sTo, sFrom);
+		Id visId = DM080_Visitor.getVisitorId(sTo);
+		CVCH__NexmoMessage__c mess = initMessage(sTo, sFrom,visId);
 
 		mess.CVCH__Text__c = sText;
 		if (mess.CVCH__Text__c != null && mess.CVCH__Text__c.length() > 254)
@@ -250,10 +320,10 @@ global class SM042_NexmoOut2 implements Queueable
 		sendCustomText(sTo, sText, sFrom, async, 'Custom');
 	}
 
-
 	global static void sendCustomText(String sTo, String sText, String sFrom, Boolean async, String sType)
 	{
-		CVCH__NexmoMessage__c mess = initMessage(sTo, sFrom);
+		Id visId = DM080_Visitor.getVisitorId(sTo);
+		CVCH__NexmoMessage__c mess = initMessage(sTo, sFrom,visId);
 
 		mess.CVCH__Text__c = sText;
 		if (mess.CVCH__Text__c != null && mess.CVCH__Text__c.length() > 254)
@@ -267,7 +337,11 @@ global class SM042_NexmoOut2 implements Queueable
 
 	global static void sendComplexType(MessageOptions opt, String sto, String sFrom)
 	{
-		CVCH__NexmoMessage__c mess = initMessage(sto, sFrom);
+		Id visId = DM080_Visitor.getVisitorId(sto);
+
+		System.debug('sendComplexType.start');
+		System.debug(opt);
+		CVCH__NexmoMessage__c mess = initMessage(sto, sFrom,visId);
 
 		if (opt.sType == '' || opt.sType == null)
 			mess.CVCH__Type__c = 'Carousel';
@@ -283,10 +357,11 @@ global class SM042_NexmoOut2 implements Queueable
 		sendOrEnqueue(mess, opt.async);
 	}
 
-	global static Map<String, String> getAuthHeader()
+
+	global static Map<String, String> getAuthHeader(String sPhone)
 	{
 		Map<String, String> headers = new Map <String, String>();
-		String token = JWT.getAccessToken();
+		String token = '';//JWT.getAccessToken(sPhone);
 		String sAuth = 'Bearer ' + token;
 		System.debug('sAuth=>' + sAuth);
 		headers.put('Authorization', sAuth);
@@ -326,7 +401,7 @@ global class SM042_NexmoOut2 implements Queueable
 
 	global static void sendText2(String sTo, String sFrom, String messageText)
 	{
-		SM003_Http.request(getNexmoURL(), 'POST', getAuthHeader(), getBody(sTo, messageText, sFrom), 'NexmoOut2', null, 'SM004_SMSMock');
+		SM003_Http.request(getNexmoURL(), 'POST', getAuthHeader(sFrom), getBody(sTo, messageText, sFrom), 'NexmoOut2', null, 'SM042_NexmoOutMock');
 	}
 
 	@Future(Callout=true)
@@ -342,5 +417,10 @@ global class SM042_NexmoOut2 implements Queueable
 	global static String getBodyCarousel(String sTo, String sFrom, String imageURL, String sCaption)
 	{
 		return null; //moved to SM042.getBodyImage
+	}
+
+	global static Map<String, String> getAuthHeader()
+	{
+		return null;
 	}
 }

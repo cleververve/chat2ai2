@@ -28,7 +28,7 @@ global class FlowSendMTM
 				inp.async = false;
 			CVCH__Visitor__c vis = mVis.get((id)inp.visitorId);
 			System.debug('inp.message: '+inp.content);
-			CVCH__NexmoMessage__c mess = SM042_NexmoOut2.initMessage(vis.CVCH__Id__c, vis.CVCH__Chat_Number__c);
+			CVCH__NexmoMessage__c mess = SM042_NexmoOut2.initMessage(vis.CVCH__Id__c, vis.CVCH__Chat_Number__c,vis.Id);
 
 			mess.CVCH__Text__c = inp.content;
 			if (mess.CVCH__Text__c != null && mess.CVCH__Text__c.length() > 254)
@@ -37,7 +37,9 @@ global class FlowSendMTM
 			mess.CVCH__Status__c = 'Queued';
 			mess.CVCH__Type__c = 'Template';
 			mess.CVCH__Locale__c = inp.locale;
+			SM010_Utils.setVisitor(vis);
 			SM042_NexmoOut2.sendOrEnqueue(mess, inp.async);
+
 
 			if (inp.async == true)
 				SM010_Utils.saveTran();

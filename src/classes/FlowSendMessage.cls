@@ -39,7 +39,7 @@ global class FlowSendMessage
 //            }else
 //            	SM042_NexmoOut4.sendText(vis.Id__c,vis.Chat_Number__c,inp.message);
 //            SM042_NexmoOut2.pause(800);
-
+			SM010_Utils.setVisitor(vis);
 			SM042_NexmoOut2.sendText(vis.CVCH__Id__c,inp.message,vis.CVCH__Chat_Number__c,inp.async);
 			if (inp.async == true)
 				SM010_Utils.saveTran();

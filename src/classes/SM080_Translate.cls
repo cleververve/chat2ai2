@@ -34,6 +34,9 @@ public class SM080_Translate
 		map<string, string> ret = new map<string, string>();
 		ret.put('Content-Type', 'application/json');
 		ret.put('Ocp-Apim-Subscription-Key', SM010_Utils.getChat2aiValue('Microsoft Translator Key'));
+		String sGlobal =  SM010_Utils.getChat2aiValue2('Ocp-Apim-Subscription-Region');
+		if(sGlobal != '')
+			ret.put('Ocp-Apim-Subscription-Region',sGlobal);
 		return ret;
 	}
 

@@ -6,27 +6,27 @@ Description:
 
 global class OutletSearch
 {
-	string sSearchFlow = SM010_Utils.getChat2aiValue('search');
-	string sDefaultDetailsFlow = SM010_Utils.getChat2aiValue('get_outlet_info');
-	string sDefaultBackFlow = SM010_Utils.getChat2aiValue('Main_Menu');
-	string sGenderFlow = SM010_Utils.getChat2aiValue('search_select_gender');
+	String sSearchFlow = SM010_Utils.getChat2aiValue('search');
+	String sDefaultDetailsFlow = SM010_Utils.getChat2aiValue('get_outlet_info');
+	String sDefaultBackFlow = SM010_Utils.getChat2aiValue('Main_Menu');
+	String sGenderFlow = SM010_Utils.getChat2aiValue('search_select_gender');
 
-	@AuraEnabled @InvocableVariable global id visitorId;
-	@AuraEnabled @InvocableVariable global string keyword;
-	@AuraEnabled @InvocableVariable global string gender;
-	@AuraEnabled @InvocableVariable global string detailsFlow;
-	@AuraEnabled @InvocableVariable global string backFlow;
-	@AuraEnabled @InvocableVariable global integer pageNum;
-	@AuraEnabled @InvocableVariable global string entities;
-	@AuraEnabled @InvocableVariable global string type;
+	@AuraEnabled @InvocableVariable global Id visitorId;
+	@AuraEnabled @InvocableVariable global String keyword;
+	@AuraEnabled @InvocableVariable global String gender;
+	@AuraEnabled @InvocableVariable global String detailsFlow;
+	@AuraEnabled @InvocableVariable global String backFlow;
+	@AuraEnabled @InvocableVariable global Integer pageNum;
+	@AuraEnabled @InvocableVariable global String entities;
+	@AuraEnabled @InvocableVariable global String type;
 	CVCH__Visitor__c vis;
 
 	@InvocableMethod(label='search outlets by category' description='')
-	global static void search(list<OutletSearch> search)
+	global static void search(List<OutletSearch> search)
 	{
-		set<id>sids = new set<id>();
+		Set<Id>sids = new Set<Id>();
 
-		system.debug('Search flow start');
+		System.debug('Search flow start');
 		for (OutletSearch s : search)
 		{
 			if (s.visitorId != null)
@@ -38,34 +38,34 @@ global class OutletSearch
 			if (s.backFlow == null || s.backFlow == '')
 				s.backFlow = s.sDefaultBackFlow;
 		}
-		map<id, CVCH__Visitor__c> mVis = new map<id, CVCH__Visitor__c>(DM080_Visitor.getRecords(sids));
-		map<id, CVCH__Visitor__c> mUpdate = new map<id, CVCH__Visitor__c>();
+		Map<Id, CVCH__Visitor__c> mVis = new Map<Id, CVCH__Visitor__c>(DM080_Visitor.getRecords(sids));
+		Map<Id, CVCH__Visitor__c> mUpdate = new Map<Id, CVCH__Visitor__c>();
 		for (OutletSearch srch : search)
 		{
 			srch.vis = mVis.get(srch.visitorId);
-			system.debug('gender: ' + srch.gender);
-			system.debug('keyword: ' + srch.keyword);
-			Map<string, object> mEntities = new map<string, object>();
+			System.debug('gender: ' + srch.gender);
+			System.debug('keyword: ' + srch.keyword);
+			Map<String, Object> mEntities = new Map<String, Object>();
 			if (srch.entities != null && srch.entities != '')
 			{
-				mEntities = (Map<string, object>) JSON.deserializeUntyped(srch.entities);
-				system.debug(mEntities);
+				mEntities = (Map<String, Object>) JSON.deserializeUntyped(srch.entities);
+				System.debug(mEntities);
 				if (mEntities.get('gender') != null)
-					srch.gender = String.valueOf(((list<object>) mEntities.get('gender'))[0]);
+					srch.gender = String.valueOf(((List<Object>) mEntities.get('gender'))[0]);
 				if (mEntities.get('shops') != null)
-					srch.keyword = String.valueOf(((list<object>) mEntities.get('shops'))[0]);
+					srch.keyword = String.valueOf(((List<Object>) mEntities.get('shops'))[0]);
 				if (mEntities.get('item') != null)
-					srch.keyword = String.valueOf(((list<object>) mEntities.get('item'))[0]);
+					srch.keyword = String.valueOf(((List<Object>) mEntities.get('item'))[0]);
 				if (mEntities.get('fashion men') != null)
-					srch.keyword = String.valueOf(((list<object>) mEntities.get('fashion men'))[0]);
+					srch.keyword = String.valueOf(((List<Object>) mEntities.get('fashion men'))[0]);
 				else if (mEntities.get('fashion women') != null)
-					srch.keyword = String.valueOf(((list<object>) mEntities.get('fashion women'))[0]);
+					srch.keyword = String.valueOf(((List<Object>) mEntities.get('fashion women'))[0]);
 				else if (mEntities.get('fashion kids') != null)
-					srch.keyword = string.valueOf(((list<object>) mEntities.get('fashion kids'))[0]);
+					srch.keyword = String.valueOf(((List<Object>) mEntities.get('fashion kids'))[0]);
 			}
-			system.debug('gender2: ' + srch.gender);
-			system.debug('keyword2: ' + srch.keyword);
-			MessageOptions opt = srch.OutletSearch();
+			System.debug('gender2: ' + srch.gender);
+			System.debug('keyword2: ' + srch.keyword);
+			MessageOptions opt = srch.outletSearch();
 			if (opt != null)
 			{
 				opt.send(srch.vis);
@@ -73,15 +73,15 @@ global class OutletSearch
 				CVCH__Visitor__c vis2 = new CVCH__Visitor__c
 						(
 								CVCH__keyword__c = srch.keyword
-								, id = srch.vis.id
+								, Id = srch.vis.Id
 								, CVCH__Context__c = srch.vis.CVCH__Context__c
 						);
-				mUpdate.put(vis2.id, vis2);
+				mUpdate.put(vis2.Id, vis2);
 			}
 			else
 			{
-				CVCH__Visitor__c vis2 = new CVCH__Visitor__c(CVCH__keyword__c = srch.keyword, id = srch.vis.id);
-				mUpdate.put(vis2.id, vis2);
+				CVCH__Visitor__c vis2 = new CVCH__Visitor__c(CVCH__keyword__c = srch.keyword, Id = srch.vis.Id);
+				mUpdate.put(vis2.Id, vis2);
 			}
 		}
 		update mUpdate.values();
@@ -95,26 +95,26 @@ global class OutletSearch
 		if (keyword == null || keyword == '')
 			throw new MyException('The search key is not specified');
 
-		system.debug(keyword);
+		System.debug(keyword);
 		keyword = keyword.replaceAll('_', ' ').replaceAll('-', '&');
-		system.debug(keyword);
-		string sKeyword = keyword;
+		System.debug(keyword);
+		String sKeyword = keyword;
 		if (genderSpecific(keyword))
 		{
 			if (gender == '' || gender == null)
 			{
 				Map<String, Object> params = new Map<String, Object>();
-				params.put('visitorId', vis.id);
+				params.put('visitorId', vis.Id);
 				Flow.Interview flow = Flow.Interview.createInterview(sGenderFlow, params);
 				flow.start();
 				return null;
 			}
 
 			if (gender != '' && gender != 'all' && gender != null)
-				sKeyWord = gender + ' ' + keyword;
+				sKeyword = gender + ' ' + keyword;
 		}
 
-		list<account>lAcc = new list<account>();
+		List<Account>lAcc = new List<Account>();
 		if (type == 'outlet')
 			lAcc = searchAccByKeyWord(sKeyword, false, true);
 		else
@@ -122,7 +122,7 @@ global class OutletSearch
 
 
 		if (lAcc.isEmpty())
-			ret = MessageOptions.message(vis.id, SM010_Utils.translate('There is no any shops by keyword ', vis.CVCH__language__c) + sKeyWord);
+			ret = MessageOptions.message(vis.Id, SM010_Utils.translate('There is no any shops by keyword ', vis.CVCH__language__c) + sKeyword);
 		else if (lAcc.size() == 1 && Test.isRunningTest() == false)
 			ret = getOutletInfo(vis, lAcc[0].Id);
 //		else if (vis.Chanel__c == 'whatsapp')
@@ -133,67 +133,67 @@ global class OutletSearch
 	}
 
 
-	public static account getAccountRecord(id accountId)
+	public static Account getAccountRecord(Id accountId)
 	{
 		return
 		[
-				select id,
-						name,CVCH__Image__c,phone,website,CVCH__location__c, CVCH__name_ar__c, CVCH__name_en__c, CVCH__name_it__c, CVCH__url__c
-				from account
-				where id = :accountId
+				select Id,
+						Name,CVCH__Image__c,Phone,Website,CVCH__Location__c, CVCH__name_ar__c, CVCH__name_en__c, CVCH__name_it__c, CVCH__url__c
+				from Account
+				where Id = :accountId
 		];
 	}
 
 
-	public list<account> searchAccByKeyWord(string sKeyWord0, boolean srchCat, boolean srchName)
+	public List<Account> searchAccByKeyWord(String sKeyWord0, Boolean srchCat, Boolean srchName)
 	{
-		map<id, account> mret = new map<id, account>();
-		string sKeyWord = '%' + sKeyWord0 + '%';
-		string sKeyWord1 = sKeyWord0.toUpperCase();
-		list<CVCH__Category__c> lCat =
+		Map<Id, Account> mret = new Map<Id, Account>();
+		String sKeyWord = '%' + sKeyWord0 + '%';
+		String sKeyWord1 = sKeyWord0.toUpperCase();
+		List<CVCH__Category__c> lCat =
 		[
-				select CVCH__account__r.id,CVCH__Account__r.name
+				select CVCH__Account__r.Id,CVCH__Account__r.Name
 				from CVCH__Category__c
-				where CVCH__Category__c = :sKeyWord1 and CVCH__account__r.id != null
+				where CVCH__Category__c = :sKeyWord1 and CVCH__Account__r.Id != null
 		];
-		for (CVCH__category__c cat : lCat)
+		for (CVCH__Category__c cat : lCat)
 		{
-			if (cat.CVCH__account__r.id != null)
-				mret.put(cat.CVCH__account__r.id, null);
+			if (cat.CVCH__Account__r.Id != null)
+				mret.put(cat.CVCH__Account__r.Id, null);
 		}
-		set<id> mrkeyset = new set<id>();
+		Set<Id> mrkeyset = new Set<Id>();
 		if (srchCat)
 		{
-			for (id i : mret.keyset())
+			for (Id i : mret.keySet())
 				mrkeyset.add(i);
 		}
 
-		string langname = getNameFieldName(vis.CVCH__language__c);
-		list<sobject> lobj = new list<sobject>();
-		string sQuery = '';
+		String langname = getNameFieldName(vis.CVCH__language__c);
+		List<SObject> lobj = new List<SObject>();
+		String sQuery = '';
 		if (srchName)
-			sQuery = 'select id,Name,Image__c,phone,website,location__c, ' + langname + ', url__c from account where (id in :mrkeySet or ' + langname + ' like :sKeyWord or name like :sKeyWord or location__c = :sKeyWord0)  order by name';
+			sQuery = 'select id,Name,Image__c,phone,website,location__c, ' + langname + ', url__c from account where (id in :mrkeyset or ' + langname + ' like :sKeyWord or name like :sKeyWord or location__c = :sKeyWord0)  order by name';
 			//and (recordType.name = 'Outlet' or recordType.name = 'Location')
 		else
-				sQuery = 'select id,Name,Image__c,phone,website,location__c, ' + langname + ', url__c from account where id in :mrkeySet order by ' + langname;
-		system.debug(sQuery);
+				sQuery = 'select id,Name,Image__c,phone,website,location__c, ' + langname + ', url__c from account where id in :mrkeyset order by ' + langname;
+		System.debug(sQuery);
 		lobj = Database.query(sQuery);
-		system.debug(lObj);
-		list<account> lacc = new list<account>();
-		for (sobject o : lobj)
+		System.debug(lobj);
+		List<Account> lacc = new List<Account>();
+		for (SObject o : lobj)
 		{
 			lacc.add((Account) o);
 		}
-		for (account acc : lAcc)
+		for (Account acc : lacc)
 		{
-			mret.put(acc.id, acc);
+			mret.put(acc.Id, acc);
 		}
-		list<account> lret = new list<account>();
-		for (account a : mret.values())
+		List<Account> lret = new List<Account>();
+		for (Account a : mret.values())
 		{
 			if (a != null)
 			{
-				if (a.name == 'IKEA' && !lret.isempty())
+				if (a.Name == 'IKEA' && !lret.isEmpty())
 					lret.add(0, a);
 				else
 						lret.add(a);
@@ -202,44 +202,44 @@ global class OutletSearch
 		return lret;
 	}
 
-	public static string getNameFieldName(string lang)
+	public static String getNameFieldName(String lang)
 	{
-		string sRet = 'name_en__c';
+		String sRet = 'name_en__c';
 		if (lang != '' && lang != null)
 			sRet = 'name_' + lang + '__c';
 		return sRet;
 	}
 
-	public static string getName(account acc, string lang)
+	public static String getName(Account acc, String lang)
 	{
-		system.debug('getName(' + lang + ').' + acc);
-		string sRet = (string) acc.get(getNameFieldName(lang));
+		System.debug('getName(' + lang + ').' + acc);
+		String sRet = (String) acc.get(getNameFieldName(lang));
 		if (sRet == null || sRet == '')
 			sRet = acc.Name;
-		system.debug('getName.ret=' + sRet);
+		System.debug('getName.ret=' + sRet);
 		return sRet;
 	}
 
-	public static integer iSize = 10;
+	public static Integer iSize = 10;
 
 
-	public static boolean genderSpecific(string sKeyWord)
+	public static Boolean genderSpecific(String sKeyWord)
 	{
 		return (CVCH__GenderCat__c.getInstance(sKeyWord) != null);
 	}
 
 
-	public MessageOptions options(list<account>lacc)
+	public MessageOptions options(List<Account>lacc)
 	{
-		SM010_Utils.pageReturn page = SM010_Utils.getPage(lAcc, pageNum, 10, false, true);
+		SM010_Utils.pageReturn page = SM010_Utils.getPage(lacc, pageNum, 10, false, true);
 		MessageOptions ret = new MessageOptions(vis.Id);
 		ret.sType = 'Options';
 
 
-		for (object obj : page.lObj)
+		for (Object obj : page.lObj)
 		{
-			account acc = (account) obj;
-			if (acc.CVCH__location__c != null && acc.CVCH__location__c != '')
+			Account acc = (Account) obj;
+			if (acc.CVCH__Location__c != null && acc.CVCH__Location__c != '')
 				ret.lOptions.add(getOption(acc, vis.CVCH__language__c, detailsFlow));
 		}
 		if (page.bEnd == false)
@@ -304,28 +304,28 @@ global class OutletSearch
 //		return ret;
 //	}
 
-	public static MessageOptions getOutletInfo(CVCH__Visitor__c vis, id outletId)
+	public static MessageOptions getOutletInfo(CVCH__Visitor__c vis, Id outletId)
 	{
 		MessageOptions mo = new MessageOptions(vis.Id);
 		mo.sType = 'Carousel';
-		account acc = getAccountRecord(outletId);
+		Account acc = getAccountRecord(outletId);
 		mo.lItems.add(getTemplate(acc, vis.CVCH__language__c, true, null));
 		return mo;
 	}
 
-	public static CarouselItem getTemplate(account acc, string language, boolean bCall, string sBackMenuFlow)
+	public static CarouselItem getTemplate(Account acc, String language, Boolean bCall, String sBackMenuFlow)
 	{
 		CarouselItem temp = new CarouselItem();
 
 		temp.title = getName(acc, language);
-		temp.imageURL = acc.CVCH__image__c;
+		temp.imageURL = acc.CVCH__Image__c;
 		if (acc.CVCH__url__c != null)
 			temp.subtitle = acc.CVCH__url__c;
 
 		if (bCall && acc.Phone != null)
 			temp.subtitle = SM010_Utils.translate('Call Now ', language) + ' ' + acc.Phone;
 
-		string sToId = acc.CVCH__location__c;
+		String sToId = acc.CVCH__Location__c;
 		if (sToId != '' && sToId != null)
 		{
 			Option opt = new Option();
@@ -347,14 +347,14 @@ global class OutletSearch
 		return temp;
 	}
 
-	public Option getOption(account acc, string language, string sFlow)
+	public Option getOption(Account acc, String language, String sFlow)
 	{
 		Option ret = new Option();
 		ret.sLabel = getName(acc, language);
 		ret.sFlow = sFlow;
 		ret.sName = 'outletId';
 		ret.sValue = acc.Id;
-		system.debug('getOption.return=' + ret);
+		System.debug('getOption.return=' + ret);
 		return ret;
 	}
 

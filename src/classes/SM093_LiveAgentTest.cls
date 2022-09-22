@@ -28,7 +28,7 @@ public with sharing class SM093_LiveAgentTest
 	public static void testAvilability()
 	{
 		Test.startTest();
-		SM093_LiveAgent.isAvailable();
+		SM093_LiveAgent.isAvailable('111111111111111111','111111111111111111');
 		Test.stopTest();
 	}
 }

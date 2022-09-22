@@ -10,8 +10,7 @@ public with sharing class SM080_LUISTest
 	public static void testIt()
 	{
 		Test.startTest();
-		SM080_LUIS.queryPhrase('Hi','it');
+		SM080_LUIS.queryPhrase('Hi','it','111');
 		Test.stopTest();
 	}
-
 }

@@ -8,93 +8,99 @@ global class SM080_QnA
 {
 	global class QnAPrompt
 	{
-		public integer displayOrder = 0;
-		public integer qnaId = 0;
-		public string displayText = '';
+		public Integer displayOrder = 0;
+		public Integer qnaId = 0;
+		public String displayText = '';
 
 	}
 	global class QnAResponse
 	{
-		public string sAnswer = '';
-		public string sQuery = '';
-		public decimal dScore = 0;
-		public list<QnAPrompt> prompts = new list<QnAPrompt>();
+		public String sAnswer = '';
+		public String sQuery = '';
+		public Decimal dScore = 0;
+		public List<QnAPrompt> prompts = new List<QnAPrompt>();
 	}
-	public static map<string, string> getHeaders()
+	public static Map<String, String> getHeaders(String sChatNumber)
 	{
-		CVCH__Chat2ai__c oAuth = CVCH__Chat2ai__c.getInstance('QnA Authorization');
-		string sAuth = 'EndpointKey 62b515e5-9377-4b3b-8d94-c236a49eeda9';
+		String sSettingName = 'QnA Authorization';
+		if(SM010_Utils.getChat2aiValue2('Multi ChatBots')=='TRUE')
+			sSettingName = sSettingName+'_'+sChatNumber;
+
+		CVCH__Chat2ai__c oAuth = CVCH__Chat2ai__c.getInstance(sSettingName);
+		String sAuth = 'EndpointKey 62b515e5-9377-4b3b-8d94-c236a49eeda9';
 		if(oAuth != null)
 			sAuth = oAuth.Value__c;
-		map<string, string> ret = new map<string, string>();
+		else if(!Test.isRunningTest())
+				throw new MyException('Can not find '+sSettingName+' chat2ai custom setting');
+		Map<String, String> ret = new Map<String, String>();
 		ret.put('Content-Type', 'application/json');
 		ret.put('Authorization', sAuth);
 		return ret;
 	}
-	public static string getBody(string sPhrase, integer qnaid)
+	public static String getBody(String sPhrase, Integer qnaid)
 	{
-		map<string, object> mResp = new map<string, object>();
+		Map<String, Object> mResp = new Map<String, Object>();
 		if (qnaid != null)
 			mResp.put('qnaId', qnaid);
 		else
 				mResp.put('question', sPhrase);
 		return JSON.serialize(mResp);
 	}
-	global static QnAResponse queryPhrase(string sPhrase,string language)
+	global static QnAResponse queryPhrase(String sPhrase,String language)
 	{
 		return queryPhrase(sPhrase, null,language,null);
 	}
-	global static QnAResponse queryPhrase(string sPhrase,string language, string sChatNumber)
+	global static QnAResponse queryPhrase(String sPhrase,String language, String sChatNumber)
 	{
 		return queryPhrase(sPhrase, null,language,sChatNumber);
 	}
 
-	public static QnAResponse getQNA(integer  qnaid, string language, string sChatNumber)
+	public static QnAResponse getQNA(Integer  qnaid, String language, String sChatNumber)
 	{
 		return queryPhrase(null, qnaid, language,sChatNumber);
 	}
 
-	public static QnAResponse getQNA(integer  qnaid, string language)
+	public static QnAResponse getQNA(Integer  qnaid, String language)
 	{
 		return queryPhrase(null, qnaid, language,null);
 	}
 
 
-	global static QnAResponse queryPhrase(string sPhrase, integer qnaid, string language)
+	global static QnAResponse queryPhrase(String sPhrase, Integer qnaid, String language)
 	{
 		return queryPhrase(sPhrase,  qnaid,  language, null);
 	}
-	global static QnAResponse queryPhrase(string sPhrase, integer qnaid, string language, string sChatNumber)
+	global static QnAResponse queryPhrase(String sPhrase, Integer qnaid, String language, String sChatNumber)
 	{
 		QnAResponse ret = new QnAResponse();
 		ret.dScore =0;
-		string sURL = 'callout:QnA';
+		String sURL = 'callout:QnA';
 		if(SM010_Utils.getChat2aiValue2('Multi ChatBots')=='TRUE')
 			sURL = sURL +'_'+sChatNumber;
-		system.debug('qna url='+sURL);
+		System.debug('qna url='+sURL);
 		HttpResponse resp = SM003_Http.request(
 				sURL
 				,
-				'POST', getHeaders(), getBody(sPhrase,qnaid), 'QnA QUERY', NULL, 'SM080_QnAMock');
-		map<string, object>mObj = (map<string, object>) JSON.deserializeUntyped(resp.getBody());
+				'POST', getHeaders(sChatNumber), getBody(sPhrase,qnaid), 'QnA QUERY', NULL, 'SM080_QnAMock');
+		Map<String, Object>mObj = (Map<String, Object>) JSON.deserializeUntyped(resp.getBody());
 		ret.sQuery = sPhrase;
-		list<object>lAns = (list<object>) mObj.get('answers');
+		List<Object>lAns = (List<Object>) mObj.get('answers');
 		if (!lAns.isEmpty())
 		{
-			map<string, object> mAns = (map<string, object>) lAns[0];
-			ret.sAnswer = (string) mAns.get('answer');
-			ret.dScore = (decimal) mAns.get('score');
-			map<string, object> mCont = (map<string, object>) mAns.get('context');
+			Map<String, Object> mAns = (Map<String, Object>) lAns[0];
+			ret.sAnswer = (String) mAns.get('answer');
+			ret.dScore = (Decimal) mAns.get('score');
+			Map<String, Object> mCont = (Map<String, Object>) mAns.get('context');
 			if(mCont != null && mCont.get('prompts') != null)
 			{
-				list<object> lPrompts = (list<object>) mCont.get('prompts');
-				for (object oPrompt : lPrompts)
+				List<Object> lPrompts = (List<Object>) mCont.get('prompts');
+				for (Object oPrompt : lPrompts)
 				{
-					map<string, object>mPrompt = (map<string, object>) oPrompt;
+					Map<String, Object>mPrompt = (Map<String, Object>) oPrompt;
 					QnAPrompt pr = new QnAPrompt();
-					pr.displayText = (string) mPrompt.get('displayText');
-					pr.qnaId = (integer) mPrompt.get('qnaId');
-					pr.displayOrder = (integer) mPrompt.get('displayOrder');
+					pr.displayText = (String) mPrompt.get('displayText');
+					pr.qnaId = (Integer) mPrompt.get('qnaId');
+					pr.displayOrder = (Integer) mPrompt.get('displayOrder');
 					ret.prompts.add(pr);
 				}
 			}

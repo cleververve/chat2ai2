@@ -30,6 +30,7 @@ global class FlowSendFile2
 //
 
 			CVCH__Visitor__c vis = mVis.get((id)inp.visitorId);
+			SM010_Utils.setVisitor(vis);
 			if(vis.CVCH__language__c != 'en' && vis.CVCH__language__c != null && vis.CVCH__language__c != '')
 				inp.caption = SM010_Utils.translate(inp.caption,vis.CVCH__language__c);
 			MessageOptions mo = new MessageOptions();

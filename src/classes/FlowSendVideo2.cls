@@ -36,6 +36,7 @@ global class FlowSendVideo2
 			mo.lItems.add(item);
 			mo.sType = 'Carousel';
 			mo.visitorId = vis.Id;
+			SM010_Utils.setVisitor(vis);
 			SM042_NexmoOut2.sendComplexType(mo, vis.CVCH__Id__c, vis.CVCH__Chat_Number__c);
 
 			SM042_NexmoOut2.pause(1000);

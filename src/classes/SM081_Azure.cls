@@ -7,37 +7,56 @@ Description:
 public with sharing class SM081_Azure
 {
 
-	public static string getURL(string sConversation, string activityid)
+	static String getChannelId(CVCH__NexmoMessage__c mess)
 	{
-//		string sRET = 'https://smba.trafficmanager.net/apis/v3';
-
-		string sRET = SM010_Utils.getChat2aiValue('Azure Bot URL'); //'https://webchat.botframework.com/v3'
+		if(mess.CVCH__ChannelId__c != null && mess.CVCH__ChannelId__c != '')
+			return mess.CVCH__ChannelId__c;
+		Visitor__c vis = DM080_Visitor.getVisitorById(mess.Visitor__c);
+		if(vis != null && vis.CVCH__Last_Inbound_Message__r != null  && vis.CVCH__Last_Inbound_Message__r.ChannelId__c != null && vis.CVCH__Last_Inbound_Message__r.ChannelId__c != '')
+		{
+			return vis.CVCH__Last_Inbound_Message__r.ChannelId__c;
+		}
+		if(SM042_NexmoOut2.inboundMess != null && SM042_NexmoOut2.inboundMess.ChannelId__c !=  null && SM042_NexmoOut2.inboundMess.ChannelId__c !=  '')
+			return SM042_NexmoOut2.inboundMess.ChannelId__c;
+		return null;
+	}
+	public static String getURL(NexmoMessage__c mess)
+	{
+		String sConversation = mess.conversationId__c;
+		String activityid = mess.activityId__c;
+		String channelId = getChannelId(mess);
+		String sURLSettingName = 'Azure Bot URL';
+		if(channelId == 'telegram')
+			sURLSettingName = 'Azure Telegram Bot URL';
+		if(channelId == 'facebook')
+			sURLSettingName = 'Azure Facebook Bot URL';
+		if(channelId == 'webchat')
+			sURLSettingName = 'Azure Website Bot URL';
+		String sRET = SM010_Utils.getChat2aiValue(sURLSettingName); //'https://webchat.botframework.com/v3'
 		sRET += '/conversations/' + sConversation + '/activities/' + activityid;
 		return sRET;
 	}
 
-	public static void sendCarousel(CVCH__NexmoMessage__c mess, list<CarouselItem> items)
+	public static void sendCarousel(CVCH__NexmoMessage__c mess, List<CarouselItem> items)
 	{
-		HttpResponse resp = SM003_Http.request(getURL(mess.CVCH__conversationId__c, mess.CVCH__activityId__c), 'POST', getHeaders(), getBodyCarousel(mess, items), 'Azure card', NULL, 'SM081_AzureTokenMock');
+		HttpResponse resp = SM003_Http.request(getURL(mess), 'POST', getHeaders(), getBodyCarousel(mess, items), 'Azure card '+mess.ChannelId__c, NULL, 'SM042_NexmoOutMock');
 	}
-
 
 	public static void sendText(CVCH__NexmoMessage__c mess)
 	{
-		HttpResponse resp = SM003_Http.request(getURL(mess.CVCH__conversationId__c, mess.CVCH__activityId__c), 'POST', getHeaders(), getBodyText(mess), 'Azure text', NULL, 'SM081_AzureTokenMock');
+		HttpResponse resp = SM003_Http.request(getURL(mess), 'POST', getHeaders(), getBodyText(mess), 'Azure text '+mess.ChannelId__c, NULL, 'SM042_NexmoOutMock');
 	}
 
 	public static void sendOptions(CVCH__NexmoMessage__c mess, MessageOptions mo)
 	{
-		HttpResponse resp = SM003_Http.request(getURL(mess.CVCH__conversationId__c, mess.CVCH__activityId__c), 'POST', getHeaders(), getBodyOptions(mess, mo), 'Azure options', NULL, 'SM081_AzureTokenMock');
+		HttpResponse resp = SM003_Http.request(getURL(mess), 'POST', getHeaders(), getBodyOptions(mess, mo), 'Azure options '+mess.ChannelId__c, NULL, 'SM042_NexmoOutMock');
 	}
 
-
-	public static void addButton(list<object> lButtons, Option button)
+	public static void addButton(List<Object> lButtons, Option button)
 	{
 		if (button != null && button.sLabel != null && button.sLabel != '')
 		{
-			map<string, object>mButton = new map<string, object>();
+			Map<String, Object>mButton = new Map<String, Object>();
 
 			mButton.put('value', '' + button.iNumber);
 			mButton.put('title', button.sLabel);
@@ -45,19 +64,19 @@ public with sharing class SM081_Azure
 			lButtons.add(mButton);
 		}
 	}
-	public static map<string, object>getBodyTemplate(CVCH__NexmoMessage__c mess)
+	public static Map<String, Object>getBodyTemplate(CVCH__NexmoMessage__c mess)
 	{
-		map<string, object>mRet = new map<string, object>();
+		Map<String, Object>mRet = new Map<String, Object>();
 		mRet.put('replyToId', mess.CVCH__activityId__c);
-		map<string, object>mRecipient = new map<string, object>();
+		Map<String, Object>mRecipient = new Map<String, Object>();
 		mRecipient.put('name', mess.CVCH__To_Name__c);
 		mRecipient.put('id', mess.CVCH__To__c);
 		mRet.put('recipient', mRecipient);
-		map<string, object>mConv = new map<string, object>();
+		Map<String, Object>mConv = new Map<String, Object>();
 		mConv.put('name', mess.CVCH__conversationId__c);
 		mConv.put('id', mess.CVCH__conversationId__c);
 		mRet.put('conversation', mConv);
-		map<string, object>mFrom = new map<string, object>();
+		Map<String, Object>mFrom = new Map<String, Object>();
 		mFrom.put('name', mess.CVCH__From_Name__c);
 		mFrom.put('id', mess.CVCH__From__c);
 		mRet.put('from', mFrom);
@@ -65,76 +84,85 @@ public with sharing class SM081_Azure
 		return mRet;
 	}
 
-	public static string getBodyCarousel(CVCH__NexmoMessage__c mess, list<CarouselItem> items)
+	public static String getBodyCarousel(CVCH__NexmoMessage__c mess, List<CarouselItem> items)
 	{
-		map<string, object>mRet = getBodyTemplate(mess);
+		Map<String, Object>mRet = getBodyTemplate(mess);
 //		mRet.put('replyToId',mess.CVCH__activityId__c);
-		list<object>lAtt = new list<object>();
+		List<Object>lAtt = new List<Object>();
 
 		mRet.put('attachments', lAtt);
 		for (CarouselItem item : items)
 		{
-			map<string, object>mAtt = new map<string, object>();
-			map<string, object>mContent = new map<string, object>();
+			Map<String, Object>mAtt = new Map<String, Object>();
+			Map<String, Object>mContent = new Map<String, Object>();
 			mAtt.put('content', mContent);
 			mAtt.put('contentType', 'application/vnd.microsoft.card.hero');
 
-			list<object>lButtons = new list<object>();
+			List<Object>lButtons = new List<Object>();
 			mContent.put('buttons', lButtons);
 			addButton(lButtons, item.button1);
 			addButton(lButtons, item.button2);
 			addButton(lButtons, item.button3);
-			list<object>lIm = new list<object>();
-			mContent.put('images', lIm);
-			map<string, object>mIm = new map<string, object>();
-			lIm.add(mIm);
-			mIm.put('url', item.imageURL);
+			if(item.imageURL != null && item.imageURL != '')
+			{
+				List<Object>lIm = new List<Object>();
+				mContent.put('images', lIm);
+				Map<String, Object>mIm = new Map<String, Object>();
+				lIm.add(mIm);
+				mIm.put('url', item.imageURL);
+			}
+
+
+
 			mContent.put('text', item.subtitle2);
 			mContent.put('subtitle', item.subtitle);
 			mContent.put('title', item.title);
-			latt.add(mAtt);
+			lAtt.add(mAtt);
 		}
 		return JSON.serialize(mRet);
 	}
 
-	public static string getBodyText(CVCH__NexmoMessage__c mess)
+	public static String getBodyText(CVCH__NexmoMessage__c mess)
 	{
-		map<string, object>mRet = getBodyTemplate(mess);
+		Map<String, Object>mRet = getBodyTemplate(mess);
 		mRet.put('text', mess.CVCH__Text__c);
 		return JSON.serialize(mRet);
 	}
 
-	public static string getBodyOptions(CVCH__NexmoMessage__c mess, MessageOptions mo)
+	public static String getBodyOptions(CVCH__NexmoMessage__c mess, MessageOptions mo)
 	{
-		map<string, object>mRet = getBodyTemplate(mess);
+		Map<String, Object>mRet = getBodyTemplate(mess);
 
-		list<object>lAtt = new list<object>();
+		List<Object>lAtt = new List<Object>();
 		mRet.put('attachments', lAtt);
 
-		map<string, object>mAtt = new map<string, object>();
-		latt.add(mAtt);
-		map<string, object>mContent = new map<string, object>();
+		Map<String, Object>mAtt = new Map<String, Object>();
+		lAtt.add(mAtt);
+		Map<String, Object>mContent = new Map<String, Object>();
 		mAtt.put('content', mContent);
 		mAtt.put('contentType', 'application/vnd.microsoft.card.hero');
 
-		list<object>lButtons = new list<object>();
+		List<Object>lButtons = new List<Object>();
 		mContent.put('buttons', lButtons);
-		list<Option> lOpt = mo.mOptions.values();
-		for(integer i = lOpt.size()-1;i>=0;i--)
+		List<Option> lOpt = mo.mOptions.values();
+		for(Integer i = lOpt.size()-1;i>=0;i--)
 		{
-			Option opt = lopt[i];
+			Option opt = lOpt[i];
 			addButton(lButtons, opt);
 		}
 
-		list<object>lIm = new list<object>();
+		List<Object>lIm = new List<Object>();
 		mContent.put('images', lIm);
 		mContent.put('title', mo.sMessage);
+		if(mo.sBody != null && mo.sBody !='')
+			mContent.put('text', mo.sBody);
 		return JSON.serialize(mRet);
 	}
 
-	public static map<string, string>getHeaders()
+
+	public static Map<String, String>getHeaders()
 	{
-		map<string, string>mRet = new map<string, string>();
+		Map<String, String>mRet = new Map<String, String>();
 		mRet.put('Content-Type', 'application/json');
 		mRet.put('Authorization', 'Bearer ' + SM081_AzureToken.getToken());
 		return mRet;

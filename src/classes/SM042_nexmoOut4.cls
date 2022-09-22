@@ -8,8 +8,13 @@ global class SM042_nexmoOut4
 {
 	global static map<string,string> getAuthHeader()
 	{
+		return null;
+	}
+	global static map<string,string> getAuthHeader(string sPhone)
+	{
 		map<string,string> headers = new map <string,string>();
-		string token = JWT.getAccessToken();
+
+		string token = JWT.getAccessToken(sPhone );
 		string sAuth = 'Bearer '+token;
 		system.debug('sAuth=>'+sAuth);
 		headers.put('Authorization',sAuth);
@@ -17,26 +22,27 @@ global class SM042_nexmoOut4
 		return headers;
 	}
 
+
 	global static void sendText(string sTo,string sFrom, string messageText)
 	{
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
 
-		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyText(sTo, messageText,sFrom), 'NexmoOut3', null);
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(sFrom), getBodyText(sTo, messageText,sFrom), 'NexmoOut3', null);
 	}
 
 	global static void sendCustom(string sTo,string sFrom, string messageText)
 	{
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyCustom(sTo, messageText,sFrom), 'NexmoOutCustom', null);
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(sFrom), getBodyCustom(sTo, messageText,sFrom), 'NexmoOutCustom', null);
 	}
 
 	global static void sendCustom2(string sTo,string sFrom, string messageText)
 	{
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURLV1(), 'POST', getAuthHeader(), getBodyCustom2(sTo, messageText,sFrom), 'NexmoOutCustom2', null);
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURLV1(), 'POST', getAuthHeader(sFrom), getBodyCustom2(sTo, messageText,sFrom), 'NexmoOutCustom2', null);
 	}
 
 	global static string getBodyCustom(string sTo,string messageText,string sFrom)
@@ -106,7 +112,7 @@ global class SM042_nexmoOut4
 	{
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyFile(sTo, sFile,sCaption,sFrom), 'NexmoOut2', null);
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(sFrom), getBodyFile(sTo, sFile,sCaption,sFrom), 'NexmoOut2', null);
 
 	}
 
@@ -143,7 +149,7 @@ global class SM042_nexmoOut4
 	{
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyVideo(sTo, sVideoURL, sCaption, sFrom), 'NexmoOut2', null);
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(sFrom), getBodyVideo(sTo, sVideoURL, sCaption, sFrom), 'NexmoOut2', null);
 
 	}
 
@@ -191,7 +197,7 @@ global class SM042_nexmoOut4
 	{
 		if (Test.isRunningTest())
 			Test.setMock(HttpCalloutMock.class, new SM004_SMSMock ());
-		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(), getBodyImage(sTo, sFrom, imageurl, caption), 'NexmoOut2', null);
+		Object o = SM003_Http.request(SM042_NexmoOut2.getNexmoURL(), 'POST', getAuthHeader(sFrom), getBodyImage(sTo, sFrom, imageurl, caption), 'NexmoOut2', null);
 	}
 
 
@@ -226,7 +232,4 @@ global class SM042_nexmoOut4
 	{
 		return null;
 	}
-
-
-
 }
