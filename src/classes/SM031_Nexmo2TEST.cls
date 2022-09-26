@@ -63,10 +63,9 @@ public with sharing class SM031_Nexmo2TEST
 	{
 		RestRequest req = new RestRequest();
 		RestResponse res = new RestResponse();
-
 		req.requestURI = '/services/apexrest/nexmo2/';
 		req.httpMethod = 'POST';
-		req.requestBody = Blob.valueOf('test1');
+		req.requestBody = Blob.valueOf('{"to":"971600555559", "from":"009876543211", "channel":"whatsapp", "message_uuid":"b30de73b-7c55-4a8b-963c-9d0e1fe0b10b", "timestamp":"2022-02-17T06:13:13Z", "message_type":"location", "location":{"address":"Dubai, Dubai", "name":"Cricket Stadium Bus Stop", "url":"https://foursquare.com/v/5a34e3a9bed4831f48b6700f", "lat":25.04334831237793, "long":55.21806335449219}, "profile":{"name":"Vika"}}');
 		RestContext.request = req;
 		RestContext.response = res;
 

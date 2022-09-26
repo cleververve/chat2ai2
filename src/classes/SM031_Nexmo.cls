@@ -173,26 +173,6 @@ global class SM031_Nexmo
 					if (errorMess.indexOf(SM093_LiveAgent.sessionRequired) >= 0)
 					{
 						LiveChatStatusBatch.terminateChat(visr);
-//						SM010_Utils.setVisitor(visr);
-//						String sFlowName = SM010_Utils.getChat2aiValue2('Session Expired Flow');
-//						if(sFlowName!= '')
-//						{
-//							Map<String, Object> params = new Map<String, Object>();
-//							params.put('visitorId', visr.Id);
-//							Flow.Interview flow = SM010_Utils.getFlow(sFlowName, mess.CVCH__To__c, params);
-//							flow.start();
-//						}
-//						else
-//						{
-//							CVCH.SM042_NexmoOut2.sendText(visr.CVCH__Id__c, SM010_Utils.translate('Sorry, your chat session is expired..', visr.CVCH__language__c), visr.CVCH__Chat_Number__c, false);
-//						}
-//
-//						CVCH__Visitor__c vis = new CVCH__Visitor__c();
-//						vis.Id = visr.Id;
-//						vis.CVCH__Livechat_Session_Key__c = null;
-//						vis.CVCH__Livechat_Session_Id__c = null;
-//						vis.CVCH__Livechat_affinityToken__c = null;
-//						update vis;
 					}
 				}
 			}

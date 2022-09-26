@@ -12,6 +12,8 @@ global class MessageOptions implements iMessage
 	@AuraEnabled @InvocableVariable global string content;
 	@AuraEnabled @InvocableVariable global string sType;
 	@AuraEnabled @InvocableVariable global boolean async;
+	@AuraEnabled @InvocableVariable global String OrchestrationInstance;
+
 	public string sFieldName;
 	public string sParamName;
 	public string sFlow;
@@ -177,6 +179,7 @@ global class MessageOptions implements iMessage
 		{
 			system.debug('mOptions=' + mOptions);
 			visr.CVCH__Context__c = JSON.serialize(this);
+			visr.CVCH__Input_Reply_Value__c = null;
 			SM031_Nexmo.bContextChanged = true;
 			system.debug('Context__c= ' + visr.CVCH__Context__c);
 		}
