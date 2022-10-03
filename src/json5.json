@@ -1,42 +1,67 @@
 {
-    "contacts":[
-        {
-            "profile":{
-                "name":"Me"
-            },
-            "wa_id":"971501084679"
+    "kind": "ConversationResult",
+    "result": {
+        "query": "play In the air tonight from Phil Collins",
+        "prediction": {
+            "topIntent": "str_festival_tv",
+            "projectKind": "Conversation",
+            "intents": [
+                {
+                    "category": "str_festival_tv",
+                    "confidenceScore": 0.6
+                },
+                {
+                    "category": "str_cinema_delay",
+                    "confidenceScore": 0.55448705
+                },
+                {
+                    "category": "store search",
+                    "confidenceScore": 0.53092957
+                },
+                {
+                    "category": "str_vox_cinema",
+                    "confidenceScore": 0.53056365
+                },
+                {
+                    "category": "item search",
+                    "confidenceScore": 0.5261432
+                },
+                {
+                    "category": "dining",
+                    "confidenceScore": 0.39605746
+                },
+
+                {
+                    "category": "str_male",
+                    "confidenceScore": 0.17859024
+                },
+                {
+                    "category": "None",
+                    "confidenceScore": 0
+                }
+            ],
+            "entities": [
+                {
+                    "category": "datetimeV2",
+                    "text": "tonight",
+                    "offset": 16,
+                    "length": 7,
+                    "confidenceScore": 1,
+                    "resolutions": [
+                        {
+                            "resolutionKind": "TemporalSpanResolution",
+                            "begin": "2022-09-27 20:00:00",
+                            "end": "2022-09-27 23:59:59"
+                        }
+                    ],
+                    "extraInformation": [
+                        {
+                            "extraInformationKind": "EntitySubtype",
+                            "value": "datetime.datetimerange"
+                        }
+                    ]
+                }
+            ]
         }
-    ],
-    "messages":[
-        {
-            "from":"971501084679",
-            "id":"ABEGlxUBCEZ5Ago-sLHU3nt8DUkE",
-            "order":{
-                "catalog_id":"679615539743464",
-                "product_items":[
-                    {
-                        "currency":"AED",
-                        "item_price":20,
-                        "product_retailer_id":"tl8zro85g0",
-                        "quantity":1
-                    },
-                    {
-                        "currency":"AED",
-                        "item_price":20,
-                        "product_retailer_id":"ujootwm3or",
-                        "quantity":4
-                    },
-                    {
-                        "currency":"AED",
-                        "item_price":20,
-                        "product_retailer_id":"bvr32hajb6",
-                        "quantity":8
-                    }
-                ],
-                "text":"Please deliver this items"
-            },
-            "timestamp":"1654241486",
-            "type":"order"
-        }
-    ]
+    }
 }

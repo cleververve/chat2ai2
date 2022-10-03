@@ -1,33 +1,65 @@
 {
-    "attachments":[
-        {
-            "contentType":"application/vnd.microsoft.card.hero",
-            "content":{
-                "title":"",
-                "subtitle":"",
-                "text":"",
-                "images":[
+    "query":"would you change the metropolitan museum of art roof garden reservation to 8:00 tonight",
+    "prediction":{
+        "topIntent":"RestaurantReservation.ChangeReservation",
+        "intents":{
+            "RestaurantReservation.ChangeReservation":{
+                "score":0.9546011
+            },
+            "RestaurantReservation.DeleteReservation":{
+                "score":0.0305679
+            }
+        },
+        "entities":{
+            "RestaurantReservation.PlaceName":[
+                "metropolitan museum of art roof garden"
+            ],
+            "RestaurantReservation.Time":[
+                "8:00",
+                "tonight"
+            ],
+            "$instance":{
+                "RestaurantReservation.PlaceName":[
                     {
-                        "url":"https://s3-ap-south-1.amazonaws.com:443/bot-bkt/prod/37039/37039-a67e2576-daf5-44b5-bdca-3a9b0ac86625.jpeg",
-
+                        "type":"RestaurantReservation.PlaceName",
+                        "text":"metropolitan museum of art roof garden",
+                        "startIndex":21,
+                        "length":38,
+                        "score":0.9852,
+                        "modelTypeId":1,
+                        "modelType":"Entity Extractor",
+                        "recognitionSources":[
+                            "model"
+                        ]
                     }
                 ],
-                "buttons":[]
+                "RestaurantReservation.Time":[
+                    {
+                        "type":"RestaurantReservation.Time",
+                        "text":"8:00",
+                        "startIndex":75,
+                        "length":4,
+                        "score":0.9990256,
+                        "modelTypeId":1,
+                        "modelType":"Entity Extractor",
+                        "recognitionSources":[
+                            "model"
+                        ]
+                    },
+                    {
+                        "type":"RestaurantReservation.Time",
+                        "text":"tonight",
+                        "startIndex":80,
+                        "length":7,
+                        "score":0.999200761,
+                        "modelTypeId":1,
+                        "modelType":"Entity Extractor",
+                        "recognitionSources":[
+                            "model"
+                        ]
+                    }
+                ]
             }
         }
-    ],
-    "type":"message",
-    "from":{
-        "id":"104342924748948",
-        "name":"BotCannels"
-    },
-    "conversation":{
-        "id":"5397409610315298-104342924748948",
-        "name":"5397409610315298-104342924748948"
-    },
-    "recipient":{
-        "id":"5397409610315298",
-        "name":"Serhii Volynets"
-    },
-    "replyToId":"m_q_wHnlRAgVojR8FRZW3s9N-bXIlxTvbBjS8MYl8YbOU5QBnyZ7AGxGkryisMoMet-EuChk4RjW6Oe"
+    }
 }

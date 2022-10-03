@@ -9,7 +9,6 @@ public with sharing class SM099_FlowMapping
 
 	public static String getFlow(String sIntent, String sText)
 	{
-		String sFlow;
 		String sIntent2 = getIntentFromText(sText);
 		if(sIntent2 != null)
 		{

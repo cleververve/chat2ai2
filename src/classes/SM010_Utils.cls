@@ -163,7 +163,8 @@ global class SM010_Utils
 		lResponses.add(sResp);
 	}
 
-	public static void insertConversation(Decimal scoreLUIS, Decimal scoreQnA, String intentLUIS, String triggeredFlow, String language, String phone, String input, String output, Id visitorId, String errMsg)
+
+	public static void insertConversation(Decimal scoreLUIS, Decimal scoreQnA, String intentLUIS, String triggeredFlow, String language, String phone, String input, String output, Id visitorId, String errMsg, String strParams)
 	{
 		Conversation__c conv = new Conversation__c();
 		try
@@ -194,6 +195,7 @@ global class SM010_Utils
 			List<String>lResp = new List<String>();
 			lResp.addAll(lResponses);
 			conv.Responses__c = String.join(lResp, '; ');
+			conv.Parameters__c = strParams;
 			insert conv;
 		}
 		catch (Exception e)
@@ -399,6 +401,23 @@ global class SM010_Utils
 		if (val == null)
 			return '';
 		return val.CVCH__Value__c;
+	}
+
+
+	public static String getChat2aiValue(String sSettingName,String sChatNumber)
+	{
+		String sRet = '';
+		if (SM010_Utils.getChat2aiValue2('Multi ChatBots') == 'TRUE')
+		{
+			sSettingName = sSettingName + '_' + sChatNumber;
+			sRet = SM010_Utils.getChat2aiValue2(sSettingName + '_' + sChatNumber);
+		}
+		if(sRet == '')
+		{
+			sRet = SM010_Utils.getChat2aiValue2(sSettingName);
+
+		}
+		return sRet;
 	}
 
 /*    public static string getFlowId(string flowName,string programId, string language)
@@ -1027,6 +1046,24 @@ global class SM010_Utils
 		}
 		return ret;
 	}
+
+	public static String startFlow(String sFlowName, String sTo, Map<String, Object> params)
+	{
+		if (SM010_Utils.getChat2aiValue2('Multi ChatBots') == 'TRUE' && sTo != null && sTo != '')
+		{
+			sFlowName = sFlowName + '_' + sTo;
+		}
+		try
+		{
+			Flow.Interview.createInterview(sFlowName, params).start();
+		}
+		catch (Exception e)
+		{
+			throw new MyException('Can not find the flow \'' + sFlowName + '\'');
+		}
+		return sFlowName;
+	}
+
 
 	public static Flow.Interview getFlow(String sFlowName, String sTo, Map<String, Object> params)
 	{

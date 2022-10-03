@@ -404,7 +404,8 @@ global class SM031_Nexmo2
 						v.Context__c='';
 						v.Input_Reply_Value__c = mess.Text__c;
 						update v;
-						EventBus.publish(new FlowOrchestrationEvent(OrchestrationInstanceId= mo.OrchestrationInstance));
+						SM031_Nexmo2.publishEvent(mo.OrchestrationInstance);
+//						EventBus.publish(new FlowOrchestrationEvent(OrchestrationInstanceId= mo.OrchestrationInstance));
 					}
 
 					if (mo.sFlow != null && mo.sFlow != '')
@@ -523,6 +524,11 @@ global class SM031_Nexmo2
 		return lret;
 	}
 
+	public static void publishEvent(string instanceId)
+	{
+		EventBus.publish(new FlowOrchestrationEvent(OrchestrationInstanceId= instanceId));
+	}
+
 
 	global static List<CVCH__NexmoMessage__c> getMessage0(String jsonbody)
 	{
@@ -616,7 +622,7 @@ global class SM031_Nexmo2
 					insert mess0;
 					SM031_Nexmo.updateVisitor(new Visitor__c(Id = visr.Id, Last_Inbound_Message__c = mess0.Id));
 				}
-				SM010_Utils.insertConversation(scoreLUIS, scoreQnA, intentLUIS, triggeredFlow, visr.language__c, visr.CVCH__Id__c, mess0.Text__c, sOutput, visr.Id, errMsg);
+				SM010_Utils.insertConversation(scoreLUIS, scoreQnA, intentLUIS, triggeredFlow, visr.language__c, visr.CVCH__Id__c, mess0.Text__c, sOutput, visr.Id, errMsg,'');
 				if (triggeredLUIS)
 				{ // if we got LUIS response for query - log Search Request for keyword, if present
 					SM010_Utils.logSearchRequest(respLuis);
