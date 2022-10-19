@@ -68,7 +68,7 @@ global class SM005_Logs
             sURL = sURL.substring(255);
         c.CVCH__URL__c = sURL;
         c.CVCH__Authorization__c = sAuth;
-        c.CVCH__responseId__c = getResponseId(respBody);
+        c.CVCH__ResponseId__c = getResponseId(respBody);
 		add(c);
         return c;
 //        insert  c;       
@@ -82,10 +82,18 @@ global class SM005_Logs
             try
             {
                 Object o = JSON.deserializeUntyped(respBody);
-                String uuid = (String)JPath.safeGet(o,'/message_uuid');
-                if(uuid != '' && uuid != null)
-                    sRet = uuid;
 
+                String uuid = (String)JPath.safeGet(o,'/message_uuid');
+                if(uuid == null || uuid == '')
+                {
+                    System.debug('getResponseId');
+                    System.debug(o);
+                    uuid = (String)JPath.safeGet(o,'/messages[1]/id');
+                }
+                if(uuid != '' && uuid != null)
+                {
+                    sRet = uuid;
+                }
             }catch(Exception e)
             {}
         }

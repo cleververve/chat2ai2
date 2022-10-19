@@ -247,8 +247,8 @@ global class SM031_Nexmo
 				if (sFlow2 != '')
 				{
 					System.debug('Welcome Flow: ' + JSON.serialize(params));
-					SM010_Utils.getFlow(sFlow2, mess.To__c, params).start();
-					triggeredFlow = 'Welcome Flow';
+					triggeredFlow = SM010_Utils.startFlow(sFlow2, mess.To__c, params);
+
 				}
 			}
 			else if (SM031_Nexmo.apexGDPR() && visr.CVCH__GDPR_Consent__c == 'No Access' && (visr.CVCH__Context__c == '' || visr.CVCH__Context__c == null)) //Restrict Non-GDPR users
@@ -291,15 +291,14 @@ global class SM031_Nexmo
 					{
 						params.put(opt.sName3, opt.sValue3);
 					}
-					Flow.Interview flow = SM010_Utils.getFlow(opt.sFlow, mess.To__c, params);
-					flow.start();
-					triggeredFlow = 'GDPR Flow';
+					triggeredFlow = SM010_Utils.startFlow(opt.sFlow, mess.To__c, params);
 				}
 				else if (SM010_Utils.getChat2aiValue2('GDPR Flow') != '')
 				{
-					Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('GDPR Flow'), mess.To__c, params);
-					flow.start();
-					triggeredFlow = 'GDPR Flow';
+					triggeredFlow = SM010_Utils.startFlow(SM010_Utils.getChat2aiValue('GDPR Flow'), mess.To__c, params);
+//							Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('GDPR Flow'), mess.To__c, params);
+//					flow.start();
+//					triggeredFlow = 'GDPR Flow';
 				}
 
 			}
@@ -356,18 +355,20 @@ global class SM031_Nexmo
 				params.put('visitorName', mess.From_Name__c);
 				params.put('input', mess.CVCH__Text__c);
 
-				Flow.Interview flow = SM010_Utils.getFlow(visr.CVCH__Next_Flow__c, mess.To__c, params);
-				flow.start();
-				triggeredFlow = visr.Next_Flow__c;
+//				Flow.Interview flow = SM010_Utils.getFlow(visr.CVCH__Next_Flow__c, mess.To__c, params);
+//				flow.start();
+//				triggeredFlow = visr.Next_Flow__c;
+				triggeredFlow = SM010_Utils.startFlow(visr.CVCH__Next_Flow__c, mess.To__c, params);
 			}
 			else if (mess.CVCH__Flow__c != null && mess.CVCH__Flow__c != '')
 			{
 				params.put('visitorId', visr.Id);
 				params.put('visitorName', mess.From_Name__c);
 				params.put('originalmessage', mess.CVCH__Text__c);
-				Flow.Interview flow = SM010_Utils.getFlow(mess.CVCH__Flow__c, mess.To__c, params);
-				flow.start();
-				triggeredFlow = visr.Next_Flow__c;
+//				Flow.Interview flow = SM010_Utils.getFlow(mess.CVCH__Flow__c, mess.To__c, params);
+//				flow.start();
+//				triggeredFlow = visr.Next_Flow__c;
+				triggeredFlow =SM010_Utils.startFlow(mess.CVCH__Flow__c, mess.To__c, params);
 				bProceeded = true;
 			}
 			else if (visr.CVCH__Context__c != null && visr.CVCH__Context__c != '')
@@ -488,9 +489,10 @@ global class SM031_Nexmo
 							params.put(mo.sParamName, mess.Text__c);
 						}
 
-						Flow.Interview flow = SM010_Utils.getFlow(mo.sFlow, mess.To__c, params);
-						flow.start();
-						triggeredFlow = mo.sFlow;
+//						Flow.Interview flow = SM010_Utils.getFlow(mo.sFlow, mess.To__c, params);
+//						flow.start();
+//						triggeredFlow = mo.sFlow;
+						triggeredFlow = SM010_Utils.startFlow(mo.sFlow, mess.To__c, params);
 					}
 
 					if (mo.sFieldName == '' || mo.sFieldName == null)
@@ -541,9 +543,10 @@ global class SM031_Nexmo
 								{
 									params.put(opt.sName3, opt.sValue3);
 								}
-								Flow.Interview flow = SM010_Utils.getFlow(opt.sFlow, mess.To__c, params);
-								flow.start();
-								triggeredFlow = opt.sFlow;
+//								Flow.Interview flow = SM010_Utils.getFlow(opt.sFlow, mess.To__c, params);
+//								flow.start();
+//								triggeredFlow = opt.sFlow;
+								triggeredFlow = SM010_Utils.startFlow(opt.sFlow, mess.To__c, params);
 							}
 						}
 					}
@@ -559,10 +562,10 @@ global class SM031_Nexmo
 				params.put('originalmessage', mess.Text__c);
 				params.put('language', tran.detectedlang);
 				params.put('visitorlanguage', visr.language__c);
-				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue2('Default Flow 2'), mess.To__c, params);
-				flow.start();// trigger default flow 2
-				triggeredFlow = 'Default Flow 2';
-//}
+//				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue2('Default Flow 2'), mess.To__c, params);
+//				flow.start();// trigger default flow 2
+//				triggeredFlow = 'Default Flow 2';
+				triggeredFlow = SM010_Utils.startFlow(SM010_Utils.getChat2aiValue2('Default Flow 2'), mess.To__c, params);
 
 			}
 			if (!bProceeded && TriggerDefaultFlow && SM010_Utils.getChat2aiValue2('Default Flow') != '')
@@ -572,10 +575,11 @@ global class SM031_Nexmo
 				params.put('visitorId', visr.Id);
 				params.put('visitorName', mess.From_Name__c);
 				params.put('originalmessage', mess.Text__c);
-				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue2('Default Flow'), mess.To__c, params);
-				flow.start();// trigger default flow
-				triggeredFlow = 'Default Flow';
+//				Flow.Interview flow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue2('Default Flow'), mess.To__c, params);
+//				flow.start();// trigger default flow
+//				triggeredFlow = 'Default Flow';
 
+				triggeredFlow = SM010_Utils.startFlow(SM010_Utils.getChat2aiValue2('Default Flow'), mess.To__c, params);
 			}
 			if (!bProceeded)
 			{
@@ -588,9 +592,10 @@ global class SM031_Nexmo
 					params.put('intent', respLuis.sIntent);
 					params.put('entities', respLuis.getEntities());
 					params.put('originalmessage', mess.CVCH__Text__c);
-					Flow.Interview chat2aiflow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('Chat2ai Flow'), mess.To__c, params);
-					chat2aiflow.start();
-					triggeredFlow = intentLUIS;
+//					Flow.Interview chat2aiflow = SM010_Utils.getFlow(SM010_Utils.getChat2aiValue('Chat2ai Flow'), mess.To__c, params);
+//					chat2aiflow.start();
+//					triggeredFlow = intentLUIS;
+					triggeredFlow =SM010_Utils.startFlow(SM010_Utils.getChat2aiValue('Chat2ai Flow'), mess.To__c, params);
 					triggeredLUIS = true;
 				}
 				else
@@ -686,7 +691,10 @@ global class SM031_Nexmo
 		mess.CVCH__From__c = (String) m.get('from');
 		mess.From_Name__c = (String) JPath.get0(mObj, '/contacts/[1]/profile/name');
 		mess.To__c = (String) mObj.get('to');
+		system.debug('/context/id='+JPath.safeGet(m,'/context/id'));
+
 		mess.CVCH__InputType__c = (String) m.get('type');
+
 
 		if (mess.CVCH__InputType__c == 'text')
 		{
@@ -748,13 +756,13 @@ global class SM031_Nexmo
 				mess.CVCH__Text__c = sId;
 			}
 		}
-
+		mess.ReplyToId__c = (String) JPath.safeGet(m, '/context[1]/id');
 		mess.CVCH__ExternalId__c = mess.Name;
 		if (mess.name.length() > 80)
 		{
 			mess.name = mess.name.substring(0, 79);
 		}
-		mess.ReplyToId__c = (String) JPath.safeGet(m, '/context/message_uuid');
+
 		System.debug('D360Message.return');
 		System.debug(mess);
 		return mess;

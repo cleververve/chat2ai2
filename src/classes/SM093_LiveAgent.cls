@@ -45,7 +45,20 @@ global class SM093_LiveAgent
 
 	public static String getText(String sResp)
 	{
+		System.debug('SM093_LiveAgent.getText.start');
+
+		System.debug(sResp);
 		Object obj = JSON.deserializeUntyped(sResp);
+		String sRet = (String)JPath.safeGet(obj,'/text/body');
+		if(sRet != null && sRet != '')
+			return sRet;
+		sRet = (String)JPath.safeGet(obj,'/image/link');
+		if(sRet != null && sRet != '')
+			return sRet;
+		sRet = (String)JPath.safeGet(obj,'/image/url');
+		if(sRet != null && sRet != '')
+			return sRet;
+
 		return getTextInner(obj);
 	}
 	public static String getMessageText(NexmoMessage__c mess)

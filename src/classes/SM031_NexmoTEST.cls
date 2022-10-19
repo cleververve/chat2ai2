@@ -516,5 +516,27 @@ public class SM031_NexmoTEST
 		Test.stopTest();
 	}
 
+	@IsTest
+	public static void testParseRef()
+	{
+		String sBody = '{"contacts": [{"profile": {"name": "Vika"}, "wa_id": "971552713278"}], "messages": [{"context": {"from": "971800226255", "id": "gBEGlxVScTJ4AgkC9gh6SVJAnCk"}, "from": "971552713278", "id": "ABEGlxVScTJ4Ago-sESrb9-sK3x_", "text": {"body": "Reply"}, "timestamp": "1664862726", "type": "text"}], "to": "971800226255"}';
+		Test.startTest();
+		CVCH__NexmoMessage__c mess = SM031_Nexmo.parse(sBody);
+		Test.stopTest();
+		system.debug(mess.ReplyToId__c);
+		System.assert(mess.ReplyToId__c == 'gBEGlxVScTJ4AgkC9gh6SVJAnCk');
+	}
 
+
+	@IsTest
+	public static void testReplyTo()
+	{
+		Test.startTest();
+		SM044_NexmoV1.sendText('111','1111','liveagent text');
+		SM005_Logs.save();
+		NexmoMessage__c mess = SM031_Nexmo.parse('{"to":"971800226255","from":"917978025200","channel":"whatsapp","message_uuid":"991cc4a7-d0a0-4f85-9b0e-b546f062342c","timestamp":"2022-09-15T08:36:58Z","message_type":"text","text":"No.. thank you","profile":{"name":"Ak"},"context":{"message_uuid":"111222333"}}');
+		String sText = SM093_LiveAgent.getMessageText(mess);
+		Test.stopTest();
+		System.assertEquals(sText,'Replying to "liveagent text"\nNo.. thank you');
+	}
 }

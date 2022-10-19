@@ -31,6 +31,18 @@ public with sharing class SM044_NexmoV1Test
 		System.assertEquals(sText,'Replying to "liveagent text"\nNo.. thank you');
 	}
 
+	@IsTest
+	public static void testReplyToImage()
+	{
+		SM044_NexmoV1.sendLink('111','1111','google.com','caption','image');
+		SM005_Logs.save();
+		Test.startTest();
+		NexmoMessage__c mess = SM031_Nexmo.parse('{"to":"971800226255","from":"917978025200","channel":"whatsapp","message_uuid":"991cc4a7-d0a0-4f85-9b0e-b546f062342c","timestamp":"2022-09-15T08:36:58Z","message_type":"text","text":"No.. thank you","profile":{"name":"Ak"},"context":{"message_uuid":"111222333"}}');
+		String sText = SM093_LiveAgent.getMessageText(mess);
+		Test.stopTest();
+		System.assertEquals(sText,'Replying to "google.com"\nNo.. thank you');
+	}
+
 
 	@IsTest
 	public static void testgettext()

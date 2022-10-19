@@ -13,9 +13,9 @@ public with sharing class SM043_360Dialog
 	 * @param sFrom message text
 	 * @param messageText message text
 	 **/
-	public static void sendTextMessage(String sTo, string sFrom, String messageText)
+	public static void sendTextMessage(String sTo, String sFrom, String messageText)
 	{
-		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(sFrom), JSON.serialize(getBodyText(sTo, messageText)), 'D360OutText', null, 'SM004_SMSMock');
+		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(sFrom), JSON.serialize(getBodyText(sTo, messageText)), 'D360OutText', null, 'SM043_360DialogMock');
 	}
 	/**
 	 * @param sTo client's phone number
@@ -45,7 +45,7 @@ public with sharing class SM043_360Dialog
 
 	public static void sendLink(String sTo, String sFrom, String sLinkURL, String caption, String sType)
 	{
-		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(sFrom), JSON.serialize(getLinkBody(sTo, sLinkURL, caption, sType)), 'D360Out' + sType, null, 'SM004_SMSMock');
+		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(sFrom), JSON.serialize(getLinkBody(sTo, sLinkURL, caption, sType)), 'D360Out' + sType, null, 'SM043_360DialogMock');
 	}
 
 	/**
@@ -54,9 +54,9 @@ public with sharing class SM043_360Dialog
 	 * @param type string, right now 'interactive' or 'template'
 	 * @param payload custom payload string or object
 	 **/
-	public static void sendCustom(String sTo, string sFrom, String type, Object payload)
+	public static void sendCustom(String sTo, String sFrom, String type, Object payload)
 	{
-		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(sFrom), JSON.serialize(getCustomBody(sTo, payload, type)), 'D360OutCustom', null, 'SM004_SMSMock');
+		SM003_Http.request(getMessagesURL(), 'POST', getHeaders(sFrom), JSON.serialize(getCustomBody(sTo, payload, type)), 'D360OutCustom', null, 'SM043_360DialogMock');
 	}
 	/**
 	 * @return 360 dialog messages API URL
@@ -72,9 +72,9 @@ public with sharing class SM043_360Dialog
 	 *
 	 * @return headers
 	 **/
-	public static Map<String, String> getHeaders(string sFrom)
+	public static Map<String, String> getHeaders(String sFrom)
 	{
-		string sKeySettingName = 'D360-API-KEY';
+		String sKeySettingName = 'D360-API-KEY';
 		if (sFrom != null && sFrom != '' && SM010_Utils.getChat2aiValue2('Multi ChatBots') == 'TRUE')
 		{
 			sKeySettingName = sKeySettingName + '_' + sFrom;

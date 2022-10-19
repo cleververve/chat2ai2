@@ -347,6 +347,8 @@ context.toSearch = context.processingPath;*/
 		object ret = null;
 		try
 		{
+			if(untypedJson instanceof String)
+				untypedJson = JSON.deserializeUntyped((String)untypedJson);
 			ret = get0(untypedJson,path);
 
 		}catch(Exception e)

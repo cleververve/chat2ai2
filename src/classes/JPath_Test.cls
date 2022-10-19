@@ -473,4 +473,14 @@ public class JPath_Test
 		system.assert(result == null, 'Should not return');
 
 	}
+
+	@IsTest
+	public static void testSafeGet()
+	{
+
+		test.startTest();
+		String str =(String)JPath.get('{"contacts":[{"input":"919811696562","wa_id":"919811696562"}],"messages":[{"id":"test_d360"}],"meta":{"api_status":"stable","version":"2.41.2"}}','/messages[1]/id');
+		Test.stopTest();
+		system.assertEquals(str,'test_d360' );
+	}
 }

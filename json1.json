@@ -1,73 +1,17 @@
-//{
-//    "recipient_type": "individual",
-//    "to": "971501084679",
-//    "type": "interactive",
-//    "interactive":
-//    {
-//        "type": "product",
-//        "body":
-//        {
-//            "text": "text-body-content" //This will be dynamic text to be sent from flow
-//        },
-//        "footer":
-//        {
-//            "text": "text-footer-content"//This will be dynamic text to be sent from flow
-//        },
-//        "action":
-//        {
-//            "catalog_id": "679615539743464", //This will be catalog id from the custom settings we added while creating the products
-//            "product_retailer_id": "t738mn2pl4" // This will be the product SKU from Items custom object
-//        }
-//    }
-//}
-
 {
-    "recipient_type": "individual",
-    "to": "971501084679",
-    "type": "interactive",
-    "interactive": {
-        "type": "product_list",
-        "header": {
-            "type": "text",
-            "text": "header-text-goes-here" /
-        },
-        "body": {
-            "text": "body-text-goes-here"
-        },
-        "footer": {
-            "text": "footer-text-goes-here"
-        },
-        "action": {
-            "catalog_id": "679615539743464", //This will be catalog id from the custom settings we added while creating the products
-            "sections": [ // Maximum number of sections will be 10 and Maximum number of products will be 30 per message
-                {
-                    "title": "Section title goes here",
-                    "product_items": [
-                        {
-                            "product_retailer_id": "t738mn2pl4" // This will be the product SKU from Items custom object
-                        }
-                    ]
-                },
-                {
-                    "title": "Section title goes here",
-                    "product_items": [
-                        {
-                            "product_retailer_id": "0hoxebag7d" // This will be the product SKU from Items custom object
-                        },
-                        {
-                            "product_retailer_id": "stjtvv6uw8" // This will be the product SKU from Items custom object
-                        }
-                    ]
-                },
-                {
-                    "title": "Section title goes here",
-                    "product_items": [
-                        {
-                            "product_retailer_id": "x6zjoqzfkj" // This will be the product SKU from Items custom object
-                        }
-                    ]
-                }
-            ]
+    "contacts":[
+        {
+            "input":"919811696562",
+            "wa_id":"919811696562"
         }
+    ],
+    "messages":[
+        {
+            "id":"test_d360"
+        }
+    ],
+    "meta":{
+        "api_status":"stable",
+        "version":"2.41.2"
     }
 }
